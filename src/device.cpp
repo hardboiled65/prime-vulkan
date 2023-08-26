@@ -236,6 +236,26 @@ VkImageView VkDevice::create_image_view(
     return image_view;
 }
 
+VkShaderModule VkDevice::create_shader_module(
+    const VkShaderModule::CreateInfo& info) const
+{
+    ::VkResult result;
+
+    ::VkShaderModuleCreateInfo vk_info = info.c_struct();
+    ::VkShaderModule module;
+    result = vkCreateShaderModule(this->_device, &vk_info, nullptr, &module);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    VkShaderModule shader_module;
+    shader_module._shader_module = std::shared_ptr<::VkShaderModule>(
+        new ::VkShaderModule(module), VkShaderModule::Deleter(this->_device));
+
+    return shader_module;
+}
+
 ::VkDevice VkDevice::c_ptr()
 {
     return this->_device;

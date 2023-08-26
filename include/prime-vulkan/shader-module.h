@@ -3,11 +3,16 @@
 
 #include <vulkan/vulkan.h>
 
+#include <memory>
+
 namespace pr {
 namespace vk {
 
+class VkDevice;
+
 class VkShaderModule
 {
+    friend VkDevice;
 public:
     class CreateInfo
     {
@@ -22,9 +27,31 @@ public:
         ::VkShaderModuleCreateInfo _info;
     };
 
-private:
+    class Deleter
+    {
+    public:
+        Deleter(::VkDevice p_device)
+        {
+            this->_p_device = p_device;
+        }
+
+        void operator()(::VkShaderModule *shader_module)
+        {
+            vkDestroyShaderModule(this->_p_device, *shader_module, nullptr);
+        }
+
+    private:
+        ::VkDevice _p_device;
+    };
+
+public:
+    ::VkShaderModule c_ptr() const;
 
 private:
+    VkShaderModule();
+
+private:
+    std::shared_ptr<::VkShaderModule> _shader_module;
 };
 
 } // namespace vk

@@ -22,5 +22,16 @@ void VkShaderModule::CreateInfo::set_code(const uint32_t *code, uint64_t size)
     return this->_info;
 }
 
+
+VkShaderModule::VkShaderModule()
+{
+    this->_shader_module = nullptr;
+}
+
+::VkShaderModule VkShaderModule::c_ptr() const
+{
+    return *(this->_shader_module);
+}
+
 } // namespace vk
 } // namespace pr

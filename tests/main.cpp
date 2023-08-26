@@ -562,36 +562,32 @@ static void create_vulkan_graphics_pipeline()
     load_shader("frag.spv", &frag_shader_code, &frag_shader_code_size);
 
     // Create vertex shader module.
-    VkShaderModule vert_shader_module;
-
     pr::vk::VkShaderModule::CreateInfo vert_create_info;
     vert_create_info.set_code((const uint32_t*)vert_shader_code,
         vert_shader_code_size);
 
-    auto vert_info = vert_create_info.c_struct();
-
-    result = vkCreateShaderModule(vulkan_device->c_ptr(), &vert_info, NULL,
-        &vert_shader_module);
-    if (result != VK_SUCCESS) {
+    pr::vk::VkShaderModule *vert_shader_module;
+    try {
+        vert_shader_module = new pr::vk::VkShaderModule(
+            vulkan_device->create_shader_module(vert_create_info));
+    } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create vertex shader module!\n");
-        return;
+        exit(1);
     }
     fprintf(stderr, "Vertex shader module created.\n");
 
     // Create fragment shader module.
-    VkShaderModule frag_shader_module;
-
     pr::vk::VkShaderModule::CreateInfo frag_create_info;
     frag_create_info.set_code((const uint32_t*)frag_shader_code,
         frag_shader_code_size);
 
-    auto frag_info = frag_create_info.c_struct();
-
-    result = vkCreateShaderModule(vulkan_device->c_ptr(), &frag_info, NULL,
-        &frag_shader_module);
-    if (result != VK_SUCCESS) {
+    pr::vk::VkShaderModule *frag_shader_module;
+    try {
+        frag_shader_module = new pr::vk::VkShaderModule(
+            vulkan_device->create_shader_module(frag_create_info));
+    } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create fragment shader module!\n");
-        return;
+        exit(1);
     }
     fprintf(stderr, "Fragment shader module created.\n");
 
@@ -599,13 +595,13 @@ static void create_vulkan_graphics_pipeline()
     vulkan_vert_shader_stage_create_info.sType =
         VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vulkan_vert_shader_stage_create_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vulkan_vert_shader_stage_create_info.module = vert_shader_module;
+    vulkan_vert_shader_stage_create_info.module = vert_shader_module->c_ptr();
     vulkan_vert_shader_stage_create_info.pName = "main";
 
     vulkan_frag_shader_stage_create_info.sType =
         VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vulkan_frag_shader_stage_create_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    vulkan_frag_shader_stage_create_info.module = frag_shader_module;
+    vulkan_frag_shader_stage_create_info.module = frag_shader_module->c_ptr();
     vulkan_frag_shader_stage_create_info.pName = "main";
 
     // Shader stage.
@@ -728,6 +724,8 @@ static void create_vulkan_graphics_pipeline()
     vkDestroyShaderModule(vulkan_device, frag_shader_module, NULL);
     vkDestroyShaderModule(vulkan_device, vert_shader_module, NULL);
     */
+    delete frag_shader_module;
+    delete vert_shader_module;
 }
 
 static void create_vulkan_framebuffers()

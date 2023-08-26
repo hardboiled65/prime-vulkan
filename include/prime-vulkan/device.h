@@ -8,6 +8,7 @@
 
 #include <prime-vulkan/queue.h>
 #include <prime-vulkan/swapchain.h>
+#include <prime-vulkan/shader-module.h>
 
 namespace pr {
 namespace vk {
@@ -79,6 +80,8 @@ public:
     Vector<VkImage> images_for(const VkSwapchain& swapchain) const;
 
     VkImageView create_image_view(const VkImageView::CreateInfo& info) const;
+
+    VkShaderModule create_shader_module(const VkShaderModule::CreateInfo& info) const;
 
     ::VkDevice c_ptr();
 
