@@ -8,6 +8,7 @@
 #include <prime-vulkan/device.h>
 #include <prime-vulkan/surface.h>
 #include <prime-vulkan/swapchain.h>
+#include <prime-vulkan/shader-module.h>
 
 namespace pr {
 namespace vk {

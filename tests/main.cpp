@@ -66,9 +66,7 @@ VkPresentModeKHR vulkan_present_mode;
 VkExtent2D vulkan_extent;
 pr::vk::VkSwapchain *vulkan_swapchain = nullptr;
 pr::Vector<pr::vk::VkImage> vulkan_swapchain_images;
-uint32_t vulkan_swapchain_images_length = 0;
 // Image views.
-//VkImageView *vulkan_image_views = NULL;
 pr::Vector<pr::vk::VkImageView> vulkan_image_views;
 // Render pass.
 VkAttachmentDescription vulkan_attachment_description;
@@ -566,14 +564,13 @@ static void create_vulkan_graphics_pipeline()
     // Create vertex shader module.
     VkShaderModule vert_shader_module;
 
-    VkShaderModuleCreateInfo vert_create_info;
-    vert_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    vert_create_info.codeSize = vert_shader_code_size;
-    vert_create_info.pCode = (const uint32_t*)vert_shader_code;
-    vert_create_info.flags = 0;
-    vert_create_info.pNext = NULL;
+    pr::vk::VkShaderModule::CreateInfo vert_create_info;
+    vert_create_info.set_code((const uint32_t*)vert_shader_code,
+        vert_shader_code_size);
 
-    result = vkCreateShaderModule(vulkan_device->c_ptr(), &vert_create_info, NULL,
+    auto vert_info = vert_create_info.c_struct();
+
+    result = vkCreateShaderModule(vulkan_device->c_ptr(), &vert_info, NULL,
         &vert_shader_module);
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to create vertex shader module!\n");
@@ -584,14 +581,13 @@ static void create_vulkan_graphics_pipeline()
     // Create fragment shader module.
     VkShaderModule frag_shader_module;
 
-    VkShaderModuleCreateInfo frag_create_info;
-    frag_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    frag_create_info.codeSize = frag_shader_code_size;
-    frag_create_info.pCode = (const uint32_t*)frag_shader_code;
-    frag_create_info.flags = 0;
-    frag_create_info.pNext = NULL;
+    pr::vk::VkShaderModule::CreateInfo frag_create_info;
+    frag_create_info.set_code((const uint32_t*)frag_shader_code,
+        frag_shader_code_size);
 
-    result = vkCreateShaderModule(vulkan_device->c_ptr(), &frag_create_info, NULL,
+    auto frag_info = frag_create_info.c_struct();
+
+    result = vkCreateShaderModule(vulkan_device->c_ptr(), &frag_info, NULL,
         &frag_shader_module);
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to create fragment shader module!\n");
