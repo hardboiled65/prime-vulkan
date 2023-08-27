@@ -95,6 +95,154 @@ VkPipeline::DynamicStateCreateInfo::c_struct() const
 }
 
 
+VkPipeline::VertexInputStateCreateInfo::VertexInputStateCreateInfo()
+{
+    this->_info.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
+    this->_info.flags = 0;
+    this->_info.pNext = nullptr;
+}
+
+void VkPipeline::VertexInputStateCreateInfo::set_vertex_binding_descriptions(
+    const pr::Vector<::VkVertexInputBindingDescription>& descriptions)
+{
+    if (descriptions.length() != 0) {
+        fprintf(stderr, "[WARN] Description setter with non-zero length Vector is not implemented.\n");
+    }
+
+    this->_info.vertexBindingDescriptionCount = 0;
+    this->_info.pVertexBindingDescriptions = nullptr;
+}
+
+void VkPipeline::VertexInputStateCreateInfo::set_vertex_attribute_descriptions(
+    const pr::Vector<::VkVertexInputAttributeDescription>& descriptions)
+{
+    if (descriptions.length() != 0) {
+        fprintf(stderr, "[WARN] Description setter with non-zero length Vector is not implemented.\n");
+    }
+
+    this->_info.vertexAttributeDescriptionCount = 0;
+    this->_info.pVertexAttributeDescriptions = nullptr;
+}
+
+auto VkPipeline::VertexInputStateCreateInfo::c_struct() const -> CType
+{
+    return this->_info;
+}
+
+
+VkPipeline::InputAssemblyStateCreateInfo::InputAssemblyStateCreateInfo()
+{
+    this->_info.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+
+    this->_info.flags = 0;
+    this->_info.pNext = nullptr;
+}
+
+void VkPipeline::InputAssemblyStateCreateInfo::set_topology(
+    ::VkPrimitiveTopology topology)
+{
+    this->_info.topology = topology;
+}
+
+void VkPipeline::InputAssemblyStateCreateInfo::set_primitive_restart_enable(
+    bool enable)
+{
+    this->_info.primitiveRestartEnable = (enable) ? VK_TRUE : VK_FALSE;
+}
+
+auto VkPipeline::InputAssemblyStateCreateInfo::c_struct() const -> CType
+{
+    return this->_info;
+}
+
+
+VkPipeline::ViewportStateCreateInfo::ViewportStateCreateInfo()
+{
+    this->_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+
+    this->_info.pViewports = nullptr;
+    this->_info.pScissors = nullptr;
+
+    this->_info.flags = 0;
+    this->_info.pNext = nullptr;
+}
+
+void VkPipeline::ViewportStateCreateInfo::set_viewport_count(uint32_t count)
+{
+    this->_info.viewportCount = count;
+}
+
+void VkPipeline::ViewportStateCreateInfo::set_scissor_count(uint32_t count)
+{
+    this->_info.scissorCount = count;
+}
+
+auto VkPipeline::ViewportStateCreateInfo::c_struct() const -> CType
+{
+    return this->_info;
+}
+
+
+VkPipeline::RasterizationStateCreateInfo::RasterizationStateCreateInfo()
+{
+    this->_info.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+
+    this->_info.flags = 0;
+    this->_info.pNext = nullptr;
+}
+
+void VkPipeline::RasterizationStateCreateInfo::set_depth_clamp_enable(
+    bool enable)
+{
+    this->_info.depthClampEnable = (enable) ? VK_TRUE : VK_FALSE;
+}
+
+void VkPipeline::RasterizationStateCreateInfo::set_rasterizer_discard_enable(
+    bool enable)
+{
+    this->_info.rasterizerDiscardEnable = (enable) ? VK_TRUE : VK_FALSE;
+}
+
+void VkPipeline::RasterizationStateCreateInfo::set_polygon_mode(
+    ::VkPolygonMode mode)
+{
+    this->_info.polygonMode = mode;
+}
+
+void VkPipeline::RasterizationStateCreateInfo::set_line_width(
+    float width)
+{
+    this->_info.lineWidth = width;
+}
+
+void VkPipeline::RasterizationStateCreateInfo::set_cull_mode(
+    ::VkCullModeFlags cull_mode)
+{
+    this->_info.cullMode = cull_mode;
+}
+
+void VkPipeline::RasterizationStateCreateInfo::set_front_face(
+    ::VkFrontFace front_face)
+{
+    this->_info.frontFace = front_face;
+}
+
+void VkPipeline::RasterizationStateCreateInfo::set_depth_bias_enable(
+    bool enable)
+{
+    this->_info.depthBiasEnable = enable;
+}
+
+auto VkPipeline::RasterizationStateCreateInfo::c_struct() const -> CType
+{
+    return this->_info;
+}
+
+
 VkPipelineLayout::CreateInfo::CreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

@@ -80,13 +80,7 @@ uint8_t *vert_shader_code = NULL;
 uint32_t vert_shader_code_size = 0;
 uint8_t *frag_shader_code = NULL;
 uint32_t frag_shader_code_size = 0;
-VkPipelineShaderStageCreateInfo vulkan_vert_shader_stage_create_info;
-VkPipelineShaderStageCreateInfo vulkan_frag_shader_stage_create_info;
 VkPipelineShaderStageCreateInfo *vulkan_shader_stage_create_infos = NULL;
-VkPipelineVertexInputStateCreateInfo vulkan_vert_input_state_create_info;
-VkPipelineInputAssemblyStateCreateInfo vulkan_input_assembly_state_create_info;
-VkPipelineViewportStateCreateInfo vulkan_viewport_state_create_info;
-VkPipelineRasterizationStateCreateInfo vulkan_rasterization_state_create_info;
 VkPipelineMultisampleStateCreateInfo vulkan_multisample_state_create_info;
 VkPipelineColorBlendAttachmentState vulkan_color_blend_attachment_state;
 VkPipelineColorBlendStateCreateInfo vulkan_color_blend_state_create_info;
@@ -603,34 +597,36 @@ static void create_vulkan_graphics_pipeline()
     vulkan_shader_stage_create_infos[1] = frag_shader_stage_create_info.c_struct();
 
     // Vertex input.
-    vulkan_vert_input_state_create_info.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vulkan_vert_input_state_create_info.vertexBindingDescriptionCount = 0;
-    vulkan_vert_input_state_create_info.vertexAttributeDescriptionCount = 0;
+    pr::vk::VkPipeline::VertexInputStateCreateInfo vert_input_state_create_info;
+    vert_input_state_create_info.set_vertex_binding_descriptions(
+        pr::Vector<::VkVertexInputBindingDescription>());
+    vert_input_state_create_info.set_vertex_attribute_descriptions(
+        pr::Vector<::VkVertexInputAttributeDescription>());
+    auto vulkan_vert_input_state_create_info = vert_input_state_create_info.c_struct();
 
     // Input assembly.
-    vulkan_input_assembly_state_create_info.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    vulkan_input_assembly_state_create_info.topology =
-        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    vulkan_input_assembly_state_create_info.primitiveRestartEnable = VK_FALSE;
+    pr::vk::VkPipeline::InputAssemblyStateCreateInfo input_assembly_state_create_info;
+    input_assembly_state_create_info.set_topology(
+        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+    input_assembly_state_create_info.set_primitive_restart_enable(false);
+    auto vulkan_input_assembly_state_create_info = input_assembly_state_create_info.c_struct();
 
     // Viewport.
-    vulkan_viewport_state_create_info.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    vulkan_viewport_state_create_info.viewportCount = 1;
-    vulkan_viewport_state_create_info.scissorCount = 1;
+    pr::vk::VkPipeline::ViewportStateCreateInfo viewport_state_create_info;
+    viewport_state_create_info.set_viewport_count(1);
+    viewport_state_create_info.set_scissor_count(1);
+    auto vulkan_viewport_state_create_info = viewport_state_create_info.c_struct();
 
     // Rasterization.
-    vulkan_rasterization_state_create_info.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    vulkan_rasterization_state_create_info.depthClampEnable = VK_FALSE;
-    vulkan_rasterization_state_create_info.rasterizerDiscardEnable = VK_FALSE;
-    vulkan_rasterization_state_create_info.polygonMode = VK_POLYGON_MODE_FILL;
-    vulkan_rasterization_state_create_info.lineWidth = 1.0f;
-    vulkan_rasterization_state_create_info.cullMode = VK_CULL_MODE_BACK_BIT;
-    vulkan_rasterization_state_create_info.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    vulkan_rasterization_state_create_info.depthBiasEnable = VK_FALSE;
+    pr::vk::VkPipeline::RasterizationStateCreateInfo rasterization_state_create_info;
+    rasterization_state_create_info.set_depth_clamp_enable(false);
+    rasterization_state_create_info.set_rasterizer_discard_enable(false);
+    rasterization_state_create_info.set_polygon_mode(VK_POLYGON_MODE_FILL);
+    rasterization_state_create_info.set_line_width(1.0f);
+    rasterization_state_create_info.set_cull_mode(VK_CULL_MODE_BACK_BIT);
+    rasterization_state_create_info.set_front_face(VK_FRONT_FACE_CLOCKWISE);
+    rasterization_state_create_info.set_depth_bias_enable(false);
+    auto vulkan_rasterization_state_create_info = rasterization_state_create_info.c_struct();
 
     // Multisampling.
     vulkan_multisample_state_create_info.sType =

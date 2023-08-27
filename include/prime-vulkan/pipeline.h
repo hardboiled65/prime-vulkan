@@ -20,6 +20,7 @@ class VkPipeline
 // Nested classes
 //=================
 public:
+    /// A wrapper class for `VkPipelineShaderStageCreateInfo` struct.
     class ShaderStageCreateInfo
     {
     public:
@@ -38,6 +39,7 @@ public:
         pr::String _name;
     };
 
+    /// A wrapper class for `VkPipelineDynamicStateCreateInfo` struct.
     class DynamicStateCreateInfo
     {
     public:
@@ -56,6 +58,106 @@ public:
         ::VkPipelineDynamicStateCreateInfo _info;
 
         ::VkDynamicState *_states;
+    };
+
+    /// A wrapper class for `VkPipelineVertexInputStateCreateInfo` struct.
+    class VertexInputStateCreateInfo
+    {
+    public:
+        using CType = ::VkPipelineVertexInputStateCreateInfo;
+
+    public:
+        VertexInputStateCreateInfo();
+
+        /// Set the vertex input binding descriptions.
+        /// Count will automatically filled.
+        ///
+        /// TODO: Currently only accepts 0 length Vector.
+        /// Others not implemented.
+        void set_vertex_binding_descriptions(
+            const pr::Vector<::VkVertexInputBindingDescription>& descriptions);
+
+        /// Set the vertex input attribute descriptions.
+        /// Count will automatically filled.
+        ///
+        /// TODO: Currently only accepts 0 length Vector.
+        /// Others not implemented.
+        void set_vertex_attribute_descriptions(
+            const pr::Vector<::VkVertexInputAttributeDescription>& descriptions);
+
+        CType c_struct() const;
+
+    private:
+        CType _info;
+    };
+
+    /// A wrapper class for `VkPipelineInputAssemblyStateCreateInfo` struct.
+    class InputAssemblyStateCreateInfo
+    {
+    public:
+        using CType = ::VkPipelineInputAssemblyStateCreateInfo;
+
+    public:
+        InputAssemblyStateCreateInfo();
+
+        void set_topology(::VkPrimitiveTopology topology);
+
+        void set_primitive_restart_enable(bool enable);
+
+        CType c_struct() const;
+
+    private:
+        CType _info;
+    };
+
+    /// A wrapper class for `VkPipelineViewportStateCreateInfo` struct.
+    class ViewportStateCreateInfo
+    {
+    public:
+        using CType = ::VkPipelineViewportStateCreateInfo;
+
+    public:
+        ViewportStateCreateInfo();
+
+        /// Set viewport count for dynamic state.
+        void set_viewport_count(uint32_t count);
+
+        /// Set scissor count for dynamic state.
+        void set_scissor_count(uint32_t count);
+
+        CType c_struct() const;
+
+    private:
+        CType _info;
+    };
+
+    /// A wrapper class for `VkPipelineRasterizationStateCreateInfo` struct.
+    class RasterizationStateCreateInfo
+    {
+    public:
+        using CType = ::VkPipelineRasterizationStateCreateInfo;
+
+    public:
+        RasterizationStateCreateInfo();
+
+        void set_depth_clamp_enable(bool enable);
+
+        void set_rasterizer_discard_enable(bool enable);
+
+        void set_polygon_mode(::VkPolygonMode mode);
+
+        void set_line_width(float width);
+
+        void set_cull_mode(::VkCullModeFlags cull_mode);
+
+        void set_front_face(::VkFrontFace front_face);
+
+        void set_depth_bias_enable(bool enable);
+
+        CType c_struct() const;
+
+    private:
+        CType _info;
     };
 
 //===================
