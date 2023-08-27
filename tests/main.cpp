@@ -295,16 +295,16 @@ static void create_vulkan_logical_device()
     present_queue_create_info.set_queue_priorities(queue_priorities);
 
     // Logical device.
-    pr::Vector<pr::vk::VkDevice::QueueCreateInfo> queue_create_infos = {
-        graphics_queue_create_info,
-        present_queue_create_info,
+
+    pr::Vector<pr::String> extension_names = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     };
 
-    pr::Vector<pr::String> extension_names;
-    extension_names.push(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-
     pr::vk::VkDevice::CreateInfo device_create_info;
-    device_create_info.set_queue_create_infos(queue_create_infos);
+    device_create_info.set_queue_create_infos({
+        graphics_queue_create_info,
+        present_queue_create_info,
+    });
     device_create_info.set_enabled_features(vulkan_device_features);
     device_create_info.set_enabled_extension_names(extension_names);
 
