@@ -296,9 +296,10 @@ static void create_vulkan_logical_device()
     present_queue_create_info.set_queue_priorities(queue_priorities);
 
     // Logical device.
-    pr::Vector<pr::vk::VkDevice::QueueCreateInfo> queue_create_infos;
-    queue_create_infos.push(graphics_queue_create_info);
-    queue_create_infos.push(present_queue_create_info);
+    pr::Vector<pr::vk::VkDevice::QueueCreateInfo> queue_create_infos = {
+        graphics_queue_create_info,
+        present_queue_create_info,
+    };
 
     pr::Vector<pr::String> extension_names;
     extension_names.push(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
@@ -424,9 +425,10 @@ static void create_vulkan_swapchain()
     if (graphics_family != present_family) {
         fprintf(stderr, "NOT SAME!\n");
         swapchain_create_info.set_image_sharing_mode(VK_SHARING_MODE_CONCURRENT);
-        pr::Vector<uint32_t> indices;
-        indices.push(queue_family_indices[0]);
-        indices.push(queue_family_indices[1]);
+        pr::Vector<uint32_t> indices = {
+            queue_family_indices[0],
+            queue_family_indices[1],
+        };
         swapchain_create_info.set_queue_family_indices(indices);
     } else {
         swapchain_create_info.set_image_sharing_mode(VK_SHARING_MODE_EXCLUSIVE);
@@ -656,9 +658,10 @@ static void create_vulkan_graphics_pipeline()
     vulkan_color_blend_state_create_info.blendConstants[3] = 0.0f;
 
     // Dynamic states.
-    pr::Vector<::VkDynamicState> dynamic_states;
-    dynamic_states.push(VK_DYNAMIC_STATE_VIEWPORT);
-    dynamic_states.push(VK_DYNAMIC_STATE_SCISSOR);
+    pr::Vector<::VkDynamicState> dynamic_states = {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR,
+    };
 
     pr::vk::VkPipeline::DynamicStateCreateInfo dynamic_state_create_info;
     dynamic_state_create_info.set_dynamic_states(dynamic_states);
