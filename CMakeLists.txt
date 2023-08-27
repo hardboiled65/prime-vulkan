@@ -15,6 +15,7 @@ add_library(prime-vulkan SHARED
     src/queue.cpp
     src/swapchain.cpp
     src/shader-module.cpp
+    src/pipeline.cpp
     include/prime-vulkan/base.h
     include/prime-vulkan/extension-properties.h
     include/prime-vulkan/vulkan.h
@@ -25,6 +26,7 @@ add_library(prime-vulkan SHARED
     include/prime-vulkan/queue.h
     include/prime-vulkan/swapchain.h
     include/prime-vulkan/shader-module.h
+    include/prime-vulkan/pipeline.h
 )
 
 target_include_directories(prime-vulkan

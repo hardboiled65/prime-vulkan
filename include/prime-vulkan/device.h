@@ -9,6 +9,7 @@
 #include <prime-vulkan/queue.h>
 #include <prime-vulkan/swapchain.h>
 #include <prime-vulkan/shader-module.h>
+#include <prime-vulkan/pipeline.h>
 
 namespace pr {
 namespace vk {
@@ -81,7 +82,12 @@ public:
 
     VkImageView create_image_view(const VkImageView::CreateInfo& info) const;
 
-    VkShaderModule create_shader_module(const VkShaderModule::CreateInfo& info) const;
+    VkShaderModule
+    create_shader_module(const VkShaderModule::CreateInfo& info) const;
+
+    /// Create a pipeline layout.
+    VkPipelineLayout
+    create_pipeline_layout(const VkPipelineLayout::CreateInfo& info) const;
 
     ::VkDevice c_ptr();
 
