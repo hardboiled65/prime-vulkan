@@ -243,6 +243,35 @@ auto VkPipeline::RasterizationStateCreateInfo::c_struct() const -> CType
 }
 
 
+VkPipeline::MultisampleStateCreateInfo::MultisampleStateCreateInfo()
+{
+    this->_info.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+
+    this->_info.pSampleMask = nullptr;
+
+    this->_info.flags = 0;
+    this->_info.pNext = nullptr;
+}
+
+void VkPipeline::MultisampleStateCreateInfo::set_sample_shading_enable(
+    bool enable)
+{
+    this->_info.sampleShadingEnable = (enable) ? VK_TRUE : VK_FALSE;
+}
+
+void VkPipeline::MultisampleStateCreateInfo::set_rasterization_samples(
+    ::VkSampleCountFlagBits samples)
+{
+    this->_info.rasterizationSamples = samples;
+}
+
+auto VkPipeline::MultisampleStateCreateInfo::c_struct() const -> CType
+{
+    return this->_info;
+}
+
+
 VkPipelineLayout::CreateInfo::CreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

@@ -160,6 +160,25 @@ public:
         CType _info;
     };
 
+    /// A wrapper class for `VkPipelineMultisampleStateCreateInfo` struct.
+    class MultisampleStateCreateInfo
+    {
+    public:
+        using CType = ::VkPipelineMultisampleStateCreateInfo;
+
+    public:
+        MultisampleStateCreateInfo();
+
+        void set_sample_shading_enable(bool enable);
+
+        void set_rasterization_samples(::VkSampleCountFlagBits samples);
+
+        CType c_struct() const;
+
+    private:
+        CType _info;
+    };
+
 //===================
 // Public methods
 //===================

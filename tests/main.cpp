@@ -81,7 +81,6 @@ uint32_t vert_shader_code_size = 0;
 uint8_t *frag_shader_code = NULL;
 uint32_t frag_shader_code_size = 0;
 VkPipelineShaderStageCreateInfo *vulkan_shader_stage_create_infos = NULL;
-VkPipelineMultisampleStateCreateInfo vulkan_multisample_state_create_info;
 VkPipelineColorBlendAttachmentState vulkan_color_blend_attachment_state;
 VkPipelineColorBlendStateCreateInfo vulkan_color_blend_state_create_info;
 pr::vk::VkPipelineLayout *vulkan_layout = nullptr;
@@ -631,10 +630,10 @@ static void create_vulkan_graphics_pipeline()
     auto vulkan_rasterization_state_create_info = rasterization_state_create_info.c_struct();
 
     // Multisampling.
-    vulkan_multisample_state_create_info.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    vulkan_multisample_state_create_info.sampleShadingEnable = VK_FALSE;
-    vulkan_multisample_state_create_info.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    pr::vk::VkPipeline::MultisampleStateCreateInfo multisample_state_create_info;
+    multisample_state_create_info.set_sample_shading_enable(false);
+    multisample_state_create_info.set_rasterization_samples(VK_SAMPLE_COUNT_1_BIT);
+    auto vulkan_multisample_state_create_info = multisample_state_create_info.c_struct();
 
     // Color blend attachment.
     vulkan_color_blend_attachment_state.colorWriteMask =
