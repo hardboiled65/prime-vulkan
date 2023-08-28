@@ -497,6 +497,7 @@ static void create_vulkan_render_pass()
 {
     VkResult result;
 
+    VkAttachmentDescription vulkan_attachment_description = {};
     vulkan_attachment_description.format = vulkan_format.format;
     vulkan_attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
     vulkan_attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -516,6 +517,7 @@ static void create_vulkan_render_pass()
     vulkan_subpass_description.pColorAttachments = &vulkan_attachment_reference;
 
     // Subpass dependency.
+    VkSubpassDependency vulkan_dependency = {};
     vulkan_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     vulkan_dependency.dstSubpass = 0;
     vulkan_dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -534,7 +536,7 @@ static void create_vulkan_render_pass()
     vulkan_render_pass_create_info.flags = 0;
     vulkan_render_pass_create_info.pNext = nullptr;
 
-    // pr::vk::RenderPass::CreateInfo render_pass_create_info; <- THIS LINE BREAK ALL WHY?
+    // pr::vk::RenderPass::CreateInfo render_pass_create_info; // <- THIS LINE BREAK ALL WHY?
     /*
     render_pass_create_info.set_attachments({
         []() {
@@ -936,9 +938,17 @@ void draw_frame()
 {
     VkResult result;
 
-    vkWaitForFences(vulkan_device->c_ptr(), 1, &vulkan_in_flight_fence,
+    result = vkWaitForFences(vulkan_device->c_ptr(), 1, &vulkan_in_flight_fence,
         VK_TRUE, UINT64_MAX);
-    vkResetFences(vulkan_device->c_ptr(), 1, &vulkan_in_flight_fence);
+    if (result != VK_SUCCESS) {
+        fprintf(stderr, "Failed to wait for fences!\n");
+        exit(1);
+    }
+    result = vkResetFences(vulkan_device->c_ptr(), 1, &vulkan_in_flight_fence);
+    if (result != VK_SUCCESS) {
+        fprintf(stderr, "Failed to reset fences!\n");
+        exit(1);
+    }
 
     uint32_t image_index;
     result = vkAcquireNextImageKHR(vulkan_device->c_ptr(), vulkan_swapchain->c_ptr(), UINT64_MAX,
@@ -949,7 +959,11 @@ void draw_frame()
     }
     fprintf(stderr, "Acquired next image. - image index: %d\n", image_index);
 
-    vkResetCommandBuffer(vulkan_command_buffer, 0);
+    result = vkResetCommandBuffer(vulkan_command_buffer, 0);
+    if (result != VK_SUCCESS) {
+        fprintf(stderr, "Failed to reset command buffer!\n");
+        exit(1);
+    }
     record_command_buffer(vulkan_command_buffer, image_index);
 
     VkSubmitInfo submit_info;
@@ -1000,7 +1014,10 @@ void draw_frame()
     // Set zero or null.
     present_info.pNext = NULL;
 
-    vkQueuePresentKHR(vulkan_present_queue, &present_info);
+    result = vkQueuePresentKHR(vulkan_present_queue, &present_info);
+    if (result != VK_SUCCESS) {
+        fprintf(stderr, "Queue present failed!\n");
+    }
 }
 
 //===========
