@@ -70,8 +70,6 @@ pr::Vector<pr::vk::VkImage> vulkan_swapchain_images;
 pr::Vector<pr::vk::VkImageView> vulkan_image_views;
 // Render pass.
 VkAttachmentDescription vulkan_attachment_description;
-VkAttachmentReference vulkan_attachment_reference;
-VkSubpassDescription vulkan_subpass_description;
 VkRenderPass vulkan_render_pass;
 VkRenderPassCreateInfo vulkan_render_pass_create_info;
 VkSubpassDependency vulkan_dependency;
@@ -508,9 +506,11 @@ static void create_vulkan_render_pass()
     vulkan_attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     vulkan_attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
+    VkAttachmentReference vulkan_attachment_reference = {};
     vulkan_attachment_reference.attachment = 0;
     vulkan_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+    VkSubpassDescription vulkan_subpass_description = {};
     vulkan_subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     vulkan_subpass_description.colorAttachmentCount = 1;
     vulkan_subpass_description.pColorAttachments = &vulkan_attachment_reference;
@@ -523,6 +523,7 @@ static void create_vulkan_render_pass()
     vulkan_dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     vulkan_dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
+    VkRenderPassCreateInfo vulkan_render_pass_create_info = {};
     vulkan_render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     vulkan_render_pass_create_info.attachmentCount = 1;
     vulkan_render_pass_create_info.pAttachments = &vulkan_attachment_description;
@@ -530,6 +531,27 @@ static void create_vulkan_render_pass()
     vulkan_render_pass_create_info.pSubpasses = &vulkan_subpass_description;
     vulkan_render_pass_create_info.dependencyCount = 1;
     vulkan_render_pass_create_info.pDependencies = &vulkan_dependency;
+    vulkan_render_pass_create_info.flags = 0;
+    vulkan_render_pass_create_info.pNext = nullptr;
+
+    // pr::vk::RenderPass::CreateInfo render_pass_create_info; <- THIS LINE BREAK ALL WHY?
+    /*
+    render_pass_create_info.set_attachments({
+        []() {
+            pr::vk::AttachmentDescription desc;
+            desc.set_format(vulkan_format.format);
+            desc.set_samples(VK_SAMPLE_COUNT_1_BIT);
+            desc.set_load_op(VK_ATTACHMENT_LOAD_OP_CLEAR);
+            desc.set_store_op(VK_ATTACHMENT_STORE_OP_STORE);
+            desc.set_stencil_load_op(VK_ATTACHMENT_LOAD_OP_DONT_CARE);
+            desc.set_stencil_store_op(VK_ATTACHMENT_STORE_OP_DONT_CARE);
+            desc.set_initial_layout(VK_IMAGE_LAYOUT_UNDEFINED);
+            desc.set_final_layout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+            return desc;
+        }(),
+    });
+    */
 
     result = vkCreateRenderPass(vulkan_device->c_ptr(), &vulkan_render_pass_create_info,
         NULL, &vulkan_render_pass);

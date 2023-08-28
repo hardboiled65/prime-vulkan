@@ -82,8 +82,11 @@ SubpassDescription::SubpassDescription()
     this->_description.preserveAttachmentCount = 0;
     this->_description.pPreserveAttachments = nullptr;
     this->_description.pResolveAttachments = nullptr;
+    this->_description.pDepthStencilAttachment = nullptr;
 
     this->_description.flags = 0;
+
+    this->_attachments = nullptr;
 }
 
 SubpassDescription::~SubpassDescription()

@@ -10,6 +10,7 @@
 #include <prime-vulkan/swapchain.h>
 #include <prime-vulkan/shader-module.h>
 #include <prime-vulkan/pipeline.h>
+#include <prime-vulkan/render-pass.h>
 
 namespace pr {
 namespace vk {
