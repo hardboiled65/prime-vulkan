@@ -175,6 +175,13 @@ static void init_vulkan()
     }
     fprintf(stderr, "Number of layers: %d\n", layers);
 
+    auto layer_properties = pr::vk::LayerProperties::enumerate();
+    for (auto& props: layer_properties) {
+        fprintf(stderr, " <Layer> %s(%s)\n",
+            props.layer_name().c_str(),
+            props.description().c_str());
+    }
+
 
     // Check extensions.
     auto extension_properties = pr::vk::VkExtensionProperties::enumerate();
@@ -997,6 +1004,7 @@ void draw_frame()
         fprintf(stderr, "Failed to submit draw command buffer!\n");
         return;
     }
+    fprintf(stderr, "Queue submitted.\n");
 
     VkPresentInfoKHR present_info;
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -1012,12 +1020,14 @@ void draw_frame()
     present_info.pImageIndices = &image_index;
 
     // Set zero or null.
+    present_info.pResults = nullptr;    // THIS IS IMPORTANT!
     present_info.pNext = NULL;
 
     result = vkQueuePresentKHR(vulkan_present_queue, &present_info);
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Queue present failed!\n");
     }
+    fprintf(stderr, "vkQueuePresentKHR called\n");
 }
 
 //===========
