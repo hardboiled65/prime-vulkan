@@ -13,6 +13,33 @@
 namespace pr {
 namespace vk {
 
+class LayerProperties
+{
+public:
+    using CType = ::VkLayerProperties;
+
+public:
+    static pr::Vector<LayerProperties> enumerate();
+
+    pr::String layer_name() const;
+
+    uint32_t spec_version() const;
+
+    uint32_t implementation_version() const;
+
+    pr::String description() const;
+
+private:
+    LayerProperties();
+
+private:
+    pr::String _layerName;
+    uint32_t _specVersion;
+    uint32_t _implementationVersion;
+    pr::String _description;
+};
+
+
 class VkInstance
 {
 public:

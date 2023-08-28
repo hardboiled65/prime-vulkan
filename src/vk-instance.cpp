@@ -7,6 +7,56 @@
 namespace pr {
 namespace vk {
 
+LayerProperties::LayerProperties()
+{
+}
+
+pr::Vector<LayerProperties> LayerProperties::enumerate()
+{
+    pr::Vector<LayerProperties> v;
+
+    uint32_t count;
+    vkEnumerateInstanceLayerProperties(&count, nullptr);
+
+    LayerProperties::CType *p = new CType[count];
+    vkEnumerateInstanceLayerProperties(&count, p);
+
+    for (uint32_t i = 0; i < count; ++i) {
+        LayerProperties properties;
+        properties._layerName = p[i].layerName;
+        properties._specVersion = p[i].specVersion;
+        properties._implementationVersion = p[i].implementationVersion;
+        properties._description = p[i].description;
+
+        v.push(properties);
+    }
+
+    delete[] p;
+
+    return v;
+}
+
+pr::String LayerProperties::layer_name() const
+{
+    return this->_layerName;
+}
+
+uint32_t LayerProperties::spec_version() const
+{
+    return this->_specVersion;
+}
+
+uint32_t LayerProperties::implementation_version() const
+{
+    return this->_implementationVersion;
+}
+
+pr::String LayerProperties::description() const
+{
+    return this->_description;
+}
+
+
 VkInstance::CreateInfo::CreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
