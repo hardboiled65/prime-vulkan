@@ -229,6 +229,45 @@ public:
         ::VkPipelineColorBlendAttachmentState *_p_attachments;
     };
 
+    /// A wrapper class for `VkGraphicsPipelineCreateInfo` struct.
+    class GraphicsPipelineCreateInfo
+    {
+    public:
+        using CType = ::VkGraphicsPipelineCreateInfo;
+
+    public:
+        GraphicsPipelineCreateInfo();
+
+        void set_stages(const pr::Vector<ShaderStageCreateInfo>& stages);
+
+        void set_vertex_input_state(const VertexInputStateCreateInfo& info);
+
+        void set_input_assembly_state(const InputAssemblyStateCreateInfo& info);
+
+        void set_viewport_state(const ViewportStateCreateInfo& info);
+
+        void set_rasterization_state(const RasterizationStateCreateInfo& info);
+
+        void set_multisample_state(const MultisampleStateCreateInfo& info);
+
+        void set_color_blend_state(const ColorBlendStateCreateInfo& info);
+
+        void set_dynamic_state(const DynamicStateCreateInfo& info);
+
+        void set_layout(const VkPipelineLayout& layout);
+
+        void set_render_pass(/*const VkRenderPass& render_pass*/);
+
+        void set_subpass(uint32_t subpass);
+
+        void set_base_pipeline_handle(/**/);
+
+        CType c_struct() const;
+
+    private:
+        CType _info;
+    };
+
 //===================
 // Public methods
 //===================

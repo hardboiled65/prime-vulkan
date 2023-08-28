@@ -362,6 +362,15 @@ auto VkPipeline::ColorBlendStateCreateInfo::c_struct() const -> CType
 }
 
 
+VkPipeline::GraphicsPipelineCreateInfo::GraphicsPipelineCreateInfo()
+{
+    this->_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+
+    this->_info.flags = 0;
+    this->_info.pNext = nullptr;
+}
+
+
 VkPipelineLayout::CreateInfo::CreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
