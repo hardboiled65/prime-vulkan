@@ -16,6 +16,7 @@ add_library(prime-vulkan SHARED
     src/swapchain.cpp
     src/shader-module.cpp
     src/pipeline.cpp
+    src/render-pass.cpp
     include/prime-vulkan/base.h
     include/prime-vulkan/extension-properties.h
     include/prime-vulkan/vulkan.h
@@ -27,6 +28,7 @@ add_library(prime-vulkan SHARED
     include/prime-vulkan/swapchain.h
     include/prime-vulkan/shader-module.h
     include/prime-vulkan/pipeline.h
+    include/prime-vulkan/render-pass.h
 )
 
 target_include_directories(prime-vulkan
