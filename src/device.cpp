@@ -127,6 +127,7 @@ void VkDevice::CreateInfo::set_enabled_extension_names(
     this->_pp_enabled_extension_names = new const char*[names.length()];
     for (uint64_t i = 0; i < names.length(); ++i) {
         this->_pp_enabled_extension_names[i] = names[i].c_str();
+        // TODO: not name[i] but this->_enabled_extension_names[i].
     }
 
     this->_info.ppEnabledExtensionNames = this->_pp_enabled_extension_names;

@@ -4,6 +4,7 @@
 #include <vulkan/vulkan.h>
 
 #include <memory>
+#include <optional>
 
 #include <primer/string.h>
 
@@ -177,6 +178,55 @@ public:
 
     private:
         CType _info;
+    };
+
+    /// A wrapper class for `VkPipelineColorBlendAttachmentState` struct.
+    class ColorBlendAttachmentState
+    {
+    public:
+        using CType = ::VkPipelineColorBlendAttachmentState;
+
+    public:
+        ColorBlendAttachmentState();
+
+        void set_color_write_mask(::VkColorComponentFlags mask);
+
+        void set_blend_enable(bool enable);
+
+        CType c_struct() const;
+
+    private:
+        CType _state;
+    };
+
+    /// A wrapper class for `VkPipelineColorBlendStateCreateInfo` struct.
+    class ColorBlendStateCreateInfo
+    {
+    public:
+        using CType = ::VkPipelineColorBlendStateCreateInfo;
+
+    public:
+        ColorBlendStateCreateInfo();
+
+        ~ColorBlendStateCreateInfo();
+
+        /// Set `.logicOp` field.
+        ///
+        /// If the argument is a value, then `.logicOpEnable` field will be
+        /// `VK_TRUE`. Otherwise set as `VK_FALSE` automatically.
+        void set_logic_op(std::optional<::VkLogicOp> op);
+
+        void set_attachments(
+            const pr::Vector<ColorBlendAttachmentState>& attachments);
+
+        void set_blend_constants(float r, float g, float b, float a);
+
+        CType c_struct() const;
+
+    private:
+        CType _info;
+
+        ::VkPipelineColorBlendAttachmentState *_p_attachments;
     };
 
 //===================

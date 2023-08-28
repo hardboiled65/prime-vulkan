@@ -81,8 +81,6 @@ uint32_t vert_shader_code_size = 0;
 uint8_t *frag_shader_code = NULL;
 uint32_t frag_shader_code_size = 0;
 VkPipelineShaderStageCreateInfo *vulkan_shader_stage_create_infos = NULL;
-VkPipelineColorBlendAttachmentState vulkan_color_blend_attachment_state;
-VkPipelineColorBlendStateCreateInfo vulkan_color_blend_state_create_info;
 pr::vk::VkPipelineLayout *vulkan_layout = nullptr;
 VkGraphicsPipelineCreateInfo vulkan_graphics_pipeline_create_info;
 VkPipeline vulkan_graphics_pipeline = NULL;
@@ -635,26 +633,24 @@ static void create_vulkan_graphics_pipeline()
     multisample_state_create_info.set_rasterization_samples(VK_SAMPLE_COUNT_1_BIT);
     auto vulkan_multisample_state_create_info = multisample_state_create_info.c_struct();
 
-    // Color blend attachment.
-    vulkan_color_blend_attachment_state.colorWriteMask =
-        VK_COLOR_COMPONENT_R_BIT |
-        VK_COLOR_COMPONENT_G_BIT |
-        VK_COLOR_COMPONENT_B_BIT |
-        VK_COLOR_COMPONENT_A_BIT;
-    vulkan_color_blend_attachment_state.blendEnable = VK_FALSE;
-
     // Color blending.
-    vulkan_color_blend_state_create_info.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    vulkan_color_blend_state_create_info.logicOpEnable = VK_FALSE;
-    vulkan_color_blend_state_create_info.logicOp = VK_LOGIC_OP_COPY;
-    vulkan_color_blend_state_create_info.attachmentCount = 1;
-    vulkan_color_blend_state_create_info.pAttachments =
-        &vulkan_color_blend_attachment_state;
-    vulkan_color_blend_state_create_info.blendConstants[0] = 0.0f;
-    vulkan_color_blend_state_create_info.blendConstants[1] = 0.0f;
-    vulkan_color_blend_state_create_info.blendConstants[2] = 0.0f;
-    vulkan_color_blend_state_create_info.blendConstants[3] = 0.0f;
+    pr::vk::VkPipeline::ColorBlendStateCreateInfo color_blend_state_create_info;
+    // color_blend_state_create_info.set_logic_op(VK_LOGIC_OP_COPY);
+    // Color blend attachments.
+    color_blend_state_create_info.set_attachments({
+        []() {
+            pr::vk::VkPipeline::ColorBlendAttachmentState state;
+            state.set_color_write_mask(
+                VK_COLOR_COMPONENT_R_BIT |
+                VK_COLOR_COMPONENT_G_BIT |
+                VK_COLOR_COMPONENT_B_BIT |
+                VK_COLOR_COMPONENT_A_BIT);
+            state.set_blend_enable(false);
+            return state;
+        }(),
+    });
+    color_blend_state_create_info.set_blend_constants(0.0f, 0.0f, 0.0f, 0.0f);
+    auto vulkan_color_blend_state_create_info = color_blend_state_create_info.c_struct();
 
     // Dynamic states.
     pr::Vector<::VkDynamicState> dynamic_states = {

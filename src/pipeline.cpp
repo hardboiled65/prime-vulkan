@@ -272,6 +272,96 @@ auto VkPipeline::MultisampleStateCreateInfo::c_struct() const -> CType
 }
 
 
+VkPipeline::ColorBlendAttachmentState::ColorBlendAttachmentState()
+{
+    this->_state.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+    this->_state.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+    this->_state.colorBlendOp = VK_BLEND_OP_ADD;
+    this->_state.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    this->_state.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+    this->_state.alphaBlendOp = VK_BLEND_OP_ADD;
+}
+
+void VkPipeline::ColorBlendAttachmentState::set_color_write_mask(
+    ::VkColorComponentFlags mask)
+{
+    this->_state.colorWriteMask = mask;
+}
+
+void VkPipeline::ColorBlendAttachmentState::set_blend_enable(bool enable)
+{
+    this->_state.blendEnable = (enable) ? VK_TRUE : VK_FALSE;
+}
+
+auto VkPipeline::ColorBlendAttachmentState::c_struct() const -> CType
+{
+    return this->_state;
+}
+
+
+VkPipeline::ColorBlendStateCreateInfo::ColorBlendStateCreateInfo()
+{
+    this->_info.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+
+    this->_info.attachmentCount = 0;
+    this->_info.pAttachments = nullptr;
+
+    this->_info.flags = 0;
+    this->_info.pNext = nullptr;
+
+    this->_p_attachments = nullptr;
+}
+
+VkPipeline::ColorBlendStateCreateInfo::~ColorBlendStateCreateInfo()
+{
+    if (this->_p_attachments != nullptr) {
+        delete[] this->_p_attachments;
+    }
+}
+
+void VkPipeline::ColorBlendStateCreateInfo::set_logic_op(
+    std::optional<::VkLogicOp> op)
+{
+    if (op != std::nullopt) {
+        this->_info.logicOpEnable = VK_TRUE;
+        this->_info.logicOp = op.value();
+    } else {
+        this->_info.logicOpEnable = VK_FALSE;
+    }
+}
+
+void VkPipeline::ColorBlendStateCreateInfo::set_attachments(
+    const pr::Vector<ColorBlendAttachmentState>& attachments)
+{
+    uint64_t count = attachments.length();
+
+    this->_info.attachmentCount = count;
+
+    this->_p_attachments = new ::VkPipelineColorBlendAttachmentState[count];
+    for (uint64_t i = 0; i < count; ++i) {
+        this->_p_attachments[i] = attachments[i].c_struct();
+    }
+    this->_info.pAttachments = this->_p_attachments;
+}
+
+void VkPipeline::ColorBlendStateCreateInfo::set_blend_constants(float r,
+                                                                float g,
+                                                                float b,
+                                                                float a)
+{
+    this->_info.blendConstants[0] = r;
+    this->_info.blendConstants[1] = g;
+    this->_info.blendConstants[2] = b;
+    this->_info.blendConstants[3] = a;
+}
+
+auto VkPipeline::ColorBlendStateCreateInfo::c_struct() const -> CType
+{
+    return this->_info;
+}
+
+
 VkPipelineLayout::CreateInfo::CreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
