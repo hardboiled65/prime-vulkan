@@ -735,6 +735,9 @@ static void create_vulkan_graphics_pipeline()
     vulkan_graphics_pipeline_create_info.subpass = 0;
     vulkan_graphics_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
 
+    vulkan_graphics_pipeline_create_info.flags = 0;
+    vulkan_graphics_pipeline_create_info.pNext = nullptr;
+
     result = vkCreateGraphicsPipelines(vulkan_device->c_ptr(), VK_NULL_HANDLE,
         1, &vulkan_graphics_pipeline_create_info, NULL,
         &vulkan_graphics_pipeline);
