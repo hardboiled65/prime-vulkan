@@ -504,48 +504,9 @@ static void create_vulkan_render_pass()
 {
     VkResult result;
 
-    pr::vk::AttachmentDescription attachment_description;
-    attachment_description.set_format(vulkan_format.format);
-    attachment_description.set_samples(VK_SAMPLE_COUNT_1_BIT);
-    attachment_description.set_load_op(VK_ATTACHMENT_LOAD_OP_CLEAR);
-    attachment_description.set_store_op(VK_ATTACHMENT_STORE_OP_STORE);
-    attachment_description.set_stencil_load_op(VK_ATTACHMENT_LOAD_OP_DONT_CARE);
-    attachment_description.set_stencil_store_op(VK_ATTACHMENT_STORE_OP_DONT_CARE);
-    attachment_description.set_initial_layout(VK_IMAGE_LAYOUT_UNDEFINED);
-    attachment_description.set_final_layout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-    VkAttachmentDescription vulkan_attachment_description = attachment_description.c_struct();
-
-    pr::vk::AttachmentReference attachment_reference(0,
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-    VkAttachmentReference vulkan_attachment_reference = attachment_reference.c_struct();
-
-    VkSubpassDescription vulkan_subpass_description = {};
-    vulkan_subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    vulkan_subpass_description.colorAttachmentCount = 1;
-    vulkan_subpass_description.pColorAttachments = &vulkan_attachment_reference;
-
-    // Subpass dependency.
-    VkSubpassDependency vulkan_dependency = {};
-    vulkan_dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    vulkan_dependency.dstSubpass = 0;
-    vulkan_dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    vulkan_dependency.srcAccessMask = 0;
-    vulkan_dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    vulkan_dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-    VkRenderPassCreateInfo vulkan_render_pass_create_info = {};
-    vulkan_render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    vulkan_render_pass_create_info.attachmentCount = 1;
-    vulkan_render_pass_create_info.pAttachments = &vulkan_attachment_description;
-    vulkan_render_pass_create_info.subpassCount = 1;
-    vulkan_render_pass_create_info.pSubpasses = &vulkan_subpass_description;
-    vulkan_render_pass_create_info.dependencyCount = 1;
-    vulkan_render_pass_create_info.pDependencies = &vulkan_dependency;
-    vulkan_render_pass_create_info.flags = 0;
-    vulkan_render_pass_create_info.pNext = nullptr;
-
-    // pr::vk::RenderPass::CreateInfo render_pass_create_info; // <- THIS LINE BREAK ALL WHY?
-    /*
+    // Render pass create info.
+    pr::vk::RenderPass::CreateInfo render_pass_create_info;
+    // Set attachments.
     render_pass_create_info.set_attachments({
         []() {
             pr::vk::AttachmentDescription desc;
@@ -561,7 +522,32 @@ static void create_vulkan_render_pass()
             return desc;
         }(),
     });
-    */
+    // Set subpasses.
+    render_pass_create_info.set_subpasses({
+        []() {
+            pr::vk::SubpassDescription desc;
+            desc.set_pipeline_bind_point(VK_PIPELINE_BIND_POINT_GRAPHICS);
+            desc.set_color_attachments({
+                pr::vk::AttachmentReference(0,
+                    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL),
+            });
+            return desc;
+        }(),
+    });
+    // Set dependencies.
+    render_pass_create_info.set_dependencies({
+        []() {
+            pr::vk::SubpassDependency dep;
+            dep.set_subpass_src_dst(VK_SUBPASS_EXTERNAL, 0);
+            dep.set_stage_mask_src_dst(
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+            dep.set_access_mask_src_dst(0,
+                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT);
+            return dep;
+        }(),
+    });
+    VkRenderPassCreateInfo vulkan_render_pass_create_info = render_pass_create_info.c_struct();
 
     result = vkCreateRenderPass(vulkan_device->c_ptr(), &vulkan_render_pass_create_info,
         NULL, &vulkan_render_pass);
