@@ -668,6 +668,7 @@ static void create_vulkan_graphics_pipeline()
     pr::vk::VkPipeline::ColorBlendStateCreateInfo color_blend_state_create_info;
     // color_blend_state_create_info.set_logic_op(VK_LOGIC_OP_COPY);
     // Color blend attachments.
+    color_blend_state_create_info.set_logic_op(VK_LOGIC_OP_COPY);
     color_blend_state_create_info.set_attachments({
         []() {
             pr::vk::VkPipeline::ColorBlendAttachmentState state;
@@ -801,6 +802,8 @@ static void create_vulkan_command_pool()
         VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     vulkan_command_pool_create_info.queueFamilyIndex = graphics_family;
 
+    vulkan_command_pool_create_info.pNext = nullptr;
+
     result = vkCreateCommandPool(vulkan_device->c_ptr(),
         &vulkan_command_pool_create_info, NULL, &vulkan_command_pool);
     if (result != VK_SUCCESS) {
@@ -820,6 +823,8 @@ static void create_vulkan_command_buffer()
     vulkan_command_buffer_allocate_info.commandPool = vulkan_command_pool;
     vulkan_command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     vulkan_command_buffer_allocate_info.commandBufferCount = 1;
+
+    vulkan_command_buffer_allocate_info.pNext = nullptr;
 
     result = vkAllocateCommandBuffers(vulkan_device->c_ptr(),
         &vulkan_command_buffer_allocate_info, &vulkan_command_buffer);
@@ -901,6 +906,8 @@ static void record_command_buffer(VkCommandBuffer command_buffer,
 
     vulkan_render_pass_begin_info.clearValueCount = 1;
     vulkan_render_pass_begin_info.pClearValues = &vulkan_clear_color;
+
+    vulkan_render_pass_begin_info.pNext = nullptr;
 
     fprintf(stderr, "vkCmdBeginRenderPass() - command buffer: %p\n",
         command_buffer);
