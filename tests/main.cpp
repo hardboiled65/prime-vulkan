@@ -69,10 +69,8 @@ pr::Vector<pr::vk::VkImage> vulkan_swapchain_images;
 // Image views.
 pr::Vector<pr::vk::VkImageView> vulkan_image_views;
 // Render pass.
-VkAttachmentDescription vulkan_attachment_description;
 VkRenderPass vulkan_render_pass;
-VkRenderPassCreateInfo vulkan_render_pass_create_info;
-VkSubpassDependency vulkan_dependency;
+pr::vk::RenderPass *render_pass;
 // Shaders.
 uint8_t *vert_shader_code = NULL;
 uint32_t vert_shader_code_size = 0;
@@ -547,13 +545,15 @@ static void create_vulkan_render_pass()
             return dep;
         }(),
     });
-    VkRenderPassCreateInfo vulkan_render_pass_create_info = render_pass_create_info.c_struct();
 
-    result = vkCreateRenderPass(vulkan_device->c_ptr(), &vulkan_render_pass_create_info,
-        NULL, &vulkan_render_pass);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to create render pass!\n");
+    try {
+        render_pass = new pr::vk::RenderPass(
+            vulkan_device->create_render_pass(render_pass_create_info));
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to create render pass. %s\n", e.what());
     }
+    vulkan_render_pass = render_pass->c_ptr();
+
     fprintf(stderr, "Render pass created. - render pass: %p\n",
         vulkan_render_pass);
 }
