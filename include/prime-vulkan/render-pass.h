@@ -4,6 +4,7 @@
 #include <vulkan/vulkan.h>
 
 #include <memory>
+#include <vector>
 
 #include <primer/vector.h>
 
@@ -136,9 +137,12 @@ public:
     private:
         CType _info;
 
-        AttachmentDescription::CType *_attachments;
-        SubpassDescription::CType *_subpasses;
-        SubpassDependency::CType *_dependencies;
+        pr::Vector<AttachmentDescription> _attachments;
+        std::vector<AttachmentDescription::CType> _p_attachments;
+        pr::Vector<SubpassDescription> _subpasses;
+        std::vector<SubpassDescription::CType> _p_subpasses;
+        pr::Vector<SubpassDependency> _dependencies;
+        std::vector<SubpassDependency::CType> _p_dependencies;
     };
 
     class Deleter

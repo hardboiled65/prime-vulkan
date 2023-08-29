@@ -138,6 +138,7 @@ auto SubpassDescription::c_struct() const -> CType
 
 SubpassDependency::SubpassDependency()
 {
+    this->_dependency.dependencyFlags = 0;
 }
 
 void SubpassDependency::set_subpass_src_dst(int32_t src, int32_t dst)
@@ -172,65 +173,52 @@ RenderPass::CreateInfo::CreateInfo()
 
     this->_info.flags = 0;
     this->_info.pNext = nullptr;
-
-    this->_attachments = nullptr;
-    this->_subpasses = nullptr;
-    this->_dependencies = nullptr;
 }
 
 RenderPass::CreateInfo::~CreateInfo()
 {
-    if (this->_attachments != nullptr) {
-        delete[] this->_attachments;
-    }
-    if (this->_subpasses != nullptr) {
-        delete[] this->_subpasses;
-    }
-    if (this->_dependencies != nullptr) {
-        delete[] this->_dependencies;
-    }
 }
 
 void RenderPass::CreateInfo::set_attachments(
     const pr::Vector<AttachmentDescription>& vec)
 {
+    this->_attachments = vec;
     uint64_t count = vec.length();
 
     this->_info.attachmentCount = count;
 
-    this->_attachments = new AttachmentDescription::CType[count];
     for (uint64_t i = 0; i < count; ++i) {
-        this->_attachments[i] = vec[i].c_struct();
+        this->_p_attachments.push_back(this->_attachments[i].c_struct());
     }
-    this->_info.pAttachments = this->_attachments;
+    this->_info.pAttachments = this->_p_attachments.data();
 }
 
 void RenderPass::CreateInfo::set_subpasses(
     const pr::Vector<SubpassDescription>& vec)
 {
+    this->_subpasses = vec;
     uint64_t count = vec.length();
 
     this->_info.subpassCount = count;
-
-    this->_subpasses = new SubpassDescription::CType[count];
     for (uint64_t i = 0; i < count; ++i) {
-        this->_subpasses[i] = vec[i].c_struct();
+        this->_p_subpasses.push_back(this->_subpasses[i].c_struct());
     }
-    this->_info.pSubpasses = this->_subpasses;
+
+    this->_info.pSubpasses = this->_p_subpasses.data();
 }
 
 void RenderPass::CreateInfo::set_dependencies(
     const pr::Vector<SubpassDependency>& vec)
 {
+    this->_dependencies = vec;
     uint64_t count = vec.length();
 
     this->_info.dependencyCount = count;
 
-    this->_dependencies = new SubpassDependency::CType[count];
     for (uint64_t i = 0; i < count; ++i) {
-        this->_dependencies[i] = vec[i].c_struct();
+        this->_p_dependencies.push_back(this->_dependencies[i].c_struct());
     }
-    this->_info.pDependencies = this->_dependencies;
+    this->_info.pDependencies = this->_p_dependencies.data();
 }
 
 auto RenderPass::CreateInfo::c_struct() const -> CType
