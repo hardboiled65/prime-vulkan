@@ -515,9 +515,9 @@ static void create_vulkan_render_pass()
     attachment_description.set_final_layout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
     VkAttachmentDescription vulkan_attachment_description = attachment_description.c_struct();
 
-    VkAttachmentReference vulkan_attachment_reference = {};
-    vulkan_attachment_reference.attachment = 0;
-    vulkan_attachment_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    pr::vk::AttachmentReference attachment_reference(0,
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    VkAttachmentReference vulkan_attachment_reference = attachment_reference.c_struct();
 
     VkSubpassDescription vulkan_subpass_description = {};
     vulkan_subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
