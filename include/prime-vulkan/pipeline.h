@@ -15,6 +15,8 @@ class VkShaderModule;
 
 class VkDevice;
 
+class VkPipelineLayout;
+
 class VkPipeline
 {
 //=================
@@ -266,6 +268,15 @@ public:
 
     private:
         CType _info;
+
+        pr::Vector<ShaderStageCreateInfo> _stages;
+        VertexInputStateCreateInfo _vertex_input_state;
+        InputAssemblyStateCreateInfo _input_assembly_state;
+        ViewportStateCreateInfo _viewport_state;
+        RasterizationStateCreateInfo _rasterization_state;
+        MultisampleStateCreateInfo _multisample_state;
+        ColorBlendStateCreateInfo _color_blend_state;
+        DynamicStateCreateInfo _dynamic_state;
     };
 
 //===================

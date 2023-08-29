@@ -89,11 +89,30 @@ SubpassDescription::SubpassDescription()
     this->_attachments = nullptr;
 }
 
+SubpassDescription::SubpassDescription(const SubpassDescription& other)
+{
+    this->_description = other._description;
+
+    if (other._attachments != nullptr) {
+        uint32_t count = other._description.colorAttachmentCount;
+        this->_attachments = new AttachmentReference::CType[count];
+        for (uint32_t i = 0; i < count; ++i) {
+            this->_attachments[i] = other._attachments[i];
+        }
+        this->_description.pColorAttachments = this->_attachments;
+    }
+}
+
 SubpassDescription::~SubpassDescription()
 {
     if (this->_attachments != nullptr) {
         delete[] this->_attachments;
     }
+}
+
+void SubpassDescription::set_pipeline_bind_point(::VkPipelineBindPoint bind_point)
+{
+    this->_description.pipelineBindPoint = bind_point;
 }
 
 void SubpassDescription::set_color_attachments(
@@ -212,6 +231,22 @@ void RenderPass::CreateInfo::set_dependencies(
         this->_dependencies[i] = vec[i].c_struct();
     }
     this->_info.pDependencies = this->_dependencies;
+}
+
+auto RenderPass::CreateInfo::c_struct() const -> CType
+{
+    return this->_info;
+}
+
+
+RenderPass::RenderPass()
+{
+    this->_render_pass = nullptr;
+}
+
+auto RenderPass::c_ptr() const -> CType
+{
+    return *(this->_render_pass);
 }
 
 } // namespace vk

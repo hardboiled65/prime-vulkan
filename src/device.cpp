@@ -279,6 +279,28 @@ VkPipelineLayout VkDevice::create_pipeline_layout(
     return layout;
 }
 
+RenderPass VkDevice::create_render_pass(
+    const RenderPass::CreateInfo& info) const
+{
+    ::VkResult result;
+
+    RenderPass::CreateInfo::CType vk_info = info.c_struct();
+    RenderPass::CType c_render_pass;
+    result = vkCreateRenderPass(this->_device, &vk_info, nullptr,
+        &c_render_pass);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    RenderPass render_pass;
+    render_pass._render_pass = std::shared_ptr<RenderPass::CType>(
+        new RenderPass::CType(c_render_pass),
+        RenderPass::Deleter(this->_device));
+
+    return render_pass;
+}
+
 ::VkDevice VkDevice::c_ptr()
 {
     return this->_device;

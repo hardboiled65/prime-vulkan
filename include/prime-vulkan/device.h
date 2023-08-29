@@ -10,6 +10,7 @@
 #include <prime-vulkan/swapchain.h>
 #include <prime-vulkan/shader-module.h>
 #include <prime-vulkan/pipeline.h>
+#include <prime-vulkan/render-pass.h>
 
 namespace pr {
 namespace vk {
@@ -88,6 +89,8 @@ public:
     /// Create a pipeline layout.
     VkPipelineLayout
     create_pipeline_layout(const VkPipelineLayout::CreateInfo& info) const;
+
+    RenderPass create_render_pass(const RenderPass::CreateInfo& info) const;
 
     ::VkDevice c_ptr();
 

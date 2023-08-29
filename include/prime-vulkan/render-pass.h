@@ -10,6 +10,8 @@
 namespace pr {
 namespace vk {
 
+class VkDevice;
+
 class AttachmentDescription
 {
 public:
@@ -66,7 +68,11 @@ public:
 public:
     SubpassDescription();
 
+    SubpassDescription(const SubpassDescription& other);
+
     ~SubpassDescription();
+
+    void set_pipeline_bind_point(::VkPipelineBindPoint bind_point);
 
     void set_color_attachments(
         const pr::Vector<AttachmentReference>& attachments);
@@ -105,6 +111,7 @@ private:
 
 class RenderPass
 {
+    friend VkDevice;
 public:
     using CType = ::VkRenderPass;
 
@@ -123,6 +130,8 @@ public:
         void set_subpasses(const pr::Vector<SubpassDescription>& vec);
 
         void set_dependencies(const pr::Vector<SubpassDependency>& vec);
+
+        CType c_struct() const;
 
     private:
         CType _info;
