@@ -504,15 +504,16 @@ static void create_vulkan_render_pass()
 {
     VkResult result;
 
-    VkAttachmentDescription vulkan_attachment_description = {};
-    vulkan_attachment_description.format = vulkan_format.format;
-    vulkan_attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
-    vulkan_attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    vulkan_attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    vulkan_attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    vulkan_attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    vulkan_attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    vulkan_attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    pr::vk::AttachmentDescription attachment_description;
+    attachment_description.set_format(vulkan_format.format);
+    attachment_description.set_samples(VK_SAMPLE_COUNT_1_BIT);
+    attachment_description.set_load_op(VK_ATTACHMENT_LOAD_OP_CLEAR);
+    attachment_description.set_store_op(VK_ATTACHMENT_STORE_OP_STORE);
+    attachment_description.set_stencil_load_op(VK_ATTACHMENT_LOAD_OP_DONT_CARE);
+    attachment_description.set_stencil_store_op(VK_ATTACHMENT_STORE_OP_DONT_CARE);
+    attachment_description.set_initial_layout(VK_IMAGE_LAYOUT_UNDEFINED);
+    attachment_description.set_final_layout(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    VkAttachmentDescription vulkan_attachment_description = attachment_description.c_struct();
 
     VkAttachmentReference vulkan_attachment_reference = {};
     vulkan_attachment_reference.attachment = 0;
