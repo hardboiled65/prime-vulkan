@@ -412,7 +412,7 @@ void VkDevice::wait_for_fences(const Vector<Fence>& fences,
 {
     ::VkResult result;
 
-    uint32_t count = fences.length();
+    uint64_t count = fences.length();
     Fence::CType *vk_fences = new Fence::CType[count];
     for (uint64_t i = 0; i < count; ++i) {
         vk_fences[i] = fences[i].c_ptr();
@@ -422,6 +422,25 @@ void VkDevice::wait_for_fences(const Vector<Fence>& fences,
 
     result = vkWaitForFences(this->_device,
         count, vk_fences, vk_wait_all, timeout);
+
+    delete[] vk_fences;
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+}
+
+void VkDevice::reset_fences(const Vector<Fence>& fences) const
+{
+    ::VkResult result;
+
+    uint64_t count = fences.length();
+    Fence::CType *vk_fences = new Fence::CType[count];
+    for (uint64_t i = 0; i < count; ++i) {
+        vk_fences[i] = fences[i].c_ptr();
+    }
+
+    result = vkResetFences(this->_device, count, vk_fences);
 
     delete[] vk_fences;
 

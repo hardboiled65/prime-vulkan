@@ -935,9 +935,12 @@ void draw_frame()
         exit(1);
     }
 
-    result = vkResetFences(vulkan_device->c_ptr(), 1, &fence);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to reset fences!\n");
+    try {
+        vulkan_device->reset_fences({
+            *in_flight_fence,
+        });
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to reset fences. %s\n", e.what());
         exit(1);
     }
 
