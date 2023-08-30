@@ -83,8 +83,7 @@ VkPipeline vulkan_graphics_pipeline = NULL;
 // Framebuffers.
 pr::Vector<pr::vk::Framebuffer> framebuffers;
 // Command pool.
-VkCommandPoolCreateInfo vulkan_command_pool_create_info;
-VkCommandPool vulkan_command_pool = NULL;
+pr::vk::CommandPool *command_pool = nullptr;
 // Command buffer.
 VkCommandBufferAllocateInfo vulkan_command_buffer_allocate_info;
 VkCommandBuffer vulkan_command_buffer = NULL;
@@ -771,24 +770,20 @@ static void create_vulkan_framebuffers()
 
 static void create_vulkan_command_pool()
 {
-    VkResult result;
+    pr::vk::CommandPool::CreateInfo command_pool_create_info;
+    command_pool_create_info.set_queue_family_index(graphics_family);
+    command_pool_create_info.set_flags(
+        VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 
-    vulkan_command_pool_create_info.sType =
-        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    vulkan_command_pool_create_info.flags =
-        VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    vulkan_command_pool_create_info.queueFamilyIndex = graphics_family;
-
-    vulkan_command_pool_create_info.pNext = nullptr;
-
-    result = vkCreateCommandPool(vulkan_device->c_ptr(),
-        &vulkan_command_pool_create_info, NULL, &vulkan_command_pool);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to create command pool!\n");
-        return;
+    try {
+        command_pool = new pr::vk::CommandPool(
+            vulkan_device->create_command_pool(command_pool_create_info));
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to create command pool! %s\n", e.what());
     }
+
     fprintf(stderr, "Command pool created. - command pool: %p\n",
-        vulkan_command_pool);
+        command_pool->c_ptr());
 }
 
 static void create_vulkan_command_buffer()
@@ -797,7 +792,7 @@ static void create_vulkan_command_buffer()
 
     vulkan_command_buffer_allocate_info.sType =
         VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    vulkan_command_buffer_allocate_info.commandPool = vulkan_command_pool;
+    vulkan_command_buffer_allocate_info.commandPool = command_pool->c_ptr();
     vulkan_command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     vulkan_command_buffer_allocate_info.commandBufferCount = 1;
 

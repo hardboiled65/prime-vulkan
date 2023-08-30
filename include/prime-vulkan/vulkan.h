@@ -12,6 +12,7 @@
 #include <prime-vulkan/pipeline.h>
 #include <prime-vulkan/render-pass.h>
 #include <prime-vulkan/framebuffer.h>
+#include <prime-vulkan/command-pool.h>
 
 namespace pr {
 namespace vk {

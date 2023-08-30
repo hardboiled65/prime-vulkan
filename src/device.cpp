@@ -323,6 +323,28 @@ Framebuffer VkDevice::create_framebuffer(
     return framebuffer;
 }
 
+CommandPool VkDevice::create_command_pool(
+    const CommandPool::CreateInfo& info) const
+{
+    ::VkResult result;
+
+    CommandPool::CreateInfo::CType vk_info = info.c_struct();
+    CommandPool::CType c_command_pool;
+    result = vkCreateCommandPool(this->_device, &vk_info, nullptr,
+        &c_command_pool);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    CommandPool command_pool;
+    command_pool._command_pool = std::shared_ptr<CommandPool::CType>(
+        new CommandPool::CType(c_command_pool),
+        CommandPool::Deleter(this->_device));
+
+    return command_pool;
+}
+
 ::VkDevice VkDevice::c_ptr()
 {
     return this->_device;
