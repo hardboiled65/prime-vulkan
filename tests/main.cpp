@@ -85,8 +85,7 @@ pr::Vector<pr::vk::Framebuffer> framebuffers;
 // Command pool.
 pr::vk::CommandPool *command_pool = nullptr;
 // Command buffer.
-VkCommandBufferAllocateInfo vulkan_command_buffer_allocate_info;
-VkCommandBuffer vulkan_command_buffer = NULL;
+pr::vk::CommandBuffer *command_buffer;
 VkCommandBufferBeginInfo vulkan_command_buffer_begin_info; // Unused.
 VkRenderPassBeginInfo vulkan_render_pass_begin_info;
 VkClearValue vulkan_clear_color;
@@ -788,21 +787,21 @@ static void create_vulkan_command_pool()
 
 static void create_vulkan_command_buffer()
 {
-    VkResult result;
-
     pr::vk::CommandBuffer::AllocateInfo command_buffer_alloc_info;
     command_buffer_alloc_info.set_command_pool(*command_pool);
     command_buffer_alloc_info.set_level(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
     command_buffer_alloc_info.set_command_buffer_count(1);
-    vulkan_command_buffer_allocate_info = command_buffer_alloc_info.c_struct();
 
-    result = vkAllocateCommandBuffers(vulkan_device->c_ptr(),
-        &vulkan_command_buffer_allocate_info, &vulkan_command_buffer);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to allocate command buffers!\n");
+    try {
+        command_buffer = new pr::vk::CommandBuffer(
+            vulkan_device->allocate_command_buffers(command_buffer_alloc_info));
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to allocate command buffers. %s\n", e.what());
+        exit(1);
     }
+
     fprintf(stderr, "Command buffer allocated. - command buffer: %p\n",
-        vulkan_command_buffer);
+        command_buffer);
 }
 
 static void create_vulkan_sync_objects()
@@ -946,12 +945,12 @@ void draw_frame()
     }
     fprintf(stderr, "Acquired next image. - image index: %d\n", image_index);
 
-    result = vkResetCommandBuffer(vulkan_command_buffer, 0);
+    result = vkResetCommandBuffer(command_buffer->c_ptr(), 0);
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to reset command buffer!\n");
         exit(1);
     }
-    record_command_buffer(vulkan_command_buffer, image_index);
+    record_command_buffer(command_buffer->c_ptr(), image_index);
 
     VkSubmitInfo submit_info;
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -962,12 +961,15 @@ void draw_frame()
     VkPipelineStageFlags wait_stages[] = {
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
     };
+    VkCommandBuffer buffers[] = {
+        command_buffer->c_ptr(),
+    };
     submit_info.waitSemaphoreCount = 1;
     submit_info.pWaitSemaphores = wait_semaphores;
     submit_info.pWaitDstStageMask = wait_stages;
 
     submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers = &vulkan_command_buffer;
+    submit_info.pCommandBuffers = buffers;
 
     VkSemaphore signal_semaphores[] = {
         vulkan_render_finished_semaphore,

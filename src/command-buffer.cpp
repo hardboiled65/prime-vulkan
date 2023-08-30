@@ -33,5 +33,16 @@ auto CommandBuffer::AllocateInfo::c_struct() const -> CType
     return this->_info;
 }
 
+
+CommandBuffer::CommandBuffer()
+{
+    this->_command_buffer = nullptr;
+}
+
+auto CommandBuffer::c_ptr() const -> CType
+{
+    return this->_command_buffer;
+}
+
 } // namespace vk
 } // namespace pr

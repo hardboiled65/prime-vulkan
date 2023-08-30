@@ -13,6 +13,7 @@
 #include <prime-vulkan/render-pass.h>
 #include <prime-vulkan/framebuffer.h>
 #include <prime-vulkan/command-pool.h>
+#include <prime-vulkan/command-buffer.h>
 
 namespace pr {
 namespace vk {
@@ -97,6 +98,9 @@ public:
     Framebuffer create_framebuffer(const Framebuffer::CreateInfo& info) const;
 
     CommandPool create_command_pool(const CommandPool::CreateInfo& info) const;
+
+    CommandBuffer
+    allocate_command_buffers(const CommandBuffer::AllocateInfo& info) const;
 
     ::VkDevice c_ptr();
 

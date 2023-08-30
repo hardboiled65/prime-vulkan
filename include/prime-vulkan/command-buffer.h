@@ -36,7 +36,14 @@ public:
         CType _info;
     };
 
+public:
+    CType c_ptr() const;
+
 private:
+    CommandBuffer();
+
+private:
+    CType _command_buffer;
 };
 
 } // namespace vk

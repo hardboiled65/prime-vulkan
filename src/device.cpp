@@ -345,6 +345,27 @@ CommandPool VkDevice::create_command_pool(
     return command_pool;
 }
 
+CommandBuffer VkDevice::allocate_command_buffers(
+    const CommandBuffer::AllocateInfo& info) const
+{
+    ::VkResult result;
+
+    CommandBuffer::AllocateInfo::CType vk_info = info.c_struct();
+    CommandBuffer::CType c_command_buffer;
+    result = vkAllocateCommandBuffers(this->_device, &vk_info,
+        &c_command_buffer);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    CommandBuffer command_buffer;
+    // TODO: shared_ptr with custom deleter, should I?
+    command_buffer._command_buffer = c_command_buffer;
+
+    return command_buffer;
+}
+
 ::VkDevice VkDevice::c_ptr()
 {
     return this->_device;
