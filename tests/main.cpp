@@ -790,13 +790,11 @@ static void create_vulkan_command_buffer()
 {
     VkResult result;
 
-    vulkan_command_buffer_allocate_info.sType =
-        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    vulkan_command_buffer_allocate_info.commandPool = command_pool->c_ptr();
-    vulkan_command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    vulkan_command_buffer_allocate_info.commandBufferCount = 1;
-
-    vulkan_command_buffer_allocate_info.pNext = nullptr;
+    pr::vk::CommandBuffer::AllocateInfo command_buffer_alloc_info;
+    command_buffer_alloc_info.set_command_pool(*command_pool);
+    command_buffer_alloc_info.set_level(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+    command_buffer_alloc_info.set_command_buffer_count(1);
+    vulkan_command_buffer_allocate_info = command_buffer_alloc_info.c_struct();
 
     result = vkAllocateCommandBuffers(vulkan_device->c_ptr(),
         &vulkan_command_buffer_allocate_info, &vulkan_command_buffer);
