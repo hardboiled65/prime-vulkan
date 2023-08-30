@@ -11,6 +11,11 @@ Fence::CreateInfo::CreateInfo()
     this->_info.pNext = nullptr;
 }
 
+void Fence::CreateInfo::set_flags(::VkFenceCreateFlags flags)
+{
+    this->_info.flags = flags;
+}
+
 auto Fence::CreateInfo::c_struct() const -> CType
 {
     return this->_info;

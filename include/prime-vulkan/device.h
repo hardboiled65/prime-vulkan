@@ -108,6 +108,12 @@ public:
 
     Fence create_fence(const Fence::CreateInfo& info) const;
 
+    void wait_for_fences(const Vector<Fence>& fences,
+                         bool wait_all,
+                         uint64_t timeout) const;
+
+    void reset_fences(const Vector<Fence>& fences) const;
+
     ::VkDevice c_ptr();
 
 private:

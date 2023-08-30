@@ -92,7 +92,7 @@ VkClearValue vulkan_clear_color;
 // Sync objects.
 pr::vk::Semaphore *image_available_semaphore = nullptr;
 pr::vk::Semaphore *render_finished_semaphore = nullptr;
-VkFence vulkan_in_flight_fence = NULL;
+pr::vk::Fence *in_flight_fence = nullptr;
 
 
 struct wl_subsurface *subsurface;
@@ -810,10 +810,8 @@ static void create_vulkan_sync_objects()
 
     pr::vk::Semaphore::CreateInfo semaphore_create_info;
 
-    VkFenceCreateInfo fence_create_info;
-    fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fence_create_info.pNext = NULL;
-    fence_create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    pr::vk::Fence::CreateInfo fence_create_info;
+    fence_create_info.set_flags(VK_FENCE_CREATE_SIGNALED_BIT);
 
     try {
         image_available_semaphore = new pr::vk::Semaphore(
@@ -830,14 +828,16 @@ static void create_vulkan_sync_objects()
         fprintf(stderr, "Failed to create render finished semaphore!\n");
         exit(1);
     }
-
     fprintf(stderr, "Render finished semaphore created.\n");
-    result = vkCreateFence(vulkan_device->c_ptr(), &fence_create_info,
-        NULL, &vulkan_in_flight_fence);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to create fence!\n");
-        return;
+
+    try {
+        in_flight_fence = new pr::vk::Fence(
+            vulkan_device->create_fence(fence_create_info));
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to create fence. %s\n", e.what());
+        exit(1);
     }
+
     fprintf(stderr, "Fence created.\n");
 }
 
@@ -924,13 +924,18 @@ void draw_frame()
 {
     VkResult result;
 
-    result = vkWaitForFences(vulkan_device->c_ptr(), 1, &vulkan_in_flight_fence,
-        VK_TRUE, UINT64_MAX);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to wait for fences!\n");
+    pr::vk::Fence::CType fence = in_flight_fence->c_ptr();
+
+    try {
+        vulkan_device->wait_for_fences({
+            *in_flight_fence,
+        }, true, UINT64_MAX);
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to wait for fences. %s\n", e.what());
         exit(1);
     }
-    result = vkResetFences(vulkan_device->c_ptr(), 1, &vulkan_in_flight_fence);
+
+    result = vkResetFences(vulkan_device->c_ptr(), 1, &fence);
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to reset fences!\n");
         exit(1);
@@ -981,7 +986,7 @@ void draw_frame()
     submit_info.pNext = NULL;
 
     result = vkQueueSubmit(vulkan_graphics_queue, 1, &submit_info,
-        vulkan_in_flight_fence);
+        in_flight_fence->c_ptr());
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to submit draw command buffer!\n");
         return;
@@ -1161,6 +1166,7 @@ int main(int argc, char *argv[])
     int res = wl_display_dispatch(display);
     fprintf(stderr, "Initial dispatch.\n");
     while (res != -1) {
+        // draw_frame();
         res = wl_display_dispatch(display);
     }
     fprintf(stderr, "wl_display_dispatch() - res: %d\n", res);
