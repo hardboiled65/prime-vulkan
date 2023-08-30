@@ -81,7 +81,7 @@ pr::vk::VkPipelineLayout *vulkan_layout = nullptr;
 VkGraphicsPipelineCreateInfo vulkan_graphics_pipeline_create_info;
 VkPipeline vulkan_graphics_pipeline = NULL;
 // Framebuffers.
-VkFramebuffer *vulkan_framebuffers = NULL;
+pr::Vector<pr::vk::Framebuffer> framebuffers;
 // Command pool.
 VkCommandPoolCreateInfo vulkan_command_pool_create_info;
 VkCommandPool vulkan_command_pool = NULL;
@@ -500,8 +500,6 @@ static void create_vulkan_image_views()
 
 static void create_vulkan_render_pass()
 {
-    VkResult result;
-
     // Render pass create info.
     pr::vk::RenderPass::CreateInfo render_pass_create_info;
     // Set attachments.
@@ -746,36 +744,28 @@ static void create_vulkan_graphics_pipeline()
 
 static void create_vulkan_framebuffers()
 {
-    VkResult result;
-
-    vulkan_framebuffers = (VkFramebuffer*)malloc(
-        sizeof(VkFramebuffer) * vulkan_swapchain_images.length()
-    );
-
     for (uint32_t i = 0; i < vulkan_swapchain_images.length(); ++i) {
-        VkImageView attachments[] = {
-            vulkan_image_views[i].c_ptr(),
+        pr::Vector<pr::vk::VkImageView> attachments = {
+            vulkan_image_views[i],
         };
 
-        VkFramebufferCreateInfo create_info;
-        create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        create_info.renderPass = vulkan_render_pass;
-        create_info.attachmentCount = 1;
-        create_info.pAttachments = attachments;
-        create_info.width = vulkan_extent.width;
-        create_info.height = vulkan_extent.height;
-        create_info.layers = 1;
-        create_info.flags = 0;
-        create_info.pNext = NULL;
+        pr::vk::Framebuffer::CreateInfo create_info;
+        create_info.set_render_pass(*render_pass);
+        create_info.set_attachments(attachments);
+        create_info.set_width(vulkan_extent.width);
+        create_info.set_height(vulkan_extent.height);
+        create_info.set_layers(1);
 
-        result = vkCreateFramebuffer(vulkan_device->c_ptr(), &create_info, NULL,
-            (vulkan_framebuffers + i));
-        if (result != VK_SUCCESS) {
-            fprintf(stderr, "Failed to create framebuffer.\n");
-            return;
+        try {
+            pr::vk::Framebuffer fb =
+                vulkan_device->create_framebuffer(create_info);
+            framebuffers.push(fb);
+        } catch (const pr::vk::VulkanError& e) {
+            fprintf(stderr, "Failed to create framebuffer. %s\n", e.what());
         }
+
         fprintf(stderr, "Framebuffer created. - framebuffer: %p\n",
-            vulkan_framebuffers[i]);
+            framebuffers[i].c_ptr());
     }
 }
 
@@ -877,11 +867,11 @@ static void record_command_buffer(VkCommandBuffer command_buffer,
         return;
     }
     fprintf(stderr, "Begin command buffer.\n");
-    fprintf(stderr, "Using framebuffer: %p\n", vulkan_framebuffers[image_index]);
+    fprintf(stderr, "Using framebuffer: %p\n", framebuffers[image_index].c_ptr());
 
     vulkan_render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     vulkan_render_pass_begin_info.renderPass = vulkan_render_pass;
-    vulkan_render_pass_begin_info.framebuffer = vulkan_framebuffers[image_index];
+    vulkan_render_pass_begin_info.framebuffer = framebuffers[image_index].c_ptr();
     vulkan_render_pass_begin_info.renderArea.offset.x = 0;
     vulkan_render_pass_begin_info.renderArea.offset.y = 0;
     vulkan_render_pass_begin_info.renderArea.extent = vulkan_extent;

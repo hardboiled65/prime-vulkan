@@ -11,6 +11,7 @@
 #include <prime-vulkan/shader-module.h>
 #include <prime-vulkan/pipeline.h>
 #include <prime-vulkan/render-pass.h>
+#include <prime-vulkan/framebuffer.h>
 
 namespace pr {
 namespace vk {
@@ -91,6 +92,8 @@ public:
     create_pipeline_layout(const VkPipelineLayout::CreateInfo& info) const;
 
     RenderPass create_render_pass(const RenderPass::CreateInfo& info) const;
+
+    Framebuffer create_framebuffer(const Framebuffer::CreateInfo& info) const;
 
     ::VkDevice c_ptr();
 

@@ -301,6 +301,28 @@ RenderPass VkDevice::create_render_pass(
     return render_pass;
 }
 
+Framebuffer VkDevice::create_framebuffer(
+    const Framebuffer::CreateInfo& info) const
+{
+    ::VkResult result;
+
+    Framebuffer::CreateInfo::CType vk_info = info.c_struct();
+    Framebuffer::CType c_framebuffer;
+    result = vkCreateFramebuffer(this->_device, &vk_info, nullptr,
+        &c_framebuffer);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    Framebuffer framebuffer;
+    framebuffer._framebuffer = std::shared_ptr<Framebuffer::CType>(
+        new Framebuffer::CType(c_framebuffer),
+        Framebuffer::Deleter(this->_device));
+
+    return framebuffer;
+}
+
 ::VkDevice VkDevice::c_ptr()
 {
     return this->_device;
