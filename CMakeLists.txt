@@ -20,6 +20,8 @@ add_library(prime-vulkan SHARED
     src/framebuffer.cpp
     src/command-pool.cpp
     src/command-buffer.cpp
+    src/semaphore.cpp
+    src/fence.cpp
     include/prime-vulkan/base.h
     include/prime-vulkan/extension-properties.h
     include/prime-vulkan/vulkan.h
@@ -35,6 +37,8 @@ add_library(prime-vulkan SHARED
     include/prime-vulkan/framebuffer.h
     include/prime-vulkan/command-pool.h
     include/prime-vulkan/command-buffer.h
+    include/prime-vulkan/semaphore.h
+    include/prime-vulkan/fence.h
 )
 
 target_include_directories(prime-vulkan

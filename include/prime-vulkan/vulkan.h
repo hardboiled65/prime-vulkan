@@ -14,6 +14,8 @@
 #include <prime-vulkan/framebuffer.h>
 #include <prime-vulkan/command-pool.h>
 #include <prime-vulkan/command-buffer.h>
+#include <prime-vulkan/semaphore.h>
+#include <prime-vulkan/fence.h>
 
 namespace pr {
 namespace vk {

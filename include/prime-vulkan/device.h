@@ -14,6 +14,8 @@
 #include <prime-vulkan/framebuffer.h>
 #include <prime-vulkan/command-pool.h>
 #include <prime-vulkan/command-buffer.h>
+#include <prime-vulkan/semaphore.h>
+#include <prime-vulkan/fence.h>
 
 namespace pr {
 namespace vk {
@@ -101,6 +103,10 @@ public:
 
     CommandBuffer
     allocate_command_buffers(const CommandBuffer::AllocateInfo& info) const;
+
+    Semaphore create_semaphore(const Semaphore::CreateInfo& info) const;
+
+    Fence create_fence(const Fence::CreateInfo& info) const;
 
     ::VkDevice c_ptr();
 

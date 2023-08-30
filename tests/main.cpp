@@ -90,8 +90,8 @@ VkCommandBufferBeginInfo vulkan_command_buffer_begin_info; // Unused.
 VkRenderPassBeginInfo vulkan_render_pass_begin_info;
 VkClearValue vulkan_clear_color;
 // Sync objects.
-VkSemaphore vulkan_image_available_semaphore = NULL;
-VkSemaphore vulkan_render_finished_semaphore = NULL;
+pr::vk::Semaphore *image_available_semaphore = nullptr;
+pr::vk::Semaphore *render_finished_semaphore = nullptr;
 VkFence vulkan_in_flight_fence = NULL;
 
 
@@ -808,29 +808,29 @@ static void create_vulkan_sync_objects()
 {
     VkResult result;
 
-    VkSemaphoreCreateInfo semaphore_create_info;
-    semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    semaphore_create_info.flags = 0;
-    semaphore_create_info.pNext = NULL;
+    pr::vk::Semaphore::CreateInfo semaphore_create_info;
 
     VkFenceCreateInfo fence_create_info;
     fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_create_info.pNext = NULL;
     fence_create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    result = vkCreateSemaphore(vulkan_device->c_ptr(), &semaphore_create_info,
-        NULL, &vulkan_image_available_semaphore);
-    if (result != VK_SUCCESS) {
+    try {
+        image_available_semaphore = new pr::vk::Semaphore(
+            vulkan_device->create_semaphore(semaphore_create_info));
+    } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create image available semaphore!\n");
-        return;
+        exit(1);
     }
-    fprintf(stderr, "Image available semaphore created.\n");
-    result = vkCreateSemaphore(vulkan_device->c_ptr(), &semaphore_create_info,
-        NULL, &vulkan_render_finished_semaphore);
-    if (result != VK_SUCCESS) {
+
+    try {
+        render_finished_semaphore = new pr::vk::Semaphore(
+            vulkan_device->create_semaphore(semaphore_create_info));
+    } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create render finished semaphore!\n");
-        return;
+        exit(1);
     }
+
     fprintf(stderr, "Render finished semaphore created.\n");
     result = vkCreateFence(vulkan_device->c_ptr(), &fence_create_info,
         NULL, &vulkan_in_flight_fence);
@@ -938,7 +938,7 @@ void draw_frame()
 
     uint32_t image_index;
     result = vkAcquireNextImageKHR(vulkan_device->c_ptr(), vulkan_swapchain->c_ptr(), UINT64_MAX,
-        vulkan_image_available_semaphore, VK_NULL_HANDLE, &image_index);
+        image_available_semaphore->c_ptr(), VK_NULL_HANDLE, &image_index);
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to acquire next image!\n");
         return;
@@ -956,7 +956,7 @@ void draw_frame()
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
     VkSemaphore wait_semaphores[] = {
-        vulkan_image_available_semaphore,
+        image_available_semaphore->c_ptr(),
     };
     VkPipelineStageFlags wait_stages[] = {
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -972,7 +972,7 @@ void draw_frame()
     submit_info.pCommandBuffers = buffers;
 
     VkSemaphore signal_semaphores[] = {
-        vulkan_render_finished_semaphore,
+        render_finished_semaphore->c_ptr(),
     };
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores = signal_semaphores;

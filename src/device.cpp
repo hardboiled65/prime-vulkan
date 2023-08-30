@@ -366,6 +366,46 @@ CommandBuffer VkDevice::allocate_command_buffers(
     return command_buffer;
 }
 
+Semaphore VkDevice::create_semaphore(const Semaphore::CreateInfo& info) const
+{
+    ::VkResult result;
+
+    Semaphore::CreateInfo::CType vk_info = info.c_struct();
+    Semaphore::CType c_semaphore;
+    result = vkCreateSemaphore(this->_device, &vk_info, nullptr, &c_semaphore);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    Semaphore semaphore;
+    semaphore._semaphore = std::shared_ptr<Semaphore::CType>(
+        new Semaphore::CType(c_semaphore),
+        Semaphore::Deleter(this->_device));
+
+    return semaphore;
+}
+
+Fence VkDevice::create_fence(const Fence::CreateInfo& info) const
+{
+    ::VkResult result;
+
+    Fence::CreateInfo::CType vk_info = info.c_struct();
+    Fence::CType c_fence;
+    result = vkCreateFence(this->_device, &vk_info, nullptr, &c_fence);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    Fence fence;
+    fence._fence = std::shared_ptr<Fence::CType>(
+        new Fence::CType(c_fence),
+        Fence::Deleter(this->_device));
+
+    return fence;
+}
+
 ::VkDevice VkDevice::c_ptr()
 {
     return this->_device;
