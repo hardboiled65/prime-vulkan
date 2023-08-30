@@ -924,8 +924,6 @@ void draw_frame()
 {
     VkResult result;
 
-    pr::vk::Fence::CType fence = in_flight_fence->c_ptr();
-
     try {
         vulkan_device->wait_for_fences({
             *in_flight_fence,
@@ -945,11 +943,13 @@ void draw_frame()
     }
 
     uint32_t image_index;
-    result = vkAcquireNextImageKHR(vulkan_device->c_ptr(), vulkan_swapchain->c_ptr(), UINT64_MAX,
-        image_available_semaphore->c_ptr(), VK_NULL_HANDLE, &image_index);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to acquire next image!\n");
-        return;
+    try {
+        image_index = vulkan_device->acquire_next_image(*vulkan_swapchain,
+            UINT64_MAX,
+            *image_available_semaphore);
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to acquire next image. %s\n", e.what());
+        exit(1);
     }
     fprintf(stderr, "Acquired next image. - image index: %d\n", image_index);
 

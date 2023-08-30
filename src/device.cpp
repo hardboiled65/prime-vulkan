@@ -449,6 +449,23 @@ void VkDevice::reset_fences(const Vector<Fence>& fences) const
     }
 }
 
+uint32_t VkDevice::acquire_next_image(const VkSwapchain& swapchain,
+                                      uint64_t timeout,
+                                      const Semaphore& semaphore) const
+{
+    ::VkResult result;
+    uint32_t index;
+
+    result = vkAcquireNextImageKHR(this->_device, swapchain.c_ptr(), timeout,
+        semaphore.c_ptr(), nullptr, &index);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    return index;
+}
+
 ::VkDevice VkDevice::c_ptr()
 {
     return this->_device;

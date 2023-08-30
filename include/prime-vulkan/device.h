@@ -114,6 +114,11 @@ public:
 
     void reset_fences(const Vector<Fence>& fences) const;
 
+    /// Call `vkAcquireNextImageKHR` function without a fence.
+    uint32_t acquire_next_image(const VkSwapchain& swapchain,
+                                uint64_t timeout,
+                                const Semaphore& semaphore) const;
+
     ::VkDevice c_ptr();
 
 private:
