@@ -800,14 +800,20 @@ static void record_command_buffer(VkCommandBuffer command_buffer,
 {
     VkResult result;
 
-    VkCommandBufferBeginInfo command_buffer_begin_info;
-    command_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    command_buffer_begin_info.flags = 0;
-    command_buffer_begin_info.pInheritanceInfo = NULL;
-    command_buffer_begin_info.pNext = NULL;
+    pr::vk::CommandBuffer::BeginInfo command_buffer_begin_info;
+    auto vk_command_buffer_begin_info = command_buffer_begin_info.c_struct();
+
+    /*
+    try {
+        command_buffer->begin(command_buffer_begin_info);
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to begin recording command buffer!\n");
+        exit(1);
+    }
+    */
 
     result = vkBeginCommandBuffer(command_buffer,
-        &command_buffer_begin_info);
+        &vk_command_buffer_begin_info);
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to begin recording command buffer!\n");
         return;
@@ -907,11 +913,13 @@ void draw_frame()
     }
     fprintf(stderr, "Acquired next image. - image index: %d\n", image_index);
 
-    result = vkResetCommandBuffer(command_buffer->c_ptr(), 0);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to reset command buffer!\n");
+    try {
+        command_buffer->reset(0);
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to reset command buffer. %s\n", e.what());
         exit(1);
     }
+
     record_command_buffer(command_buffer->c_ptr(), image_index);
 
     pr::vk::SubmitInfo submit_info;

@@ -36,7 +36,25 @@ public:
         CType _info;
     };
 
+    class BeginInfo
+    {
+    public:
+        using CType = ::VkCommandBufferBeginInfo;
+
+    public:
+        BeginInfo();
+
+        CType c_struct() const;
+
+    private:
+        CType _info;
+    };
+
 public:
+    void begin(const BeginInfo& info);
+
+    void reset(::VkCommandBufferResetFlags flags);
+
     CType c_ptr() const;
 
 private:
