@@ -158,24 +158,14 @@ static void load_shader(const char *path, uint8_t* *code, uint32_t *size)
 
 static void init_vulkan()
 {
-    VkResult result;
-
     // Check validation layers.
-    uint32_t layers = 0;
-    result = vkEnumerateInstanceLayerProperties(&layers, NULL);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Layer properties failed!\n");
-        return;
-    }
-    fprintf(stderr, "Number of layers: %d\n", layers);
-
     auto layer_properties = pr::vk::LayerProperties::enumerate();
+    fprintf(stderr, "Number of layers: %ld\n", layer_properties.length());
     for (auto& props: layer_properties) {
         fprintf(stderr, " <Layer> %s(%s)\n",
             props.layer_name().c_str(),
             props.description().c_str());
     }
-
 
     // Check extensions.
     auto extension_properties = pr::vk::VkExtensionProperties::enumerate();
