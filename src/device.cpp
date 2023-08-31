@@ -171,7 +171,7 @@ VkSwapchain VkDevice::create_swapchain(
         nullptr, &vk_swapchain);
 
     if (result != VK_SUCCESS) {
-        // TODO: Throw.
+        throw VulkanError(result);
     }
     VkSwapchain swapchain;
     swapchain._swapchain = vk_swapchain;

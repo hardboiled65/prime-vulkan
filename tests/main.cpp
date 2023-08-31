@@ -397,15 +397,15 @@ static void create_vulkan_swapchain()
     // vulkan_swapchain_create_info.oldSwapchain = VK_NULL_HANDLE;
     fprintf(stderr, "Done writing swapchain create info.\n");
 
-    swapchain = new pr::vk::VkSwapchain(
-        device->create_swapchain(swapchain_create_info));
-    /*
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to create swapchain!\n");
-        return;
+    // Create swapchain.
+    try {
+        swapchain = new pr::vk::VkSwapchain(
+            device->create_swapchain(swapchain_create_info));
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to create swapchain! %s\n", e.what());
+        exit(1);
     }
     fprintf(stderr, "Swapchain created!\n");
-    */
 
     // Images.
     try {
