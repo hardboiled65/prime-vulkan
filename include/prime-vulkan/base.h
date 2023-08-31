@@ -15,6 +15,7 @@ class Vulkan
 public:
     static pr::String vk_format_to_string(::VkFormat format);
 
+    static pr::String vk_present_mode_to_string(::VkPresentModeKHR mode);
 };
 
 class VulkanError : public std::exception

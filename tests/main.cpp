@@ -100,18 +100,6 @@ uint32_t image_height;
 uint32_t image_size;
 uint32_t *image_data;
 
-static const char* vk_present_mode_to_string(VkPresentModeKHR mode)
-{
-    switch (mode) {
-    case VK_PRESENT_MODE_MAILBOX_KHR:
-        return "VK_PRESENT_MODE_MAILBOX_KHR";
-    case VK_PRESENT_MODE_FIFO_KHR:
-        return "VK_PRESENT_MODE_FIFO_KHR";
-    default:
-        return "Unknown";
-    }
-}
-
 /*
 void load_image()
 {
@@ -322,22 +310,7 @@ static void create_vulkan_logical_device()
     fprintf(stderr, "Physical device surface capabilities. - transform: %d\n",
         vulkan_capabilities.currentTransform);
 
-    /*
-    uint32_t formats;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device->c_ptr(),
-        vulkan_surface->c_ptr(), &formats, NULL);
-    fprintf(stderr, "Surface formats: %d\n", formats);
-
-    vulkan_formats = (VkSurfaceFormatKHR*)malloc(
-        sizeof(VkSurfaceFormatKHR) * formats
-    );
-    result = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device->c_ptr(),
-        vulkan_surface->c_ptr(), &formats, vulkan_formats);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to get surface formats!\n");
-        return;
-    }
-    */
+    // Get surface formats and select one.
     try {
         surface_formats = physical_device->surface_formats_for(*vulkan_surface);
     } catch (const pr::vk::VulkanError& e) {
@@ -354,32 +327,20 @@ static void create_vulkan_logical_device()
         }
     }
 
-    uint32_t modes;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->c_ptr(),
-        vulkan_surface->c_ptr(), &modes, NULL);
-    if (modes == 0) {
-        fprintf(stderr, "No surface present modes!\n");
-        return;
-    }
-    fprintf(stderr, "Surface present modes: %d\n", modes);
-
-    vulkan_present_modes = (VkPresentModeKHR*)malloc(
-        sizeof(VkPresentModeKHR) * modes
-    );
-
-    result = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->c_ptr(),
-        vulkan_surface->c_ptr(), &modes, vulkan_present_modes);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to get surface present modes!\n");
-        return;
+    // Get present modes and select one.
+    pr::Vector<::VkPresentModeKHR> present_modes;
+    try {
+        present_modes = physical_device->present_modes_for(*vulkan_surface);
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to get surface present modes. %s\n", e.what());
+        exit(1);
     }
 
-    for (uint32_t i = 0; i < modes; ++i) {
-        VkPresentModeKHR present_mode = *(vulkan_present_modes + i);
+    for (uint64_t i = 0; i < present_modes.length(); ++i) {
         fprintf(stderr, " - Present mode: %s\n",
-            vk_present_mode_to_string(present_mode));
-        if (present_mode == VK_PRESENT_MODE_MAILBOX_KHR) {
-            vulkan_present_mode = present_mode;
+            pr::vk::Vulkan::vk_present_mode_to_string(present_modes[i]).c_str());
+        if (present_modes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
+            vulkan_present_mode = present_modes[i];
         }
     }
 

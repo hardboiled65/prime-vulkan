@@ -65,5 +65,6 @@ SurfaceFormat::SurfaceFormat()
     return this->_format.colorSpace;
 }
 
+
 } // namespace vk
 } // namespace pr

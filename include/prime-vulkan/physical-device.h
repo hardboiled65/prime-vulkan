@@ -51,6 +51,10 @@ public:
     Vector<SurfaceFormat> surface_formats_for(
         const Surface& surface) const;
 
+    /// Using `vkGetPhysicalDeviceSurfacePresentModesKHR` function.
+    Vector<::VkPresentModeKHR> present_modes_for(
+        const Surface& surface) const;
+
     ::VkPhysicalDevice c_ptr();
 
 private:

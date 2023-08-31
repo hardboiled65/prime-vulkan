@@ -159,6 +159,38 @@ Vector<SurfaceFormat> VkPhysicalDevice::surface_formats_for(
     return v;
 }
 
+Vector<::VkPresentModeKHR> VkPhysicalDevice::present_modes_for(
+    const Surface& surface) const
+{
+    ::VkResult result;
+    pr::Vector<::VkPresentModeKHR> v;
+
+    uint32_t count;
+    result = vkGetPhysicalDeviceSurfacePresentModesKHR(this->_device,
+        surface.c_ptr(), &count, nullptr);
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    ::VkPresentModeKHR *vk_modes = new ::VkPresentModeKHR[count];
+    result = vkGetPhysicalDeviceSurfacePresentModesKHR(this->_device,
+        surface.c_ptr(), &count, vk_modes);
+    if (result != VK_SUCCESS) {
+        // De-allocate memory.
+        delete[] vk_modes;
+
+        throw VulkanError(result);
+    }
+
+    for (uint32_t i = 0; i < count; ++i) {
+        v.push(vk_modes[i]);
+    }
+
+    delete[] vk_modes;
+
+    return v;
+}
+
 ::VkPhysicalDevice VkPhysicalDevice::c_ptr()
 {
     return this->_device;

@@ -27,6 +27,21 @@ pr::String Vulkan::vk_format_to_string(::VkFormat format)
     }
 }
 
+pr::String Vulkan::vk_present_mode_to_string(::VkPresentModeKHR mode)
+{
+    switch (mode) {
+    case VK_PRESENT_MODE_IMMEDIATE_KHR:
+        return "VK_PRESENT_MODE_IMMEDIATE_KHR"_S;
+    case VK_PRESENT_MODE_MAILBOX_KHR:
+        return "VK_PRESENT_MODE_MAILBOX_KHR"_S;
+    case VK_PRESENT_MODE_FIFO_KHR:
+        return "VK_PRESENT_MODE_FIFO_KHR"_S;
+    default:
+        return "Unknown"_S;
+    }
+    // TODO: More enum values.
+}
+
 
 VulkanError::VulkanError(::VkResult result)
 {
