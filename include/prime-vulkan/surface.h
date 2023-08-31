@@ -9,10 +9,12 @@ namespace vk {
 
 class VkInstance;
 
-class VkSurface
+class Surface
 {
     friend VkInstance;
 public:
+    using CType = ::VkSurfaceKHR;
+
     class WaylandSurfaceCreateInfo
     {
     public:
@@ -27,13 +29,13 @@ public:
     };
 
 public:
-    ::VkSurfaceKHR c_ptr() const;
+    CType c_ptr() const;
 
 private:
-    VkSurface();
+    Surface();
 
 private:
-    ::VkSurfaceKHR _surface;
+    CType _surface;
 };
 
 } // namespace vk

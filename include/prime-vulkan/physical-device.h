@@ -42,6 +42,9 @@ public:
 
     VkDevice create_device(const VkDevice::CreateInfo& create_info) const;
 
+    // vkGetPhysicalDeviceSurfaceCapabilitiesKHR
+    // SurfaceCapabilities surface_capabilities() const;
+
     ::VkPhysicalDevice c_ptr();
 
 private:

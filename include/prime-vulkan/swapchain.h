@@ -10,7 +10,7 @@
 namespace pr {
 namespace vk {
 
-class VkSurface;
+class Surface;
 
 class VkDevice;
 
@@ -29,7 +29,7 @@ public:
 
         /// Since raw pointers are used internally, the surface object must
         /// live longer than the create info.
-        void set_surface(const VkSurface& surface);
+        void set_surface(const Surface& surface);
 
         void set_min_image_count(uint32_t count);
 

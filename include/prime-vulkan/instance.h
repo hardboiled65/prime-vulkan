@@ -66,8 +66,8 @@ public:
     ~VkInstance();
 
     /// Create a Wayland specific surface with the given info.
-    VkSurface create_wayland_surface(
-        const VkSurface::WaylandSurfaceCreateInfo& info
+    Surface create_wayland_surface(
+        const Surface::WaylandSurfaceCreateInfo& info
     ) const;
 
     ::VkInstance c_ptr();

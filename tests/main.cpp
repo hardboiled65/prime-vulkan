@@ -53,7 +53,7 @@ pr::vk::VkDevice *device = nullptr;
 pr::vk::Queue *graphics_queue = nullptr;
 pr::vk::Queue *present_queue = nullptr;
 // Vulkan surface.
-pr::vk::VkSurface *vulkan_surface = nullptr;
+pr::vk::Surface *vulkan_surface = nullptr;
 uint32_t present_family = 0;
 // Swapchain.
 uint32_t *queue_family_indices = NULL;
@@ -211,10 +211,10 @@ static void init_vulkan()
 static void create_vulkan_window()
 {
     auto surface_create_info =
-        pr::vk::VkSurface::WaylandSurfaceCreateInfo(display, surface);
+        pr::vk::Surface::WaylandSurfaceCreateInfo(display, surface);
 
     try {
-        vulkan_surface = new pr::vk::VkSurface(
+        vulkan_surface = new pr::vk::Surface(
             instance->create_wayland_surface(surface_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create window surface! %s\n", e.what());

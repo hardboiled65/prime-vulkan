@@ -37,7 +37,7 @@ VkSwapchain::CreateInfo::~CreateInfo()
     }
 }
 
-void VkSwapchain::CreateInfo::set_surface(const VkSurface& surface)
+void VkSwapchain::CreateInfo::set_surface(const Surface& surface)
 {
     this->_info.surface = surface.c_ptr();
 }

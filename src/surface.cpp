@@ -3,7 +3,7 @@
 namespace pr {
 namespace vk {
 
-VkSurface::WaylandSurfaceCreateInfo::WaylandSurfaceCreateInfo()
+Surface::WaylandSurfaceCreateInfo::WaylandSurfaceCreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
     this->_info.flags = 0;
@@ -12,7 +12,7 @@ VkSurface::WaylandSurfaceCreateInfo::WaylandSurfaceCreateInfo()
     this->_info.surface = nullptr;
 }
 
-VkSurface::WaylandSurfaceCreateInfo::WaylandSurfaceCreateInfo(
+Surface::WaylandSurfaceCreateInfo::WaylandSurfaceCreateInfo(
     struct wl_display *display,
     struct wl_surface *surface)
 {
@@ -24,18 +24,18 @@ VkSurface::WaylandSurfaceCreateInfo::WaylandSurfaceCreateInfo(
 }
 
 ::VkWaylandSurfaceCreateInfoKHR
-VkSurface::WaylandSurfaceCreateInfo::c_struct() const
+Surface::WaylandSurfaceCreateInfo::c_struct() const
 {
     return this->_info;
 }
 
 
-VkSurface::VkSurface()
+Surface::Surface()
 {
     this->_surface = nullptr;
 }
 
-::VkSurfaceKHR VkSurface::c_ptr() const
+auto Surface::c_ptr() const -> CType
 {
     return this->_surface;
 }

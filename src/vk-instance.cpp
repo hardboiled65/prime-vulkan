@@ -121,15 +121,15 @@ VkInstance::~VkInstance()
     // Delete _instance.
 }
 
-VkSurface VkInstance::create_wayland_surface(
-    const VkSurface::WaylandSurfaceCreateInfo& info
+Surface VkInstance::create_wayland_surface(
+    const Surface::WaylandSurfaceCreateInfo& info
 ) const
 {
-    VkSurface surface;
+    Surface surface;
 
     ::VkWaylandSurfaceCreateInfoKHR vk_info = info.c_struct();
 
-    ::VkSurfaceKHR vk_surface;
+    Surface::CType vk_surface;
     ::VkResult result = vkCreateWaylandSurfaceKHR(*(this->_instance),
         &vk_info, nullptr, &vk_surface);
 
