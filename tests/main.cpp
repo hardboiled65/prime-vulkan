@@ -806,8 +806,6 @@ static void create_vulkan_command_buffer()
 
 static void create_vulkan_sync_objects()
 {
-    VkResult result;
-
     pr::vk::Semaphore::CreateInfo semaphore_create_info;
 
     pr::vk::Fence::CreateInfo fence_create_info;
@@ -960,35 +958,30 @@ void draw_frame()
     }
     record_command_buffer(command_buffer->c_ptr(), image_index);
 
-    VkSubmitInfo submit_info;
-    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    VkSubmitInfo vk_submit_info;
+    vk_submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    pr::vk::SubmitInfo submit_info;
+    submit_info.set_wait_semaphores({
+        *image_available_semaphore,
+    });
 
-    VkSemaphore wait_semaphores[] = {
-        image_available_semaphore->c_ptr(),
-    };
-    VkPipelineStageFlags wait_stages[] = {
+    submit_info.set_wait_dst_stage_mask({
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-    };
-    VkCommandBuffer buffers[] = {
-        command_buffer->c_ptr(),
-    };
-    submit_info.waitSemaphoreCount = 1;
-    submit_info.pWaitSemaphores = wait_semaphores;
-    submit_info.pWaitDstStageMask = wait_stages;
+    });
 
-    submit_info.commandBufferCount = 1;
-    submit_info.pCommandBuffers = buffers;
+    submit_info.set_command_buffers({
+        *command_buffer,
+    });
+
+    submit_info.set_signal_semaphores({
+        *render_finished_semaphore,
+    });
 
     VkSemaphore signal_semaphores[] = {
         render_finished_semaphore->c_ptr(),
     };
-    submit_info.signalSemaphoreCount = 1;
-    submit_info.pSignalSemaphores = signal_semaphores;
 
-    // Set zero or null.
-    submit_info.pNext = NULL;
-
-    result = vkQueueSubmit(vulkan_graphics_queue, 1, &submit_info,
+    result = vkQueueSubmit(vulkan_graphics_queue, 1, &vk_submit_info,
         in_flight_fence->c_ptr());
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to submit draw command buffer!\n");
