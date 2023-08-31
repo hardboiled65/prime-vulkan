@@ -963,28 +963,19 @@ void draw_frame()
     }
     record_command_buffer(command_buffer->c_ptr(), image_index);
 
-    VkSubmitInfo vk_submit_info;
     pr::vk::SubmitInfo submit_info;
     submit_info.set_wait_semaphores({
         *image_available_semaphore,
     });
-
     submit_info.set_wait_dst_stage_mask({
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
     });
-
     submit_info.set_command_buffers({
         *command_buffer,
     });
-
     submit_info.set_signal_semaphores({
         *render_finished_semaphore,
     });
-
-    VkSemaphore signal_semaphores[] = {
-        render_finished_semaphore->c_ptr(),
-    };
-    vk_submit_info = submit_info.c_struct();
 
     try {
         graphics_queue->submit({
@@ -996,26 +987,21 @@ void draw_frame()
     }
     fprintf(stderr, "Queue submitted.\n");
 
-    VkPresentInfoKHR present_info;
-    present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    present_info.waitSemaphoreCount = 1;
-    present_info.pWaitSemaphores = signal_semaphores;
+    pr::vk::PresentInfo present_info;
+    present_info.set_wait_semaphores({
+        *render_finished_semaphore,
+    });
+    present_info.set_swapchains({
+        *vulkan_swapchain,
+    });
+    present_info.set_image_indices({
+        image_index,
+    });
 
-    VkSwapchainKHR swapchains[] = {
-        vulkan_swapchain->c_ptr(),
-    };
-    present_info.swapchainCount = 1;
-    present_info.pSwapchains = swapchains;
-
-    present_info.pImageIndices = &image_index;
-
-    // Set zero or null.
-    present_info.pResults = nullptr;    // THIS IS IMPORTANT!
-    present_info.pNext = NULL;
-
-    result = vkQueuePresentKHR(present_queue->c_ptr(), &present_info);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Queue present failed!\n");
+    try {
+        present_queue->present(present_info);
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Queue present failed. %s\n", e.what());
     }
     fprintf(stderr, "vkQueuePresentKHR called\n");
 }

@@ -18,6 +18,8 @@ class VkSwapchain
 {
     friend VkDevice;
 public:
+    using CType = ::VkSwapchainKHR;
+
     class CreateInfo
     {
     public:

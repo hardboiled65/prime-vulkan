@@ -34,6 +34,19 @@ void Queue::submit(const pr::Vector<SubmitInfo>& submits, const Fence& fence)
     }
 }
 
+void Queue::present(const PresentInfo& present_info)
+{
+    ::VkResult result;
+
+    PresentInfo::CType vk_present_info = present_info.c_struct();
+
+    result = vkQueuePresentKHR(this->_queue, &vk_present_info);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+}
+
 ::VkQueue Queue::c_ptr() const
 {
     return this->_queue;
@@ -98,6 +111,49 @@ void SubmitInfo::set_signal_semaphores(const pr::Vector<Semaphore>& semaphores)
 }
 
 auto SubmitInfo::c_struct() const -> CType
+{
+    return this->_info;
+}
+
+
+PresentInfo::PresentInfo()
+{
+    this->_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+    this->_info.pResults = nullptr;
+
+    this->_info.pNext = nullptr;
+}
+
+void PresentInfo::set_wait_semaphores(const pr::Vector<Semaphore>& semaphores)
+{
+    this->_info.waitSemaphoreCount = semaphores.length();
+
+    for (auto& semaphore: semaphores) {
+        this->_wait_semaphores.push_back(semaphore.c_ptr());
+    }
+    this->_info.pWaitSemaphores = this->_wait_semaphores.data();
+}
+
+void PresentInfo::set_swapchains(const pr::Vector<VkSwapchain>& swapchains)
+{
+    this->_info.swapchainCount = swapchains.length();
+
+    for (auto& swapchain: swapchains) {
+        this->_swapchains.push_back(swapchain.c_ptr());
+    }
+    this->_info.pSwapchains = this->_swapchains.data();
+}
+
+void PresentInfo::set_image_indices(const pr::Vector<uint32_t>& indices)
+{
+    for (auto& index: indices) {
+        this->_indices.push_back(index);
+    }
+    this->_info.pImageIndices = this->_indices.data();
+}
+
+auto PresentInfo::c_struct() const -> CType
 {
     return this->_info;
 }

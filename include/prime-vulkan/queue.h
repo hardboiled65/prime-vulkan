@@ -9,11 +9,14 @@
 
 #include <prime-vulkan/semaphore.h>
 #include <prime-vulkan/command-buffer.h>
+#include <prime-vulkan/swapchain.h>
 
 namespace pr {
 namespace vk {
 
 class SubmitInfo;
+
+class PresentInfo;
 
 class Fence;
 
@@ -27,6 +30,8 @@ public:
 
 public:
     void submit(const pr::Vector<SubmitInfo>& submits, const Fence& fence);
+
+    void present(const PresentInfo& present_info);
 
     ::VkQueue c_ptr() const;
 
@@ -64,6 +69,31 @@ private:
     std::vector<::VkPipelineStageFlags> _wait_dst_stage_mask;
     std::vector<CommandBuffer::CType> _command_buffers;
     std::vector<Semaphore::CType> _signal_semaphores;
+};
+
+
+class PresentInfo
+{
+public:
+    using CType = ::VkPresentInfoKHR;
+
+public:
+    PresentInfo();
+
+    void set_wait_semaphores(const pr::Vector<Semaphore>& semaphores);
+
+    void set_swapchains(const pr::Vector<VkSwapchain>& swapchains);
+
+    void set_image_indices(const pr::Vector<uint32_t>& indices);
+
+    CType c_struct() const;
+
+private:
+    CType _info;
+
+    std::vector<Semaphore::CType> _wait_semaphores;
+    std::vector<VkSwapchain::CType> _swapchains;
+    std::vector<uint32_t> _indices;
 };
 
 } // namespace vk
