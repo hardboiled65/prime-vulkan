@@ -57,7 +57,7 @@ pr::vk::Surface *vulkan_surface = nullptr;
 uint32_t present_family = 0;
 // Swapchain.
 uint32_t *queue_family_indices = NULL;
-VkSurfaceCapabilitiesKHR vulkan_capabilities;
+pr::vk::Surface::Capabilities *surface_capabilities = nullptr;
 VkSurfaceFormatKHR *vulkan_formats = NULL;
 VkPresentModeKHR *vulkan_present_modes = NULL;
 const char* *vulkan_required_extension_names = NULL; // Not used.
@@ -308,15 +308,17 @@ static void create_vulkan_logical_device()
     present_queue = new pr::vk::Queue(
         device->queue_for(present_family, 0));
 
-    // Querying details of swap chain support.
-    result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-        physical_device->c_ptr(),
-        vulkan_surface->c_ptr(),
-        &vulkan_capabilities);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to get surface capabilities!\n");
-        return;
+    // Querying details of swapchain support.
+    try {
+        surface_capabilities = new pr::vk::Surface::Capabilities(
+            physical_device->surface_capabilities_for(*vulkan_surface)
+        );
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to get surface capabilities. %s\n", e.what());
+        exit(1);
     }
+
+    auto vulkan_capabilities = surface_capabilities->c_struct();
     fprintf(stderr, "Physical device surface capabilities. - transform: %d\n",
         vulkan_capabilities.currentTransform);
 
@@ -391,10 +393,11 @@ static void create_vulkan_logical_device()
 
 static void create_vulkan_swapchain()
 {
+    auto vk_capabilities = surface_capabilities->c_struct();
     fprintf(stderr, "Capabilities min, max image count: %d, %d\n",
-        vulkan_capabilities.minImageCount,
-        vulkan_capabilities.maxImageCount);
-    uint32_t image_count = vulkan_capabilities.minImageCount + 1;
+        vk_capabilities.minImageCount,
+        vk_capabilities.maxImageCount);
+    uint32_t image_count = vk_capabilities.minImageCount + 1;
     fprintf(stderr, "Image count: %d\n", image_count);
 
     pr::vk::VkSwapchain::CreateInfo swapchain_create_info;
@@ -418,7 +421,7 @@ static void create_vulkan_swapchain()
         swapchain_create_info.set_image_sharing_mode(VK_SHARING_MODE_EXCLUSIVE);
         swapchain_create_info.set_queue_family_indices(pr::Vector<uint32_t>());
     }
-    swapchain_create_info.set_pre_transform(vulkan_capabilities.currentTransform);
+    swapchain_create_info.set_pre_transform(vk_capabilities.currentTransform);
     // ?? No alpha?
     swapchain_create_info.set_composite_alpha(VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR);
     swapchain_create_info.set_present_mode(vulkan_present_mode);

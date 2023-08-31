@@ -6,6 +6,7 @@
 #include <primer/vector.h>
 
 #include <prime-vulkan/device.h>
+#include <prime-vulkan/surface.h>
 
 namespace pr {
 namespace vk {
@@ -42,8 +43,9 @@ public:
 
     VkDevice create_device(const VkDevice::CreateInfo& create_info) const;
 
-    // vkGetPhysicalDeviceSurfaceCapabilitiesKHR
-    // SurfaceCapabilities surface_capabilities() const;
+    /// Using `vkGetPhysicalDeviceSurfaceCapabilitiesKHR` function.
+    Surface::Capabilities surface_capabilities_for(
+        const Surface& surface) const;
 
     ::VkPhysicalDevice c_ptr();
 

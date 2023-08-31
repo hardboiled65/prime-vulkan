@@ -9,6 +9,8 @@ namespace vk {
 
 class VkInstance;
 
+class VkPhysicalDevice;
+
 class Surface
 {
     friend VkInstance;
@@ -26,6 +28,22 @@ public:
 
     private:
         ::VkWaylandSurfaceCreateInfoKHR _info;
+    };
+
+    class Capabilities
+    {
+        friend VkPhysicalDevice;
+    public:
+        using CType = ::VkSurfaceCapabilitiesKHR;
+
+    public:
+        CType c_struct() const;
+
+    private:
+        Capabilities();
+
+    private:
+        CType _capabilities;
     };
 
 public:

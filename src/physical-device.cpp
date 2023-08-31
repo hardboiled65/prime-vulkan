@@ -107,6 +107,27 @@ VkDevice VkPhysicalDevice::create_device(
     return vk_device;
 }
 
+Surface::Capabilities VkPhysicalDevice::surface_capabilities_for(
+    const Surface& surface) const
+{
+    ::VkResult result;
+
+    Surface::Capabilities::CType vk_capabilities;
+    result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+        this->_device,
+        surface.c_ptr(),
+        &vk_capabilities);
+    if (result != VK_SUCCESS) {
+        fprintf(stderr, "Failed to get surface capabilities!\n");
+        throw VulkanError(result);
+    }
+
+    Surface::Capabilities capabilities;
+    capabilities._capabilities = vk_capabilities;
+
+    return capabilities;
+}
+
 ::VkPhysicalDevice VkPhysicalDevice::c_ptr()
 {
     return this->_device;

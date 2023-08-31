@@ -30,6 +30,16 @@ Surface::WaylandSurfaceCreateInfo::c_struct() const
 }
 
 
+Surface::Capabilities::Capabilities()
+{
+}
+
+auto Surface::Capabilities::c_struct() const -> CType
+{
+    return this->_capabilities;
+}
+
+
 Surface::Surface()
 {
     this->_surface = nullptr;
