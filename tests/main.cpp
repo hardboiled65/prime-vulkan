@@ -307,20 +307,13 @@ static void create_vulkan_logical_device()
     device_create_info.set_enabled_features(vulkan_device_features);
     device_create_info.set_enabled_extension_names(extension_names);
 
-    vulkan_device = new pr::vk::VkDevice(
-        vulkan_physical_device->create_device(device_create_info));
-    /*
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to create logical device! reuslt: %d\n",
-            result);
-        return;
-    } else {
-        fprintf(stderr, "Logical device created - device: %p\n", vulkan_device);
+    try {
+        vulkan_device = new pr::vk::VkDevice(
+            vulkan_physical_device->create_device(device_create_info));
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to create logical device. %s\n", e.what());
+        exit(1);
     }
-    */
-
-//    vkGetDeviceQueue(vulkan_device->c_ptr(), graphics_family, 0, &vulkan_graphics_queue);
-//    vkGetDeviceQueue(vulkan_device->c_ptr(), present_family, 0, &vulkan_present_queue);
 
     graphics_queue = new pr::vk::Queue(
         vulkan_device->queue_for(graphics_family, 0));

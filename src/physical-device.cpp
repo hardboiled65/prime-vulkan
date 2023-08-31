@@ -1,5 +1,6 @@
 #include <prime-vulkan/physical-device.h>
 
+#include <prime-vulkan/base.h>
 #include <prime-vulkan/instance.h>
 
 namespace pr {
@@ -96,7 +97,7 @@ VkDevice VkPhysicalDevice::create_device(
     result = vkCreateDevice(this->_device, &info, nullptr, &device);
 
     if (result != VK_SUCCESS) {
-        // TODO: Exception.
+        throw VulkanError(result);
     }
 
     // Construct device class.
