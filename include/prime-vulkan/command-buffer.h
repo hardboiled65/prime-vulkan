@@ -10,6 +10,8 @@ namespace vk {
 
 class CommandPool;
 
+class VkPipeline;
+
 class VkDevice;
 
 class CommandBuffer
@@ -59,6 +61,15 @@ public:
 
     void begin_render_pass(const RenderPass::BeginInfo& info,
                            ::VkSubpassContents contents);
+
+    void bind_pipeline(::VkPipelineBindPoint bind_point,
+                       const VkPipeline& pipeline);
+
+    void set_viewport(uint32_t first_viewport,
+                      const pr::Vector<::VkViewport>& viewports);
+
+    void set_scissor(uint32_t first_scissor,
+                     const pr::Vector<::VkRect2D>& scissors);
 
     CType c_ptr() const;
 

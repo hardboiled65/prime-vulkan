@@ -800,7 +800,6 @@ static void record_command_buffer(pr::vk::CommandBuffer& command_buffer,
     VkResult result;
 
     pr::vk::CommandBuffer::BeginInfo command_buffer_begin_info;
-    auto vk_command_buffer_begin_info = command_buffer_begin_info.c_struct();
 
     try {
         command_buffer.begin(command_buffer_begin_info);
@@ -833,8 +832,6 @@ static void record_command_buffer(pr::vk::CommandBuffer& command_buffer,
         }(),
     });
 
-    auto vk_render_pass_begin_info = render_pass_begin_info.c_struct();
-
     fprintf(stderr, "vkCmdBeginRenderPass() - command buffer: %p\n",
         command_buffer.c_ptr());
     command_buffer.begin_render_pass(render_pass_begin_info,
@@ -847,6 +844,8 @@ static void record_command_buffer(pr::vk::CommandBuffer& command_buffer,
     auto vk_command_buffer = command_buffer.c_ptr();
     vkCmdBindPipeline(vk_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         vulkan_graphics_pipeline);
+//    command_buffer.bind_pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS,
+//        *graphics_pipeline);
 
     VkViewport viewport;
     viewport.x = 0.0f;
@@ -855,13 +854,17 @@ static void record_command_buffer(pr::vk::CommandBuffer& command_buffer,
     viewport.height = (float)vulkan_extent.height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(vk_command_buffer, 0, 1, &viewport);
+    command_buffer.set_viewport(0, {
+        viewport,
+    });
 
     VkRect2D scissor;
     scissor.offset.x = 0;
     scissor.offset.y = 0;
     scissor.extent = vulkan_extent;
-    vkCmdSetScissor(vk_command_buffer, 0, 1, &scissor);
+    command_buffer.set_scissor(0, {
+        scissor,
+    });
 
     vkCmdDraw(vk_command_buffer, 3, 1, 0, 0);
     //===============
