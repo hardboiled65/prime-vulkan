@@ -85,7 +85,6 @@ pr::Vector<pr::vk::Framebuffer> framebuffers;
 pr::vk::CommandPool *command_pool = nullptr;
 // Command buffer.
 pr::vk::CommandBuffer *command_buffer;
-VkRenderPassBeginInfo vulkan_render_pass_begin_info;
 VkClearValue vulkan_clear_color;
 // Sync objects.
 pr::vk::Semaphore *image_available_semaphore = nullptr;
@@ -795,7 +794,7 @@ static void create_vulkan_sync_objects()
     fprintf(stderr, "Fence created.\n");
 }
 
-static void record_command_buffer(VkCommandBuffer command_buffer,
+static void record_command_buffer(pr::vk::CommandBuffer& command_buffer,
         uint32_t image_index)
 {
     VkResult result;
@@ -803,51 +802,50 @@ static void record_command_buffer(VkCommandBuffer command_buffer,
     pr::vk::CommandBuffer::BeginInfo command_buffer_begin_info;
     auto vk_command_buffer_begin_info = command_buffer_begin_info.c_struct();
 
-    /*
     try {
-        command_buffer->begin(command_buffer_begin_info);
+        command_buffer.begin(command_buffer_begin_info);
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to begin recording command buffer!\n");
         exit(1);
     }
-    */
 
-    result = vkBeginCommandBuffer(command_buffer,
-        &vk_command_buffer_begin_info);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to begin recording command buffer!\n");
-        return;
-    }
     fprintf(stderr, "Begin command buffer.\n");
     fprintf(stderr, "Using framebuffer: %p\n", framebuffers[image_index].c_ptr());
 
-    vulkan_render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    vulkan_render_pass_begin_info.renderPass = render_pass->c_ptr();
-    vulkan_render_pass_begin_info.framebuffer = framebuffers[image_index].c_ptr();
-    vulkan_render_pass_begin_info.renderArea.offset.x = 0;
-    vulkan_render_pass_begin_info.renderArea.offset.y = 0;
-    vulkan_render_pass_begin_info.renderArea.extent = vulkan_extent;
+    pr::vk::RenderPass::BeginInfo render_pass_begin_info;
+    render_pass_begin_info.set_render_pass(*render_pass);
+    render_pass_begin_info.set_framebuffer(framebuffers[image_index]);
+    render_pass_begin_info.set_render_area([]() {
+        ::VkRect2D area;
+        area.offset.x = 0;
+        area.offset.y = 0;
+        area.extent = vulkan_extent;
+        return area;
+    }());
+    render_pass_begin_info.set_clear_values({
+        []() {
+            ::VkClearValue value;
+            value.color.float32[0] = 0.0f;
+            value.color.float32[1] = 0.0f;
+            value.color.float32[2] = 0.0f;
+            value.color.float32[3] = 1.0f;
+            return value;
+        }(),
+    });
 
-    vulkan_clear_color.color.float32[0] = 0.0f;
-    vulkan_clear_color.color.float32[1] = 0.0f;
-    vulkan_clear_color.color.float32[2] = 0.0f;
-    vulkan_clear_color.color.float32[3] = 1.0f;
-
-    vulkan_render_pass_begin_info.clearValueCount = 1;
-    vulkan_render_pass_begin_info.pClearValues = &vulkan_clear_color;
-
-    vulkan_render_pass_begin_info.pNext = nullptr;
+    auto vk_render_pass_begin_info = render_pass_begin_info.c_struct();
 
     fprintf(stderr, "vkCmdBeginRenderPass() - command buffer: %p\n",
-        command_buffer);
-    vkCmdBeginRenderPass(command_buffer, &vulkan_render_pass_begin_info,
+        command_buffer.c_ptr());
+    command_buffer.begin_render_pass(render_pass_begin_info,
         VK_SUBPASS_CONTENTS_INLINE);
     fprintf(stderr, "Begin render pass.\n");
 
     //==============
     // In Commands
     //==============
-    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+    auto vk_command_buffer = command_buffer.c_ptr();
+    vkCmdBindPipeline(vk_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
         vulkan_graphics_pipeline);
 
     VkViewport viewport;
@@ -857,22 +855,22 @@ static void record_command_buffer(VkCommandBuffer command_buffer,
     viewport.height = (float)vulkan_extent.height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(command_buffer, 0, 1, &viewport);
+    vkCmdSetViewport(vk_command_buffer, 0, 1, &viewport);
 
     VkRect2D scissor;
     scissor.offset.x = 0;
     scissor.offset.y = 0;
     scissor.extent = vulkan_extent;
-    vkCmdSetScissor(command_buffer, 0, 1, &scissor);
+    vkCmdSetScissor(vk_command_buffer, 0, 1, &scissor);
 
-    vkCmdDraw(command_buffer, 3, 1, 0, 0);
+    vkCmdDraw(vk_command_buffer, 3, 1, 0, 0);
     //===============
     // Out Commands
     //===============
 
-    vkCmdEndRenderPass(command_buffer);
+    vkCmdEndRenderPass(vk_command_buffer);
 
-    result = vkEndCommandBuffer(command_buffer);
+    result = vkEndCommandBuffer(vk_command_buffer);
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to record command buffer!\n");
         return;
@@ -882,8 +880,6 @@ static void record_command_buffer(VkCommandBuffer command_buffer,
 
 void draw_frame()
 {
-    VkResult result;
-
     try {
         device->wait_for_fences({
             *in_flight_fence,
@@ -920,7 +916,7 @@ void draw_frame()
         exit(1);
     }
 
-    record_command_buffer(command_buffer->c_ptr(), image_index);
+    record_command_buffer(*command_buffer, image_index);
 
     pr::vk::SubmitInfo submit_info;
     submit_info.set_wait_semaphores({

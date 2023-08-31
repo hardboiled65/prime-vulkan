@@ -3,6 +3,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <prime-vulkan/render-pass.h>
+
 namespace pr {
 namespace vk {
 
@@ -54,6 +56,9 @@ public:
     void begin(const BeginInfo& info);
 
     void reset(::VkCommandBufferResetFlags flags);
+
+    void begin_render_pass(const RenderPass::BeginInfo& info,
+                           ::VkSubpassContents contents);
 
     CType c_ptr() const;
 

@@ -77,6 +77,13 @@ void CommandBuffer::reset(::VkCommandBufferResetFlags flags)
     }
 }
 
+void CommandBuffer::begin_render_pass(const RenderPass::BeginInfo& info,
+                                      ::VkSubpassContents contents)
+{
+    auto vk_info = info.c_struct();
+    vkCmdBeginRenderPass(this->_command_buffer, &vk_info, contents);
+}
+
 auto CommandBuffer::c_ptr() const -> CType
 {
     return this->_command_buffer;

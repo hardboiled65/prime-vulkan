@@ -11,6 +11,8 @@
 namespace pr {
 namespace vk {
 
+class Framebuffer;
+
 class VkDevice;
 
 class AttachmentDescription
@@ -143,6 +145,30 @@ public:
         std::vector<SubpassDescription::CType> _p_subpasses;
         pr::Vector<SubpassDependency> _dependencies;
         std::vector<SubpassDependency::CType> _p_dependencies;
+    };
+
+    class BeginInfo
+    {
+    public:
+        using CType = ::VkRenderPassBeginInfo;
+
+    public:
+        BeginInfo();
+
+        void set_render_pass(const RenderPass& render_pass);
+
+        void set_framebuffer(const Framebuffer& framebuffer);
+
+        void set_render_area(::VkRect2D area);
+
+        void set_clear_values(const pr::Vector<::VkClearValue>& values);
+
+        CType c_struct() const;
+
+    private:
+        CType _info;
+
+        std::vector<::VkClearValue> _clear_values;
     };
 
     class Deleter

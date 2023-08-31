@@ -1,5 +1,7 @@
 #include <prime-vulkan/render-pass.h>
 
+#include <prime-vulkan/framebuffer.h>
+
 namespace pr {
 namespace vk {
 
@@ -222,6 +224,45 @@ void RenderPass::CreateInfo::set_dependencies(
 }
 
 auto RenderPass::CreateInfo::c_struct() const -> CType
+{
+    return this->_info;
+}
+
+
+RenderPass::BeginInfo::BeginInfo()
+{
+    this->_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+
+    this->_info.pNext = nullptr;
+}
+
+void RenderPass::BeginInfo::set_render_pass(const RenderPass& render_pass)
+{
+    this->_info.renderPass = render_pass.c_ptr();
+}
+
+void RenderPass::BeginInfo::set_framebuffer(const Framebuffer& framebuffer)
+{
+    this->_info.framebuffer = framebuffer.c_ptr();
+}
+
+void RenderPass::BeginInfo::set_render_area(::VkRect2D area)
+{
+    this->_info.renderArea = area;
+}
+
+void RenderPass::BeginInfo::set_clear_values(
+    const pr::Vector<::VkClearValue>& values)
+{
+    this->_info.clearValueCount = values.length();
+
+    for (auto& value: values) {
+        this->_clear_values.push_back(value);
+    }
+    this->_info.pClearValues = this->_clear_values.data();
+}
+
+auto RenderPass::BeginInfo::c_struct() const -> CType
 {
     return this->_info;
 }
