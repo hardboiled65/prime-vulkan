@@ -52,8 +52,6 @@ VkPhysicalDeviceFeatures vulkan_device_features;
 pr::vk::VkDevice *vulkan_device = nullptr;
 pr::vk::Queue *graphics_queue = nullptr;
 pr::vk::Queue *present_queue = nullptr;
-VkQueue vulkan_graphics_queue;
-VkQueue vulkan_present_queue;
 // Vulkan surface.
 pr::vk::VkSurface *vulkan_surface = nullptr;
 uint32_t present_family = 0;
@@ -321,13 +319,13 @@ static void create_vulkan_logical_device()
     }
     */
 
-    vkGetDeviceQueue(vulkan_device->c_ptr(), graphics_family, 0, &vulkan_graphics_queue);
-    vkGetDeviceQueue(vulkan_device->c_ptr(), present_family, 0, &vulkan_present_queue);
+//    vkGetDeviceQueue(vulkan_device->c_ptr(), graphics_family, 0, &vulkan_graphics_queue);
+//    vkGetDeviceQueue(vulkan_device->c_ptr(), present_family, 0, &vulkan_present_queue);
 
-//    graphics_queue = new pr::vk::Queue(
-//        vulkan_device->queue_for(graphics_family, 0));
-//    present_queue = new pr::vk::Queue(
-//        vulkan_device->queue_for(present_family, 0));
+    graphics_queue = new pr::vk::Queue(
+        vulkan_device->queue_for(graphics_family, 0));
+    present_queue = new pr::vk::Queue(
+        vulkan_device->queue_for(present_family, 0));
 
     // Querying details of swap chain support.
     result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
@@ -988,11 +986,13 @@ void draw_frame()
     };
     vk_submit_info = submit_info.c_struct();
 
-    result = vkQueueSubmit(vulkan_graphics_queue, 1, &vk_submit_info,
-        in_flight_fence->c_ptr());
-    if (result != VK_SUCCESS) {
+    try {
+        graphics_queue->submit({
+            submit_info,
+        }, *in_flight_fence);
+    } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to submit draw command buffer!\n");
-        return;
+        exit(1);
     }
     fprintf(stderr, "Queue submitted.\n");
 
@@ -1013,7 +1013,7 @@ void draw_frame()
     present_info.pResults = nullptr;    // THIS IS IMPORTANT!
     present_info.pNext = NULL;
 
-    result = vkQueuePresentKHR(vulkan_present_queue, &present_info);
+    result = vkQueuePresentKHR(present_queue->c_ptr(), &present_info);
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Queue present failed!\n");
     }
