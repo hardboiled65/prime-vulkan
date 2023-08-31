@@ -148,13 +148,13 @@ VkDevice::VkDevice(const VkDevice& other)
     this->_device = other._device;
 }
 
-VkQueue VkDevice::queue_for(uint32_t queue_family_index,
-                            uint32_t queue_index) const
+Queue VkDevice::queue_for(uint32_t queue_family_index,
+                          uint32_t queue_index) const
 {
     ::VkQueue queue;
     vkGetDeviceQueue(this->_device, queue_family_index, queue_index, &queue);
 
-    VkQueue ret;
+    Queue ret;
     ret._queue = queue;
 
     return ret;

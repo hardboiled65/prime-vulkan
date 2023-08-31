@@ -80,7 +80,7 @@ public:
     VkDevice(const VkDevice& other);
 
     /// Using `vkGetDeviceQueue`.
-    VkQueue queue_for(uint32_t queue_family_index, uint32_t queue_index) const;
+    Queue queue_for(uint32_t queue_family_index, uint32_t queue_index) const;
 
     VkSwapchain create_swapchain(const VkSwapchain::CreateInfo& info) const;
 

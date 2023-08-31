@@ -19,7 +19,7 @@ class Fence;
 
 class VkDevice;
 
-class VkQueue
+class Queue
 {
     friend VkDevice;
 public:
@@ -31,7 +31,7 @@ public:
     ::VkQueue c_ptr() const;
 
 private:
-    VkQueue();
+    Queue();
 
 private:
     ::VkQueue _queue;

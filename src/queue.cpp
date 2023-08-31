@@ -10,12 +10,12 @@
 namespace pr {
 namespace vk {
 
-VkQueue::VkQueue()
+Queue::Queue()
 {
     this->_queue = nullptr;
 }
 
-void VkQueue::submit(const pr::Vector<SubmitInfo>& submits, const Fence& fence)
+void Queue::submit(const pr::Vector<SubmitInfo>& submits, const Fence& fence)
 {
     ::VkResult result;
 
@@ -34,7 +34,7 @@ void VkQueue::submit(const pr::Vector<SubmitInfo>& submits, const Fence& fence)
     }
 }
 
-::VkQueue VkQueue::c_ptr() const
+::VkQueue Queue::c_ptr() const
 {
     return this->_queue;
 }

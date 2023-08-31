@@ -48,13 +48,15 @@ pr::vk::VkInstance *vulkan_instance = nullptr;
 pr::vk::VkPhysicalDevice *vulkan_physical_device = nullptr;
 uint32_t graphics_family = 0;
 VkPhysicalDeviceFeatures vulkan_device_features;
-VkQueue vulkan_graphics_queue = NULL;
 // Logical device.
 pr::vk::VkDevice *vulkan_device = nullptr;
+pr::vk::Queue *graphics_queue = nullptr;
+pr::vk::Queue *present_queue = nullptr;
+VkQueue vulkan_graphics_queue;
+VkQueue vulkan_present_queue;
 // Vulkan surface.
 pr::vk::VkSurface *vulkan_surface = nullptr;
 uint32_t present_family = 0;
-VkQueue vulkan_present_queue = NULL;
 // Swapchain.
 uint32_t *queue_family_indices = NULL;
 VkSurfaceCapabilitiesKHR vulkan_capabilities;
@@ -321,6 +323,11 @@ static void create_vulkan_logical_device()
 
     vkGetDeviceQueue(vulkan_device->c_ptr(), graphics_family, 0, &vulkan_graphics_queue);
     vkGetDeviceQueue(vulkan_device->c_ptr(), present_family, 0, &vulkan_present_queue);
+
+//    graphics_queue = new pr::vk::Queue(
+//        vulkan_device->queue_for(graphics_family, 0));
+//    present_queue = new pr::vk::Queue(
+//        vulkan_device->queue_for(present_family, 0));
 
     // Querying details of swap chain support.
     result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
@@ -959,7 +966,6 @@ void draw_frame()
     record_command_buffer(command_buffer->c_ptr(), image_index);
 
     VkSubmitInfo vk_submit_info;
-    vk_submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     pr::vk::SubmitInfo submit_info;
     submit_info.set_wait_semaphores({
         *image_available_semaphore,
@@ -980,6 +986,7 @@ void draw_frame()
     VkSemaphore signal_semaphores[] = {
         render_finished_semaphore->c_ptr(),
     };
+    vk_submit_info = submit_info.c_struct();
 
     result = vkQueueSubmit(vulkan_graphics_queue, 1, &vk_submit_info,
         in_flight_fence->c_ptr());
