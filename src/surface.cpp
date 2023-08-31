@@ -50,5 +50,20 @@ auto Surface::c_ptr() const -> CType
     return this->_surface;
 }
 
+
+SurfaceFormat::SurfaceFormat()
+{
+}
+
+::VkFormat SurfaceFormat::format() const
+{
+    return this->_format.format;
+}
+
+::VkColorSpaceKHR SurfaceFormat::color_space() const
+{
+    return this->_format.colorSpace;
+}
+
 } // namespace vk
 } // namespace pr

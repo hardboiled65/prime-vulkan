@@ -47,6 +47,10 @@ public:
     Surface::Capabilities surface_capabilities_for(
         const Surface& surface) const;
 
+    /// Using `vkGetPhysicalDeviceSurfaceFormatsKHR` function.
+    Vector<SurfaceFormat> surface_formats_for(
+        const Surface& surface) const;
+
     ::VkPhysicalDevice c_ptr();
 
 private:

@@ -58,7 +58,7 @@ uint32_t present_family = 0;
 // Swapchain.
 uint32_t *queue_family_indices = NULL;
 pr::vk::Surface::Capabilities *surface_capabilities = nullptr;
-VkSurfaceFormatKHR *vulkan_formats = NULL;
+pr::Vector<pr::vk::SurfaceFormat> surface_formats;
 VkPresentModeKHR *vulkan_present_modes = NULL;
 const char* *vulkan_required_extension_names = NULL; // Not used.
 VkSurfaceFormatKHR vulkan_format;
@@ -322,6 +322,7 @@ static void create_vulkan_logical_device()
     fprintf(stderr, "Physical device surface capabilities. - transform: %d\n",
         vulkan_capabilities.currentTransform);
 
+    /*
     uint32_t formats;
     vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device->c_ptr(),
         vulkan_surface->c_ptr(), &formats, NULL);
@@ -336,14 +337,20 @@ static void create_vulkan_logical_device()
         fprintf(stderr, "Failed to get surface formats!\n");
         return;
     }
+    */
+    try {
+        surface_formats = physical_device->surface_formats_for(*vulkan_surface);
+    } catch (const pr::vk::VulkanError& e) {
+        exit(1);
+    }
 
-    for (uint32_t i = 0; i < formats; ++i) {
-        VkSurfaceFormatKHR surface_format = *(vulkan_formats + i);
+    for (uint32_t i = 0; i < surface_formats.length(); ++i) {
         pr::println(" - Format: {}, Color space: {}",
-            pr::vk::Vulkan::vk_format_to_string(surface_format.format),
-            (int)(surface_format.colorSpace));
-        if (surface_format.format == VK_FORMAT_B8G8R8A8_SRGB) {
-            vulkan_format = surface_format;
+            pr::vk::Vulkan::vk_format_to_string(surface_formats[i].format()),
+            (int)(surface_formats[i].color_space()));
+        if (surface_formats[i].format() == VK_FORMAT_B8G8R8A8_SRGB) {
+            vulkan_format.format = surface_formats[i].format();
+            vulkan_format.colorSpace = surface_formats[i].color_space();
         }
     }
 

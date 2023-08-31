@@ -128,6 +128,37 @@ Surface::Capabilities VkPhysicalDevice::surface_capabilities_for(
     return capabilities;
 }
 
+Vector<SurfaceFormat> VkPhysicalDevice::surface_formats_for(
+    const Surface& surface) const
+{
+    ::VkResult result;
+    pr::Vector<SurfaceFormat> v;
+
+    uint32_t formats;
+    result = vkGetPhysicalDeviceSurfaceFormatsKHR(this->_device,
+        surface.c_ptr(), &formats, nullptr);
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    ::VkSurfaceFormatKHR *vk_formats = new ::VkSurfaceFormatKHR[formats];
+    result = vkGetPhysicalDeviceSurfaceFormatsKHR(this->_device,
+        surface.c_ptr(), &formats, vk_formats);
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    for (uint32_t i = 0; i < formats; ++i) {
+        SurfaceFormat surface_format;
+        surface_format._format = vk_formats[i];
+        v.push(surface_format);
+    }
+
+    delete[] vk_formats;
+
+    return v;
+}
+
 ::VkPhysicalDevice VkPhysicalDevice::c_ptr()
 {
     return this->_device;

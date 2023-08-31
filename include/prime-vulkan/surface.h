@@ -56,6 +56,25 @@ private:
     CType _surface;
 };
 
+
+class SurfaceFormat
+{
+    friend VkPhysicalDevice;
+public:
+    using CType = ::VkSurfaceFormatKHR;
+
+public:
+    ::VkFormat format() const;
+
+    ::VkColorSpaceKHR color_space() const;
+
+private:
+    SurfaceFormat();
+
+private:
+    CType _format;
+};
+
 } // namespace vk
 } // namespace pr
 
