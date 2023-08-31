@@ -42,14 +42,14 @@ const bool enable_validation_layers = false;
 #else
 const bool enable_validation_layers = true;
 #endif
-VkLayerProperties *vulkan_layer_properties = NULL;
+
 // Vulkan init.
-pr::vk::VkInstance *vulkan_instance = nullptr;
-pr::vk::VkPhysicalDevice *vulkan_physical_device = nullptr;
+pr::vk::VkInstance *instance = nullptr;
+pr::vk::VkPhysicalDevice *physical_device = nullptr;
 uint32_t graphics_family = 0;
 VkPhysicalDeviceFeatures vulkan_device_features;
 // Logical device.
-pr::vk::VkDevice *vulkan_device = nullptr;
+pr::vk::VkDevice *device = nullptr;
 pr::vk::Queue *graphics_queue = nullptr;
 pr::vk::Queue *present_queue = nullptr;
 // Vulkan surface.
@@ -64,12 +64,11 @@ const char* *vulkan_required_extension_names = NULL; // Not used.
 VkSurfaceFormatKHR vulkan_format;
 VkPresentModeKHR vulkan_present_mode;
 VkExtent2D vulkan_extent;
-pr::vk::VkSwapchain *vulkan_swapchain = nullptr;
-pr::Vector<pr::vk::VkImage> vulkan_swapchain_images;
+pr::vk::VkSwapchain *swapchain = nullptr;
+pr::Vector<pr::vk::VkImage> swapchain_images;
 // Image views.
-pr::Vector<pr::vk::VkImageView> vulkan_image_views;
+pr::Vector<pr::vk::VkImageView> image_views;
 // Render pass.
-VkRenderPass vulkan_render_pass;
 pr::vk::RenderPass *render_pass;
 // Shaders.
 uint8_t *vert_shader_code = NULL;
@@ -86,7 +85,6 @@ pr::Vector<pr::vk::Framebuffer> framebuffers;
 pr::vk::CommandPool *command_pool = nullptr;
 // Command buffer.
 pr::vk::CommandBuffer *command_buffer;
-VkCommandBufferBeginInfo vulkan_command_buffer_begin_info; // Unused.
 VkRenderPassBeginInfo vulkan_render_pass_begin_info;
 VkClearValue vulkan_clear_color;
 // Sync objects.
@@ -198,7 +196,7 @@ static void init_vulkan()
     info.set_enabled_extension_names(extension_names);
 
     try {
-        vulkan_instance = new pr::vk::VkInstance(info);
+        instance = new pr::vk::VkInstance(info);
         fprintf(stderr, "Vulkan instance created!\n");
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create Vulkan instance.\n");
@@ -207,7 +205,7 @@ static void init_vulkan()
     }
 
     // Pick physical device.
-    auto physical_devices = pr::vk::VkPhysicalDevice::enumerate(*vulkan_instance);
+    auto physical_devices = pr::vk::VkPhysicalDevice::enumerate(*instance);
     if (physical_devices.length() == 0) {
         fprintf(stderr, "No GPUs with Vulkan support!\n");
         return;
@@ -217,7 +215,7 @@ static void init_vulkan()
     for (auto& device: physical_devices) {
         fprintf(stderr, " - Device: %p\n", device.c_ptr());
     }
-    vulkan_physical_device = new pr::vk::VkPhysicalDevice(physical_devices[0]);
+    physical_device = new pr::vk::VkPhysicalDevice(physical_devices[0]);
 }
 
 static void create_vulkan_window()
@@ -227,7 +225,7 @@ static void create_vulkan_window()
 
     try {
         vulkan_surface = new pr::vk::VkSurface(
-            vulkan_instance->create_wayland_surface(surface_create_info));
+            instance->create_wayland_surface(surface_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create window surface! %s\n", e.what());
         exit(1);
@@ -243,7 +241,7 @@ static void create_vulkan_logical_device()
     // Find queue families.
 
     auto queue_family_properties_list =
-        vulkan_physical_device->queue_family_properties();
+        physical_device->queue_family_properties();
     fprintf(stderr, "List of queue family properties: %ld\n",
         queue_family_properties_list.length());
 
@@ -260,7 +258,7 @@ static void create_vulkan_logical_device()
         // Presentation support.
         VkBool32 present_support = VK_FALSE;
         result = vkGetPhysicalDeviceSurfaceSupportKHR(
-            vulkan_physical_device->c_ptr(),
+            physical_device->c_ptr(),
             i, vulkan_surface->c_ptr(), &present_support);
         if (result != VK_SUCCESS) {
             fprintf(stderr, "Error!\n");
@@ -308,21 +306,21 @@ static void create_vulkan_logical_device()
     device_create_info.set_enabled_extension_names(extension_names);
 
     try {
-        vulkan_device = new pr::vk::VkDevice(
-            vulkan_physical_device->create_device(device_create_info));
+        device = new pr::vk::VkDevice(
+            physical_device->create_device(device_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create logical device. %s\n", e.what());
         exit(1);
     }
 
     graphics_queue = new pr::vk::Queue(
-        vulkan_device->queue_for(graphics_family, 0));
+        device->queue_for(graphics_family, 0));
     present_queue = new pr::vk::Queue(
-        vulkan_device->queue_for(present_family, 0));
+        device->queue_for(present_family, 0));
 
     // Querying details of swap chain support.
     result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-        vulkan_physical_device->c_ptr(),
+        physical_device->c_ptr(),
         vulkan_surface->c_ptr(),
         &vulkan_capabilities);
     if (result != VK_SUCCESS) {
@@ -333,14 +331,14 @@ static void create_vulkan_logical_device()
         vulkan_capabilities.currentTransform);
 
     uint32_t formats;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(vulkan_physical_device->c_ptr(),
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device->c_ptr(),
         vulkan_surface->c_ptr(), &formats, NULL);
     fprintf(stderr, "Surface formats: %d\n", formats);
 
     vulkan_formats = (VkSurfaceFormatKHR*)malloc(
         sizeof(VkSurfaceFormatKHR) * formats
     );
-    result = vkGetPhysicalDeviceSurfaceFormatsKHR(vulkan_physical_device->c_ptr(),
+    result = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device->c_ptr(),
         vulkan_surface->c_ptr(), &formats, vulkan_formats);
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to get surface formats!\n");
@@ -358,7 +356,7 @@ static void create_vulkan_logical_device()
     }
 
     uint32_t modes;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(vulkan_physical_device->c_ptr(),
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->c_ptr(),
         vulkan_surface->c_ptr(), &modes, NULL);
     if (modes == 0) {
         fprintf(stderr, "No surface present modes!\n");
@@ -370,7 +368,7 @@ static void create_vulkan_logical_device()
         sizeof(VkPresentModeKHR) * modes
     );
 
-    result = vkGetPhysicalDeviceSurfacePresentModesKHR(vulkan_physical_device->c_ptr(),
+    result = vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device->c_ptr(),
         vulkan_surface->c_ptr(), &modes, vulkan_present_modes);
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to get surface present modes!\n");
@@ -438,8 +436,8 @@ static void create_vulkan_swapchain()
     // vulkan_swapchain_create_info.oldSwapchain = VK_NULL_HANDLE;
     fprintf(stderr, "Done writing swapchain create info.\n");
 
-    vulkan_swapchain = new pr::vk::VkSwapchain(
-        vulkan_device->create_swapchain(swapchain_create_info));
+    swapchain = new pr::vk::VkSwapchain(
+        device->create_swapchain(swapchain_create_info));
     /*
     if (result != VK_SUCCESS) {
         fprintf(stderr, "Failed to create swapchain!\n");
@@ -450,22 +448,22 @@ static void create_vulkan_swapchain()
 
     // Images.
     try {
-        vulkan_swapchain_images = vulkan_device->images_for(*vulkan_swapchain);
+        swapchain_images = device->images_for(*swapchain);
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to get swapchain images! %s\n", e.what());
     }
 
     fprintf(stderr, "Number of images: %ld\n",
-        vulkan_swapchain_images.length());
+        swapchain_images.length());
 
     fprintf(stderr, "Swapchain images got.\n");
 }
 
 static void create_vulkan_image_views()
 {
-    for (uint64_t i = 0; i < vulkan_swapchain_images.length(); ++i) {
+    for (uint64_t i = 0; i < swapchain_images.length(); ++i) {
         pr::vk::VkImageView::CreateInfo create_info;
-        create_info.set_image(vulkan_swapchain_images[i]);
+        create_info.set_image(swapchain_images[i]);
         create_info.set_view_type(VK_IMAGE_VIEW_TYPE_2D);
         create_info.set_format(vulkan_format.format);
 
@@ -483,8 +481,8 @@ static void create_vulkan_image_views()
         create_info.set_subresource_range(range);
 
         try {
-            auto image_view = vulkan_device->create_image_view(create_info);
-            vulkan_image_views.push(image_view);
+            auto image_view = device->create_image_view(create_info);
+            image_views.push(image_view);
         } catch (const pr::vk::VulkanError& e) {
             fprintf(stderr, "Image view creation failed. %s\n", e.what());
             exit(1);
@@ -542,14 +540,13 @@ static void create_vulkan_render_pass()
 
     try {
         render_pass = new pr::vk::RenderPass(
-            vulkan_device->create_render_pass(render_pass_create_info));
+            device->create_render_pass(render_pass_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create render pass. %s\n", e.what());
     }
-    vulkan_render_pass = render_pass->c_ptr();
 
     fprintf(stderr, "Render pass created. - render pass: %p\n",
-        vulkan_render_pass);
+        render_pass->c_ptr());
 }
 
 static void create_vulkan_graphics_pipeline()
@@ -568,7 +565,7 @@ static void create_vulkan_graphics_pipeline()
     pr::vk::VkShaderModule *vert_shader_module;
     try {
         vert_shader_module = new pr::vk::VkShaderModule(
-            vulkan_device->create_shader_module(vert_create_info));
+            device->create_shader_module(vert_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create vertex shader module!\n");
         exit(1);
@@ -583,7 +580,7 @@ static void create_vulkan_graphics_pipeline()
     pr::vk::VkShaderModule *frag_shader_module;
     try {
         frag_shader_module = new pr::vk::VkShaderModule(
-            vulkan_device->create_shader_module(frag_create_info));
+            device->create_shader_module(frag_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create fragment shader module!\n");
         exit(1);
@@ -687,7 +684,7 @@ static void create_vulkan_graphics_pipeline()
 
     try {
         vulkan_layout = new pr::vk::VkPipelineLayout(
-            vulkan_device->create_pipeline_layout(pipeline_layout_create_info));
+            device->create_pipeline_layout(pipeline_layout_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create pipeline layout. %s\n", e.what());
         exit(1);
@@ -713,14 +710,14 @@ static void create_vulkan_graphics_pipeline()
     vulkan_graphics_pipeline_create_info.pDynamicState =
         &vulkan_dynamic_state_create_info;
     vulkan_graphics_pipeline_create_info.layout = vulkan_layout->c_ptr();
-    vulkan_graphics_pipeline_create_info.renderPass = vulkan_render_pass;
+    vulkan_graphics_pipeline_create_info.renderPass = render_pass->c_ptr();
     vulkan_graphics_pipeline_create_info.subpass = 0;
     vulkan_graphics_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
 
     vulkan_graphics_pipeline_create_info.flags = 0;
     vulkan_graphics_pipeline_create_info.pNext = nullptr;
 
-    result = vkCreateGraphicsPipelines(vulkan_device->c_ptr(), VK_NULL_HANDLE,
+    result = vkCreateGraphicsPipelines(device->c_ptr(), VK_NULL_HANDLE,
         1, &vulkan_graphics_pipeline_create_info, NULL,
         &vulkan_graphics_pipeline);
     if (result != VK_SUCCESS) {
@@ -740,9 +737,9 @@ static void create_vulkan_graphics_pipeline()
 
 static void create_vulkan_framebuffers()
 {
-    for (uint32_t i = 0; i < vulkan_swapchain_images.length(); ++i) {
+    for (uint32_t i = 0; i < swapchain_images.length(); ++i) {
         pr::Vector<pr::vk::VkImageView> attachments = {
-            vulkan_image_views[i],
+            image_views[i],
         };
 
         pr::vk::Framebuffer::CreateInfo create_info;
@@ -754,7 +751,7 @@ static void create_vulkan_framebuffers()
 
         try {
             pr::vk::Framebuffer fb =
-                vulkan_device->create_framebuffer(create_info);
+                device->create_framebuffer(create_info);
             framebuffers.push(fb);
         } catch (const pr::vk::VulkanError& e) {
             fprintf(stderr, "Failed to create framebuffer. %s\n", e.what());
@@ -774,7 +771,7 @@ static void create_vulkan_command_pool()
 
     try {
         command_pool = new pr::vk::CommandPool(
-            vulkan_device->create_command_pool(command_pool_create_info));
+            device->create_command_pool(command_pool_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create command pool! %s\n", e.what());
     }
@@ -792,7 +789,7 @@ static void create_vulkan_command_buffer()
 
     try {
         command_buffer = new pr::vk::CommandBuffer(
-            vulkan_device->allocate_command_buffers(command_buffer_alloc_info));
+            device->allocate_command_buffers(command_buffer_alloc_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to allocate command buffers. %s\n", e.what());
         exit(1);
@@ -811,7 +808,7 @@ static void create_vulkan_sync_objects()
 
     try {
         image_available_semaphore = new pr::vk::Semaphore(
-            vulkan_device->create_semaphore(semaphore_create_info));
+            device->create_semaphore(semaphore_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create image available semaphore!\n");
         exit(1);
@@ -819,7 +816,7 @@ static void create_vulkan_sync_objects()
 
     try {
         render_finished_semaphore = new pr::vk::Semaphore(
-            vulkan_device->create_semaphore(semaphore_create_info));
+            device->create_semaphore(semaphore_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create render finished semaphore!\n");
         exit(1);
@@ -828,7 +825,7 @@ static void create_vulkan_sync_objects()
 
     try {
         in_flight_fence = new pr::vk::Fence(
-            vulkan_device->create_fence(fence_create_info));
+            device->create_fence(fence_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create fence. %s\n", e.what());
         exit(1);
@@ -858,7 +855,7 @@ static void record_command_buffer(VkCommandBuffer command_buffer,
     fprintf(stderr, "Using framebuffer: %p\n", framebuffers[image_index].c_ptr());
 
     vulkan_render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    vulkan_render_pass_begin_info.renderPass = vulkan_render_pass;
+    vulkan_render_pass_begin_info.renderPass = render_pass->c_ptr();
     vulkan_render_pass_begin_info.framebuffer = framebuffers[image_index].c_ptr();
     vulkan_render_pass_begin_info.renderArea.offset.x = 0;
     vulkan_render_pass_begin_info.renderArea.offset.y = 0;
@@ -921,7 +918,7 @@ void draw_frame()
     VkResult result;
 
     try {
-        vulkan_device->wait_for_fences({
+        device->wait_for_fences({
             *in_flight_fence,
         }, true, UINT64_MAX);
     } catch (const pr::vk::VulkanError& e) {
@@ -930,7 +927,7 @@ void draw_frame()
     }
 
     try {
-        vulkan_device->reset_fences({
+        device->reset_fences({
             *in_flight_fence,
         });
     } catch (const pr::vk::VulkanError& e) {
@@ -940,7 +937,7 @@ void draw_frame()
 
     uint32_t image_index;
     try {
-        image_index = vulkan_device->acquire_next_image(*vulkan_swapchain,
+        image_index = device->acquire_next_image(*swapchain,
             UINT64_MAX,
             *image_available_semaphore);
     } catch (const pr::vk::VulkanError& e) {
@@ -985,7 +982,7 @@ void draw_frame()
         *render_finished_semaphore,
     });
     present_info.set_swapchains({
-        *vulkan_swapchain,
+        *swapchain,
     });
     present_info.set_image_indices({
         image_index,
