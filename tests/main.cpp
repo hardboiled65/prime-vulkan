@@ -33,6 +33,8 @@ struct xdg_toplevel *xdg_toplevel = NULL;
 #define WINDOW_WIDTH 480
 #define WINDOW_HEIGHT 360
 
+static const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+
 // Vulkan validation layers.
 const char *validation_layers[] = {
     "VK_LAYER_KHRONOS_validation",
@@ -84,12 +86,13 @@ pr::Vector<pr::vk::Framebuffer> framebuffers;
 // Command pool.
 pr::vk::CommandPool *command_pool = nullptr;
 // Command buffer.
-pr::vk::CommandBuffer *command_buffer;
+pr::Vector<pr::vk::CommandBuffer> command_buffers;
 VkClearValue vulkan_clear_color;
 // Sync objects.
-pr::vk::Semaphore *image_available_semaphore = nullptr;
-pr::vk::Semaphore *render_finished_semaphore = nullptr;
-pr::vk::Fence *in_flight_fence = nullptr;
+pr::Vector<pr::vk::Semaphore> image_available_semaphores;
+pr::Vector<pr::vk::Semaphore> render_finished_semaphores;
+pr::Vector<pr::vk::Fence> in_flight_fences;
+uint32_t current_frame = 0;
 
 
 struct wl_subsurface *subsurface;
@@ -748,15 +751,16 @@ static void create_vulkan_command_buffer()
     command_buffer_alloc_info.set_command_buffer_count(1);
 
     try {
-        command_buffer = new pr::vk::CommandBuffer(
-            device->allocate_command_buffers(command_buffer_alloc_info));
+        for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+            command_buffers.push(
+                device->allocate_command_buffers(command_buffer_alloc_info));
+            fprintf(stderr, "Command buffer allocated. - command buffer: %p\n",
+                command_buffers[i].c_ptr());
+        }
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to allocate command buffers. %s\n", e.what());
         exit(1);
     }
-
-    fprintf(stderr, "Command buffer allocated. - command buffer: %p\n",
-        command_buffer);
 }
 
 static void create_vulkan_sync_objects()
@@ -767,31 +771,37 @@ static void create_vulkan_sync_objects()
     fence_create_info.set_flags(VK_FENCE_CREATE_SIGNALED_BIT);
 
     try {
-        image_available_semaphore = new pr::vk::Semaphore(
-            device->create_semaphore(semaphore_create_info));
+        for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+            image_available_semaphores.push(
+                device->create_semaphore(semaphore_create_info));
+        }
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create image available semaphore!\n");
         exit(1);
     }
 
     try {
-        render_finished_semaphore = new pr::vk::Semaphore(
-            device->create_semaphore(semaphore_create_info));
+        for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+            render_finished_semaphores.push(
+                device->create_semaphore(semaphore_create_info));
+        }
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create render finished semaphore!\n");
         exit(1);
     }
-    fprintf(stderr, "Render finished semaphore created.\n");
+    fprintf(stderr, "Render finished semaphores created.\n");
 
     try {
-        in_flight_fence = new pr::vk::Fence(
-            device->create_fence(fence_create_info));
+        for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+            in_flight_fences.push(
+                device->create_fence(fence_create_info));
+        }
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create fence. %s\n", e.what());
         exit(1);
     }
 
-    fprintf(stderr, "Fence created.\n");
+    fprintf(stderr, "Fences created.\n");
 }
 
 static void record_command_buffer(pr::vk::CommandBuffer& command_buffer,
@@ -884,7 +894,7 @@ void draw_frame()
 {
     try {
         device->wait_for_fences({
-            *in_flight_fence,
+            in_flight_fences[current_frame],
         }, true, UINT64_MAX);
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to wait for fences. %s\n", e.what());
@@ -893,7 +903,7 @@ void draw_frame()
 
     try {
         device->reset_fences({
-            *in_flight_fence,
+            in_flight_fences[current_frame],
         });
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to reset fences. %s\n", e.what());
@@ -904,7 +914,7 @@ void draw_frame()
     try {
         image_index = device->acquire_next_image(*swapchain,
             UINT64_MAX,
-            *image_available_semaphore);
+            image_available_semaphores[current_frame]);
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to acquire next image. %s\n", e.what());
         exit(1);
@@ -912,32 +922,32 @@ void draw_frame()
     fprintf(stderr, "Acquired next image. - image index: %d\n", image_index);
 
     try {
-        command_buffer->reset(0);
+        command_buffers[current_frame].reset(0);
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to reset command buffer. %s\n", e.what());
         exit(1);
     }
 
-    record_command_buffer(*command_buffer, image_index);
+    record_command_buffer(command_buffers[current_frame], image_index);
 
     pr::vk::SubmitInfo submit_info;
     submit_info.set_wait_semaphores({
-        *image_available_semaphore,
+        image_available_semaphores[current_frame],
     });
     submit_info.set_wait_dst_stage_mask({
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
     });
     submit_info.set_command_buffers({
-        *command_buffer,
+        command_buffers[current_frame],
     });
     submit_info.set_signal_semaphores({
-        *render_finished_semaphore,
+        render_finished_semaphores[current_frame],
     });
 
     try {
         graphics_queue->submit({
             submit_info,
-        }, *in_flight_fence);
+        }, in_flight_fences[current_frame]);
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to submit draw command buffer!\n");
         exit(1);
@@ -946,7 +956,7 @@ void draw_frame()
 
     pr::vk::PresentInfo present_info;
     present_info.set_wait_semaphores({
-        *render_finished_semaphore,
+        render_finished_semaphores[current_frame],
     });
     present_info.set_swapchains({
         *swapchain,
@@ -961,6 +971,8 @@ void draw_frame()
         fprintf(stderr, "Queue present failed. %s\n", e.what());
     }
     fprintf(stderr, "vkQueuePresentKHR called\n");
+
+    current_frame = (current_frame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 //===========
