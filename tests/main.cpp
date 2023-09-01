@@ -797,8 +797,6 @@ static void create_vulkan_sync_objects()
 static void record_command_buffer(pr::vk::CommandBuffer& command_buffer,
         uint32_t image_index)
 {
-    VkResult result;
-
     pr::vk::CommandBuffer::BeginInfo command_buffer_begin_info;
 
     try {
@@ -866,17 +864,18 @@ static void record_command_buffer(pr::vk::CommandBuffer& command_buffer,
         scissor,
     });
 
-    vkCmdDraw(vk_command_buffer, 3, 1, 0, 0);
+    command_buffer.draw(3, 1, 0, 0);
+
     //===============
     // Out Commands
     //===============
+    command_buffer.end_render_pass();
 
-    vkCmdEndRenderPass(vk_command_buffer);
-
-    result = vkEndCommandBuffer(vk_command_buffer);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to record command buffer!\n");
-        return;
+    try {
+        command_buffer.end();
+    } catch(const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to record command bufer. %s\n", e.what());
+        exit(1);
     }
     fprintf(stderr, "End command buffer.\n");
 }

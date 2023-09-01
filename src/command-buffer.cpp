@@ -120,6 +120,28 @@ void CommandBuffer::set_scissor(uint32_t first_scissor,
         first_scissor, count, vk_scissors.data());
 }
 
+void CommandBuffer::draw(uint32_t vertex_count,
+                         uint32_t instance_count,
+                         uint32_t first_vertex,
+                         uint32_t first_instance)
+{
+    vkCmdDraw(this->_command_buffer,
+        vertex_count, instance_count, first_vertex, first_instance);
+}
+
+void CommandBuffer::end_render_pass()
+{
+    vkCmdEndRenderPass(this->_command_buffer);
+}
+
+void CommandBuffer::end()
+{
+    ::VkResult result = vkEndCommandBuffer(this->_command_buffer);
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+}
+
 auto CommandBuffer::c_ptr() const -> CType
 {
     return this->_command_buffer;

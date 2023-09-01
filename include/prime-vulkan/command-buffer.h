@@ -71,6 +71,16 @@ public:
     void set_scissor(uint32_t first_scissor,
                      const pr::Vector<::VkRect2D>& scissors);
 
+    void draw(uint32_t vertex_count,
+              uint32_t instance_count,
+              uint32_t first_vertex,
+              uint32_t first_instance);
+
+    void end_render_pass();
+
+    /// Finish recording a command buffer.
+    void end();
+
     CType c_ptr() const;
 
 private:
