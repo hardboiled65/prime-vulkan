@@ -466,6 +466,12 @@ uint32_t VkDevice::acquire_next_image(const VkSwapchain& swapchain,
     return index;
 }
 
+void VkDevice::wait_idle()
+{
+    vkDeviceWaitIdle(this->_device);
+    // TODO: Throw exception.
+}
+
 ::VkDevice VkDevice::c_ptr()
 {
     return this->_device;

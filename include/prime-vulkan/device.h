@@ -119,6 +119,8 @@ public:
                                 uint64_t timeout,
                                 const Semaphore& semaphore) const;
 
+    void wait_idle();
+
     ::VkDevice c_ptr();
 
 private:
