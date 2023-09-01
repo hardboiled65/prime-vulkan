@@ -55,5 +55,10 @@ const char* VulkanError::what() const noexcept
     return msg.c_str();
 }
 
+::VkResult VulkanError::vk_result() const noexcept
+{
+    return this->_vk_result;
+}
+
 } // namespace vk
 } // namespace pr

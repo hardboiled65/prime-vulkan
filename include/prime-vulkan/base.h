@@ -25,6 +25,8 @@ public:
 
     const char* what() const noexcept;
 
+    ::VkResult vk_result() const noexcept;
+
 private:
     ::VkResult _vk_result;
 };
