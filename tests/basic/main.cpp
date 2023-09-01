@@ -78,7 +78,7 @@ uint32_t vert_shader_code_size = 0;
 uint8_t *frag_shader_code = NULL;
 uint32_t frag_shader_code_size = 0;
 VkPipelineShaderStageCreateInfo *vulkan_shader_stage_create_infos = NULL;
-pr::vk::VkPipelineLayout *vulkan_layout = nullptr;
+pr::vk::PipelineLayout *vulkan_layout = nullptr;
 VkGraphicsPipelineCreateInfo vulkan_graphics_pipeline_create_info;
 VkPipeline vulkan_graphics_pipeline = NULL;
 // Framebuffers.
@@ -573,12 +573,12 @@ static void create_vulkan_graphics_pipeline()
     fprintf(stderr, "Fragment shader module created.\n");
 
     // Write shader stage create infos.
-    pr::vk::VkPipeline::ShaderStageCreateInfo vert_shader_stage_create_info;
+    pr::vk::Pipeline::ShaderStageCreateInfo vert_shader_stage_create_info;
     vert_shader_stage_create_info.set_stage(VK_SHADER_STAGE_VERTEX_BIT);
     vert_shader_stage_create_info.set_module(*vert_shader_module);
     vert_shader_stage_create_info.set_name("main"_S);
 
-    pr::vk::VkPipeline::ShaderStageCreateInfo frag_shader_stage_create_info;
+    pr::vk::Pipeline::ShaderStageCreateInfo frag_shader_stage_create_info;
     frag_shader_stage_create_info.set_stage(VK_SHADER_STAGE_FRAGMENT_BIT);
     frag_shader_stage_create_info.set_module(*frag_shader_module);
     frag_shader_stage_create_info.set_name("main"_S);
@@ -590,7 +590,7 @@ static void create_vulkan_graphics_pipeline()
     vulkan_shader_stage_create_infos[1] = frag_shader_stage_create_info.c_struct();
 
     // Vertex input.
-    pr::vk::VkPipeline::VertexInputStateCreateInfo vert_input_state_create_info;
+    pr::vk::Pipeline::VertexInputStateCreateInfo vert_input_state_create_info;
     vert_input_state_create_info.set_vertex_binding_descriptions(
         pr::Vector<::VkVertexInputBindingDescription>());
     vert_input_state_create_info.set_vertex_attribute_descriptions(
@@ -598,20 +598,20 @@ static void create_vulkan_graphics_pipeline()
     auto vulkan_vert_input_state_create_info = vert_input_state_create_info.c_struct();
 
     // Input assembly.
-    pr::vk::VkPipeline::InputAssemblyStateCreateInfo input_assembly_state_create_info;
+    pr::vk::Pipeline::InputAssemblyStateCreateInfo input_assembly_state_create_info;
     input_assembly_state_create_info.set_topology(
         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
     input_assembly_state_create_info.set_primitive_restart_enable(false);
     auto vulkan_input_assembly_state_create_info = input_assembly_state_create_info.c_struct();
 
     // Viewport.
-    pr::vk::VkPipeline::ViewportStateCreateInfo viewport_state_create_info;
+    pr::vk::Pipeline::ViewportStateCreateInfo viewport_state_create_info;
     viewport_state_create_info.set_viewport_count(1);
     viewport_state_create_info.set_scissor_count(1);
     auto vulkan_viewport_state_create_info = viewport_state_create_info.c_struct();
 
     // Rasterization.
-    pr::vk::VkPipeline::RasterizationStateCreateInfo rasterization_state_create_info;
+    pr::vk::Pipeline::RasterizationStateCreateInfo rasterization_state_create_info;
     rasterization_state_create_info.set_depth_clamp_enable(false);
     rasterization_state_create_info.set_rasterizer_discard_enable(false);
     rasterization_state_create_info.set_polygon_mode(VK_POLYGON_MODE_FILL);
@@ -622,19 +622,19 @@ static void create_vulkan_graphics_pipeline()
     auto vulkan_rasterization_state_create_info = rasterization_state_create_info.c_struct();
 
     // Multisampling.
-    pr::vk::VkPipeline::MultisampleStateCreateInfo multisample_state_create_info;
+    pr::vk::Pipeline::MultisampleStateCreateInfo multisample_state_create_info;
     multisample_state_create_info.set_sample_shading_enable(false);
     multisample_state_create_info.set_rasterization_samples(VK_SAMPLE_COUNT_1_BIT);
     auto vulkan_multisample_state_create_info = multisample_state_create_info.c_struct();
 
     // Color blending.
-    pr::vk::VkPipeline::ColorBlendStateCreateInfo color_blend_state_create_info;
+    pr::vk::Pipeline::ColorBlendStateCreateInfo color_blend_state_create_info;
     // color_blend_state_create_info.set_logic_op(VK_LOGIC_OP_COPY);
     // Color blend attachments.
     color_blend_state_create_info.set_logic_op(VK_LOGIC_OP_COPY);
     color_blend_state_create_info.set_attachments({
         []() {
-            pr::vk::VkPipeline::ColorBlendAttachmentState state;
+            pr::vk::Pipeline::ColorBlendAttachmentState state;
             state.set_color_write_mask(
                 VK_COLOR_COMPONENT_R_BIT |
                 VK_COLOR_COMPONENT_G_BIT |
@@ -653,7 +653,7 @@ static void create_vulkan_graphics_pipeline()
         VK_DYNAMIC_STATE_SCISSOR,
     };
 
-    pr::vk::VkPipeline::DynamicStateCreateInfo dynamic_state_create_info;
+    pr::vk::Pipeline::DynamicStateCreateInfo dynamic_state_create_info;
     dynamic_state_create_info.set_dynamic_states(dynamic_states);
 
     //-------------
@@ -661,14 +661,14 @@ static void create_vulkan_graphics_pipeline()
     //-------------
 
     // Layout.
-    pr::vk::VkPipelineLayout::CreateInfo pipeline_layout_create_info;
+    pr::vk::PipelineLayout::CreateInfo pipeline_layout_create_info;
     pipeline_layout_create_info.set_set_layouts(
         pr::Vector<::VkDescriptorSetLayout>());
     pipeline_layout_create_info.set_push_constant_range(
         pr::Vector<::VkPushConstantRange>());
 
     try {
-        vulkan_layout = new pr::vk::VkPipelineLayout(
+        vulkan_layout = new pr::vk::PipelineLayout(
             device->create_pipeline_layout(pipeline_layout_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create pipeline layout. %s\n", e.what());

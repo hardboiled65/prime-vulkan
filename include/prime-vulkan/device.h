@@ -92,8 +92,8 @@ public:
     create_shader_module(const VkShaderModule::CreateInfo& info) const;
 
     /// Create a pipeline layout.
-    VkPipelineLayout
-    create_pipeline_layout(const VkPipelineLayout::CreateInfo& info) const;
+    PipelineLayout
+    create_pipeline_layout(const PipelineLayout::CreateInfo& info) const;
 
     RenderPass create_render_pass(const RenderPass::CreateInfo& info) const;
 

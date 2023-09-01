@@ -66,5 +66,5 @@ set_target_properties(prime-vulkan PROPERTIES
 
 add_custom_target(tests
     SOURCES
-    tests/main.cpp
+    tests/basic/main.cpp
 )

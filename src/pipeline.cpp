@@ -5,7 +5,7 @@
 namespace pr {
 namespace vk {
 
-VkPipeline::ShaderStageCreateInfo::ShaderStageCreateInfo()
+Pipeline::ShaderStageCreateInfo::ShaderStageCreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 
@@ -14,31 +14,31 @@ VkPipeline::ShaderStageCreateInfo::ShaderStageCreateInfo()
     this->_info.pNext = nullptr;
 }
 
-void VkPipeline::ShaderStageCreateInfo::set_stage(::VkShaderStageFlagBits stage)
+void Pipeline::ShaderStageCreateInfo::set_stage(::VkShaderStageFlagBits stage)
 {
     this->_info.stage = stage;
 }
 
-void VkPipeline::ShaderStageCreateInfo::set_module(
+void Pipeline::ShaderStageCreateInfo::set_module(
     const VkShaderModule& shader_module)
 {
     this->_info.module = shader_module.c_ptr();
 }
 
-void VkPipeline::ShaderStageCreateInfo::set_name(const pr::String& name)
+void Pipeline::ShaderStageCreateInfo::set_name(const pr::String& name)
 {
     this->_name = name;
     this->_info.pName = this->_name.c_str();
 }
 
 ::VkPipelineShaderStageCreateInfo
-VkPipeline::ShaderStageCreateInfo::c_struct() const
+Pipeline::ShaderStageCreateInfo::c_struct() const
 {
     return this->_info;
 }
 
 
-VkPipeline::DynamicStateCreateInfo::DynamicStateCreateInfo()
+Pipeline::DynamicStateCreateInfo::DynamicStateCreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 
@@ -48,8 +48,8 @@ VkPipeline::DynamicStateCreateInfo::DynamicStateCreateInfo()
     this->_states = nullptr;
 }
 
-VkPipeline::DynamicStateCreateInfo::DynamicStateCreateInfo(
-    const VkPipeline::DynamicStateCreateInfo& other)
+Pipeline::DynamicStateCreateInfo::DynamicStateCreateInfo(
+    const Pipeline::DynamicStateCreateInfo& other)
 {
     this->_info.sType = other._info.sType;
 
@@ -68,14 +68,14 @@ VkPipeline::DynamicStateCreateInfo::DynamicStateCreateInfo(
     }
 }
 
-VkPipeline::DynamicStateCreateInfo::~DynamicStateCreateInfo()
+Pipeline::DynamicStateCreateInfo::~DynamicStateCreateInfo()
 {
     if (this->_states != nullptr) {
         delete[] this->_states;
     }
 }
 
-void VkPipeline::DynamicStateCreateInfo::set_dynamic_states(
+void Pipeline::DynamicStateCreateInfo::set_dynamic_states(
     const pr::Vector<::VkDynamicState>& states)
 {
     uint64_t count = states.length();
@@ -89,13 +89,13 @@ void VkPipeline::DynamicStateCreateInfo::set_dynamic_states(
 }
 
 ::VkPipelineDynamicStateCreateInfo
-VkPipeline::DynamicStateCreateInfo::c_struct() const
+Pipeline::DynamicStateCreateInfo::c_struct() const
 {
     return this->_info;
 }
 
 
-VkPipeline::VertexInputStateCreateInfo::VertexInputStateCreateInfo()
+Pipeline::VertexInputStateCreateInfo::VertexInputStateCreateInfo()
 {
     this->_info.sType =
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -104,7 +104,7 @@ VkPipeline::VertexInputStateCreateInfo::VertexInputStateCreateInfo()
     this->_info.pNext = nullptr;
 }
 
-void VkPipeline::VertexInputStateCreateInfo::set_vertex_binding_descriptions(
+void Pipeline::VertexInputStateCreateInfo::set_vertex_binding_descriptions(
     const pr::Vector<::VkVertexInputBindingDescription>& descriptions)
 {
     if (descriptions.length() != 0) {
@@ -115,7 +115,7 @@ void VkPipeline::VertexInputStateCreateInfo::set_vertex_binding_descriptions(
     this->_info.pVertexBindingDescriptions = nullptr;
 }
 
-void VkPipeline::VertexInputStateCreateInfo::set_vertex_attribute_descriptions(
+void Pipeline::VertexInputStateCreateInfo::set_vertex_attribute_descriptions(
     const pr::Vector<::VkVertexInputAttributeDescription>& descriptions)
 {
     if (descriptions.length() != 0) {
@@ -126,13 +126,13 @@ void VkPipeline::VertexInputStateCreateInfo::set_vertex_attribute_descriptions(
     this->_info.pVertexAttributeDescriptions = nullptr;
 }
 
-auto VkPipeline::VertexInputStateCreateInfo::c_struct() const -> CType
+auto Pipeline::VertexInputStateCreateInfo::c_struct() const -> CType
 {
     return this->_info;
 }
 
 
-VkPipeline::InputAssemblyStateCreateInfo::InputAssemblyStateCreateInfo()
+Pipeline::InputAssemblyStateCreateInfo::InputAssemblyStateCreateInfo()
 {
     this->_info.sType =
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -141,25 +141,25 @@ VkPipeline::InputAssemblyStateCreateInfo::InputAssemblyStateCreateInfo()
     this->_info.pNext = nullptr;
 }
 
-void VkPipeline::InputAssemblyStateCreateInfo::set_topology(
+void Pipeline::InputAssemblyStateCreateInfo::set_topology(
     ::VkPrimitiveTopology topology)
 {
     this->_info.topology = topology;
 }
 
-void VkPipeline::InputAssemblyStateCreateInfo::set_primitive_restart_enable(
+void Pipeline::InputAssemblyStateCreateInfo::set_primitive_restart_enable(
     bool enable)
 {
     this->_info.primitiveRestartEnable = (enable) ? VK_TRUE : VK_FALSE;
 }
 
-auto VkPipeline::InputAssemblyStateCreateInfo::c_struct() const -> CType
+auto Pipeline::InputAssemblyStateCreateInfo::c_struct() const -> CType
 {
     return this->_info;
 }
 
 
-VkPipeline::ViewportStateCreateInfo::ViewportStateCreateInfo()
+Pipeline::ViewportStateCreateInfo::ViewportStateCreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 
@@ -170,23 +170,23 @@ VkPipeline::ViewportStateCreateInfo::ViewportStateCreateInfo()
     this->_info.pNext = nullptr;
 }
 
-void VkPipeline::ViewportStateCreateInfo::set_viewport_count(uint32_t count)
+void Pipeline::ViewportStateCreateInfo::set_viewport_count(uint32_t count)
 {
     this->_info.viewportCount = count;
 }
 
-void VkPipeline::ViewportStateCreateInfo::set_scissor_count(uint32_t count)
+void Pipeline::ViewportStateCreateInfo::set_scissor_count(uint32_t count)
 {
     this->_info.scissorCount = count;
 }
 
-auto VkPipeline::ViewportStateCreateInfo::c_struct() const -> CType
+auto Pipeline::ViewportStateCreateInfo::c_struct() const -> CType
 {
     return this->_info;
 }
 
 
-VkPipeline::RasterizationStateCreateInfo::RasterizationStateCreateInfo()
+Pipeline::RasterizationStateCreateInfo::RasterizationStateCreateInfo()
 {
     this->_info.sType =
         VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -195,55 +195,55 @@ VkPipeline::RasterizationStateCreateInfo::RasterizationStateCreateInfo()
     this->_info.pNext = nullptr;
 }
 
-void VkPipeline::RasterizationStateCreateInfo::set_depth_clamp_enable(
+void Pipeline::RasterizationStateCreateInfo::set_depth_clamp_enable(
     bool enable)
 {
     this->_info.depthClampEnable = (enable) ? VK_TRUE : VK_FALSE;
 }
 
-void VkPipeline::RasterizationStateCreateInfo::set_rasterizer_discard_enable(
+void Pipeline::RasterizationStateCreateInfo::set_rasterizer_discard_enable(
     bool enable)
 {
     this->_info.rasterizerDiscardEnable = (enable) ? VK_TRUE : VK_FALSE;
 }
 
-void VkPipeline::RasterizationStateCreateInfo::set_polygon_mode(
+void Pipeline::RasterizationStateCreateInfo::set_polygon_mode(
     ::VkPolygonMode mode)
 {
     this->_info.polygonMode = mode;
 }
 
-void VkPipeline::RasterizationStateCreateInfo::set_line_width(
+void Pipeline::RasterizationStateCreateInfo::set_line_width(
     float width)
 {
     this->_info.lineWidth = width;
 }
 
-void VkPipeline::RasterizationStateCreateInfo::set_cull_mode(
+void Pipeline::RasterizationStateCreateInfo::set_cull_mode(
     ::VkCullModeFlags cull_mode)
 {
     this->_info.cullMode = cull_mode;
 }
 
-void VkPipeline::RasterizationStateCreateInfo::set_front_face(
+void Pipeline::RasterizationStateCreateInfo::set_front_face(
     ::VkFrontFace front_face)
 {
     this->_info.frontFace = front_face;
 }
 
-void VkPipeline::RasterizationStateCreateInfo::set_depth_bias_enable(
+void Pipeline::RasterizationStateCreateInfo::set_depth_bias_enable(
     bool enable)
 {
     this->_info.depthBiasEnable = enable;
 }
 
-auto VkPipeline::RasterizationStateCreateInfo::c_struct() const -> CType
+auto Pipeline::RasterizationStateCreateInfo::c_struct() const -> CType
 {
     return this->_info;
 }
 
 
-VkPipeline::MultisampleStateCreateInfo::MultisampleStateCreateInfo()
+Pipeline::MultisampleStateCreateInfo::MultisampleStateCreateInfo()
 {
     this->_info.sType =
         VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -254,25 +254,25 @@ VkPipeline::MultisampleStateCreateInfo::MultisampleStateCreateInfo()
     this->_info.pNext = nullptr;
 }
 
-void VkPipeline::MultisampleStateCreateInfo::set_sample_shading_enable(
+void Pipeline::MultisampleStateCreateInfo::set_sample_shading_enable(
     bool enable)
 {
     this->_info.sampleShadingEnable = (enable) ? VK_TRUE : VK_FALSE;
 }
 
-void VkPipeline::MultisampleStateCreateInfo::set_rasterization_samples(
+void Pipeline::MultisampleStateCreateInfo::set_rasterization_samples(
     ::VkSampleCountFlagBits samples)
 {
     this->_info.rasterizationSamples = samples;
 }
 
-auto VkPipeline::MultisampleStateCreateInfo::c_struct() const -> CType
+auto Pipeline::MultisampleStateCreateInfo::c_struct() const -> CType
 {
     return this->_info;
 }
 
 
-VkPipeline::ColorBlendAttachmentState::ColorBlendAttachmentState()
+Pipeline::ColorBlendAttachmentState::ColorBlendAttachmentState()
 {
     this->_state.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO;
     this->_state.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
@@ -282,24 +282,24 @@ VkPipeline::ColorBlendAttachmentState::ColorBlendAttachmentState()
     this->_state.alphaBlendOp = VK_BLEND_OP_ADD;
 }
 
-void VkPipeline::ColorBlendAttachmentState::set_color_write_mask(
+void Pipeline::ColorBlendAttachmentState::set_color_write_mask(
     ::VkColorComponentFlags mask)
 {
     this->_state.colorWriteMask = mask;
 }
 
-void VkPipeline::ColorBlendAttachmentState::set_blend_enable(bool enable)
+void Pipeline::ColorBlendAttachmentState::set_blend_enable(bool enable)
 {
     this->_state.blendEnable = (enable) ? VK_TRUE : VK_FALSE;
 }
 
-auto VkPipeline::ColorBlendAttachmentState::c_struct() const -> CType
+auto Pipeline::ColorBlendAttachmentState::c_struct() const -> CType
 {
     return this->_state;
 }
 
 
-VkPipeline::ColorBlendStateCreateInfo::ColorBlendStateCreateInfo()
+Pipeline::ColorBlendStateCreateInfo::ColorBlendStateCreateInfo()
 {
     this->_info.sType =
         VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -313,14 +313,14 @@ VkPipeline::ColorBlendStateCreateInfo::ColorBlendStateCreateInfo()
     this->_p_attachments = nullptr;
 }
 
-VkPipeline::ColorBlendStateCreateInfo::~ColorBlendStateCreateInfo()
+Pipeline::ColorBlendStateCreateInfo::~ColorBlendStateCreateInfo()
 {
     if (this->_p_attachments != nullptr) {
         delete[] this->_p_attachments;
     }
 }
 
-void VkPipeline::ColorBlendStateCreateInfo::set_logic_op(
+void Pipeline::ColorBlendStateCreateInfo::set_logic_op(
     std::optional<::VkLogicOp> op)
 {
     if (op != std::nullopt) {
@@ -331,7 +331,7 @@ void VkPipeline::ColorBlendStateCreateInfo::set_logic_op(
     }
 }
 
-void VkPipeline::ColorBlendStateCreateInfo::set_attachments(
+void Pipeline::ColorBlendStateCreateInfo::set_attachments(
     const pr::Vector<ColorBlendAttachmentState>& attachments)
 {
     uint64_t count = attachments.length();
@@ -345,7 +345,7 @@ void VkPipeline::ColorBlendStateCreateInfo::set_attachments(
     this->_info.pAttachments = this->_p_attachments;
 }
 
-void VkPipeline::ColorBlendStateCreateInfo::set_blend_constants(float r,
+void Pipeline::ColorBlendStateCreateInfo::set_blend_constants(float r,
                                                                 float g,
                                                                 float b,
                                                                 float a)
@@ -356,13 +356,13 @@ void VkPipeline::ColorBlendStateCreateInfo::set_blend_constants(float r,
     this->_info.blendConstants[3] = a;
 }
 
-auto VkPipeline::ColorBlendStateCreateInfo::c_struct() const -> CType
+auto Pipeline::ColorBlendStateCreateInfo::c_struct() const -> CType
 {
     return this->_info;
 }
 
 
-VkPipeline::GraphicsPipelineCreateInfo::GraphicsPipelineCreateInfo()
+GraphicsPipelineCreateInfo::GraphicsPipelineCreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 
@@ -371,7 +371,7 @@ VkPipeline::GraphicsPipelineCreateInfo::GraphicsPipelineCreateInfo()
 }
 
 
-VkPipelineLayout::CreateInfo::CreateInfo()
+PipelineLayout::CreateInfo::CreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
@@ -379,7 +379,7 @@ VkPipelineLayout::CreateInfo::CreateInfo()
     this->_info.pNext = nullptr;
 }
 
-void VkPipelineLayout::CreateInfo::set_set_layouts(
+void PipelineLayout::CreateInfo::set_set_layouts(
     const pr::Vector<::VkDescriptorSetLayout>& set_layouts)
 {
     if (set_layouts.length() != 0) {
@@ -390,7 +390,7 @@ void VkPipelineLayout::CreateInfo::set_set_layouts(
     this->_info.pSetLayouts = nullptr;
 }
 
-void VkPipelineLayout::CreateInfo::set_push_constant_range(
+void PipelineLayout::CreateInfo::set_push_constant_range(
     const pr::Vector<::VkPushConstantRange>& push_constant_range)
 {
     if (push_constant_range.length() != 0) {
@@ -401,18 +401,18 @@ void VkPipelineLayout::CreateInfo::set_push_constant_range(
     this->_info.pPushConstantRanges = nullptr;
 }
 
-auto VkPipelineLayout::CreateInfo::c_struct() const -> CType
+auto PipelineLayout::CreateInfo::c_struct() const -> CType
 {
     return this->_info;
 }
 
 
-VkPipelineLayout::VkPipelineLayout()
+PipelineLayout::PipelineLayout()
 {
     this->_layout = nullptr;
 }
 
-auto VkPipelineLayout::c_ptr() const -> CType
+auto PipelineLayout::c_ptr() const -> CType
 {
     return *(this->_layout);
 }

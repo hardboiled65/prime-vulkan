@@ -15,9 +15,9 @@ class VkShaderModule;
 
 class VkDevice;
 
-class VkPipelineLayout;
+class PipelineLayout;
 
-class VkPipeline
+class Pipeline
 {
 //=================
 // Nested classes
@@ -26,6 +26,9 @@ public:
     /// A wrapper class for `VkPipelineShaderStageCreateInfo` struct.
     class ShaderStageCreateInfo
     {
+    public:
+        using CType = ::VkPipelineShaderStageCreateInfo;
+
     public:
         ShaderStageCreateInfo();
 
@@ -45,6 +48,9 @@ public:
     /// A wrapper class for `VkPipelineDynamicStateCreateInfo` struct.
     class DynamicStateCreateInfo
     {
+    public:
+        using CType = ::VkPipelineDynamicStateCreateInfo;
+
     public:
         DynamicStateCreateInfo();
 
@@ -231,54 +237,6 @@ public:
         ::VkPipelineColorBlendAttachmentState *_p_attachments;
     };
 
-    /// A wrapper class for `VkGraphicsPipelineCreateInfo` struct.
-    class GraphicsPipelineCreateInfo
-    {
-    public:
-        using CType = ::VkGraphicsPipelineCreateInfo;
-
-    public:
-        GraphicsPipelineCreateInfo();
-
-        void set_stages(const pr::Vector<ShaderStageCreateInfo>& stages);
-
-        void set_vertex_input_state(const VertexInputStateCreateInfo& info);
-
-        void set_input_assembly_state(const InputAssemblyStateCreateInfo& info);
-
-        void set_viewport_state(const ViewportStateCreateInfo& info);
-
-        void set_rasterization_state(const RasterizationStateCreateInfo& info);
-
-        void set_multisample_state(const MultisampleStateCreateInfo& info);
-
-        void set_color_blend_state(const ColorBlendStateCreateInfo& info);
-
-        void set_dynamic_state(const DynamicStateCreateInfo& info);
-
-        void set_layout(const VkPipelineLayout& layout);
-
-        void set_render_pass(/*const VkRenderPass& render_pass*/);
-
-        void set_subpass(uint32_t subpass);
-
-        void set_base_pipeline_handle(/**/);
-
-        CType c_struct() const;
-
-    private:
-        CType _info;
-
-        pr::Vector<ShaderStageCreateInfo> _stages;
-        VertexInputStateCreateInfo _vertex_input_state;
-        InputAssemblyStateCreateInfo _input_assembly_state;
-        ViewportStateCreateInfo _viewport_state;
-        RasterizationStateCreateInfo _rasterization_state;
-        MultisampleStateCreateInfo _multisample_state;
-        ColorBlendStateCreateInfo _color_blend_state;
-        DynamicStateCreateInfo _dynamic_state;
-    };
-
 //===================
 // Public methods
 //===================
@@ -288,7 +246,7 @@ public:
 // Private methods
 //===================
 private:
-    VkPipeline();
+    Pipeline();
 
 //============
 // Members
@@ -297,7 +255,57 @@ private:
 };
 
 
-class VkPipelineLayout
+/// A wrapper class for `VkGraphicsPipelineCreateInfo` struct.
+class GraphicsPipelineCreateInfo
+{
+public:
+    using CType = ::VkGraphicsPipelineCreateInfo;
+
+public:
+    GraphicsPipelineCreateInfo();
+
+    void set_stages(const pr::Vector<Pipeline::ShaderStageCreateInfo>& stages);
+
+    void set_vertex_input_state(const Pipeline::VertexInputStateCreateInfo& info);
+
+    void set_input_assembly_state(const Pipeline::InputAssemblyStateCreateInfo& info);
+
+    void set_viewport_state(const Pipeline::ViewportStateCreateInfo& info);
+
+    void set_rasterization_state(const Pipeline::RasterizationStateCreateInfo& info);
+
+    void set_multisample_state(const Pipeline::MultisampleStateCreateInfo& info);
+
+    void set_color_blend_state(const Pipeline::ColorBlendStateCreateInfo& info);
+
+    void set_dynamic_state(const Pipeline::DynamicStateCreateInfo& info);
+
+    void set_layout(const PipelineLayout& layout);
+
+    void set_render_pass(/*const VkRenderPass& render_pass*/);
+
+    void set_subpass(uint32_t subpass);
+
+    void set_base_pipeline_handle(/**/);
+
+    CType c_struct() const;
+
+private:
+    CType _info;
+
+    pr::Vector<Pipeline::ShaderStageCreateInfo> _stages;
+    std::vector<Pipeline::ShaderStageCreateInfo::CType> _vk_stages;
+    Pipeline::VertexInputStateCreateInfo _vertex_input_state;
+    Pipeline::InputAssemblyStateCreateInfo _input_assembly_state;
+    Pipeline::ViewportStateCreateInfo _viewport_state;
+    Pipeline::RasterizationStateCreateInfo _rasterization_state;
+    Pipeline::MultisampleStateCreateInfo _multisample_state;
+    Pipeline::ColorBlendStateCreateInfo _color_blend_state;
+    Pipeline::DynamicStateCreateInfo _dynamic_state;
+};
+
+
+class PipelineLayout
 {
     friend VkDevice;
 //===============
@@ -367,7 +375,7 @@ public:
 // Private methods
 //=================
 private:
-    VkPipelineLayout();
+    PipelineLayout();
 
 //==========
 // Members

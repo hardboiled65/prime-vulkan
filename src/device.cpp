@@ -259,8 +259,8 @@ VkShaderModule VkDevice::create_shader_module(
     return shader_module;
 }
 
-VkPipelineLayout VkDevice::create_pipeline_layout(
-    const VkPipelineLayout::CreateInfo& info) const
+PipelineLayout VkDevice::create_pipeline_layout(
+    const PipelineLayout::CreateInfo& info) const
 {
     ::VkResult result;
 
@@ -273,10 +273,10 @@ VkPipelineLayout VkDevice::create_pipeline_layout(
         throw VulkanError(result);
     }
 
-    VkPipelineLayout layout;
+    PipelineLayout layout;
     layout._layout = std::shared_ptr<::VkPipelineLayout>(
         new ::VkPipelineLayout(c_layout),
-        VkPipelineLayout::Deleter(this->_device));
+        PipelineLayout::Deleter(this->_device));
 
     return layout;
 }
