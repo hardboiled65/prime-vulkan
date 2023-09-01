@@ -69,6 +69,25 @@ public:
         uint32_t *_indices;
     };
 
+    class Deleter
+    {
+    public:
+        Deleter() = delete;
+
+        Deleter(::VkDevice p_device)
+        {
+            this->_p_device = p_device;
+        }
+
+        void operator()(CType *swapchain)
+        {
+            vkDestroySwapchainKHR(this->_p_device, *swapchain, nullptr);
+        }
+
+    private:
+        ::VkDevice _p_device;
+    };
+
 public:
     ::VkSwapchainKHR c_ptr() const;
 
@@ -76,7 +95,7 @@ private:
     VkSwapchain();
 
 private:
-    ::VkSwapchainKHR _swapchain;
+    std::shared_ptr<CType> _swapchain;
 };
 
 

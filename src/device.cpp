@@ -174,7 +174,9 @@ VkSwapchain VkDevice::create_swapchain(
         throw VulkanError(result);
     }
     VkSwapchain swapchain;
-    swapchain._swapchain = vk_swapchain;
+    swapchain._swapchain = std::shared_ptr<VkSwapchain::CType>(
+        new VkSwapchain::CType(vk_swapchain),
+        VkSwapchain::Deleter(this->_device));
 
     return swapchain;
 }

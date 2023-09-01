@@ -129,7 +129,7 @@ VkSwapchain::VkSwapchain()
 
 ::VkSwapchainKHR VkSwapchain::c_ptr() const
 {
-    return this->_swapchain;
+    return *(this->_swapchain);
 }
 
 
