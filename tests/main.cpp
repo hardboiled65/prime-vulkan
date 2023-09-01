@@ -356,13 +356,17 @@ static void create_vulkan_logical_device()
     fprintf(stderr, "Max image extent - %dx%d\n",
         vulkan_capabilities.maxImageExtent.width,
         vulkan_capabilities.maxImageExtent.height);
-
-    vulkan_extent.width = WINDOW_WIDTH;
-    vulkan_extent.height = WINDOW_HEIGHT;
 }
 
-static void create_vulkan_swapchain()
+static void create_vulkan_swapchain(bool init = true)
 {
+    if (init) {
+        vulkan_extent.width = WINDOW_WIDTH;
+        vulkan_extent.height = WINDOW_HEIGHT;
+    } else {
+        // Do nothing.
+    }
+
     auto vk_capabilities = surface_capabilities->c_struct();
     fprintf(stderr, "Capabilities min, max image count: %d, %d\n",
         vk_capabilities.minImageCount,
@@ -404,7 +408,7 @@ static void create_vulkan_swapchain()
         swapchain = new pr::vk::VkSwapchain(
             device->create_swapchain(swapchain_create_info));
     } catch (const pr::vk::VulkanError& e) {
-        fprintf(stderr, "Failed to create swapchain! %s\n", e.what());
+        fprintf(stderr, "Failed to create swapchain! %d\n", e.vk_result());
         exit(1);
     }
     fprintf(stderr, "Swapchain created!\n");
@@ -420,6 +424,24 @@ static void create_vulkan_swapchain()
         swapchain_images.length());
 
     fprintf(stderr, "Swapchain images got.\n");
+}
+
+static void create_vulkan_image_views();
+static void create_vulkan_framebuffers();
+
+static void recreate_swapchain()
+{
+    fprintf(stderr, " === Recreating swapchain... ===\n");
+    device->wait_idle();
+
+    framebuffers = {};
+    image_views = {};
+
+    delete swapchain;
+
+    create_vulkan_swapchain(false);
+    create_vulkan_image_views();
+    create_vulkan_framebuffers();
 }
 
 static void create_vulkan_image_views()
@@ -916,8 +938,13 @@ void draw_frame()
             UINT64_MAX,
             image_available_semaphores[current_frame]);
     } catch (const pr::vk::VulkanError& e) {
-        fprintf(stderr, "Failed to acquire next image. %s\n", e.what());
-        exit(1);
+        if (e.vk_result() == VK_ERROR_OUT_OF_DATE_KHR) {
+            fprintf(stderr, "Recreate swapchain required.\n");
+            recreate_swapchain();
+        } else {
+            fprintf(stderr, "Failed to acquire next image. %s\n", e.what());
+            exit(1);
+        }
     }
     fprintf(stderr, "Acquired next image. - image index: %d\n", image_index);
 
@@ -968,7 +995,13 @@ void draw_frame()
     try {
         present_queue->present(present_info);
     } catch (const pr::vk::VulkanError& e) {
-        fprintf(stderr, "Queue present failed. %s\n", e.what());
+        if (e.vk_result() == VK_ERROR_OUT_OF_DATE_KHR ||
+            e.vk_result() == VK_SUBOPTIMAL_KHR) {
+            fprintf(stderr, "Swapchain recreate required.\n");
+            recreate_swapchain();
+        } else {
+            fprintf(stderr, "Queue present failed. %s\n", e.what());
+        }
     }
     fprintf(stderr, "vkQueuePresentKHR called\n");
 
@@ -1003,6 +1036,22 @@ static void xdg_toplevel_configure_handler(void *data,
         struct xdg_toplevel *xdg_toplevel, int32_t width, int32_t height,
         struct wl_array *states)
 {
+    (void)data;
+    (void)xdg_toplevel;
+    (void)states;
+
+    fprintf(stderr, "xdg_toplevel_configure_handler()\n");
+    fprintf(stderr, " - width: %d, height: %d\n", width, height);
+
+    if (width == 0 && height == 0) {
+        return;
+    }
+    if (swapchain == nullptr) {
+        return;
+    }
+    vulkan_extent.width = width;
+    vulkan_extent.height = height;
+    recreate_swapchain();
 }
 
 static void xdg_toplevel_close_handler(void *data,
@@ -1124,7 +1173,7 @@ int main(int argc, char *argv[])
     int res = wl_display_dispatch(display);
     fprintf(stderr, "Initial dispatch.\n");
     while (res != -1) {
-        // draw_frame();
+        draw_frame();
         res = wl_display_dispatch(display);
     }
     fprintf(stderr, "wl_display_dispatch() - res: %d\n", res);
