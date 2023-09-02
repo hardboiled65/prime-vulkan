@@ -73,15 +73,13 @@ pr::Vector<pr::vk::VkImage> swapchain_images;
 // Image views.
 pr::Vector<pr::vk::VkImageView> image_views;
 // Render pass.
-pr::vk::RenderPass *render_pass;
+pr::vk::RenderPass *render_pass = nullptr;
 // Shaders.
 uint8_t *vert_shader_code = NULL;
 uint32_t vert_shader_code_size = 0;
 uint8_t *frag_shader_code = NULL;
 uint32_t frag_shader_code_size = 0;
 pr::vk::PipelineLayout *vulkan_layout = nullptr;
-VkGraphicsPipelineCreateInfo vulkan_graphics_pipeline_create_info;
-VkPipeline vulkan_graphics_pipeline = NULL;
 std::shared_ptr<pr::vk::Pipeline> graphics_pipeline = nullptr;
 // Framebuffers.
 pr::Vector<pr::vk::Framebuffer> framebuffers;
@@ -89,7 +87,6 @@ pr::Vector<pr::vk::Framebuffer> framebuffers;
 pr::vk::CommandPool *command_pool = nullptr;
 // Command buffer.
 pr::Vector<pr::vk::CommandBuffer> command_buffers;
-VkClearValue vulkan_clear_color;
 // Sync objects.
 pr::Vector<pr::vk::Semaphore> image_available_semaphores;
 pr::Vector<pr::vk::Semaphore> render_finished_semaphores;
@@ -218,8 +215,6 @@ static void create_vulkan_window()
 
 static void create_vulkan_logical_device()
 {
-    VkResult result;
-
     // Find queue families.
 
     auto queue_family_properties_list =
@@ -238,21 +233,22 @@ static void create_vulkan_logical_device()
         }
 
         // Presentation support.
-        VkBool32 present_support = VK_FALSE;
-        result = vkGetPhysicalDeviceSurfaceSupportKHR(
-            physical_device->c_ptr(),
-            i, vulkan_surface->c_ptr(), &present_support);
-        if (result != VK_SUCCESS) {
-            fprintf(stderr, "Error!\n");
-            return;
+        bool present_support = false;
+        try {
+            present_support =
+                physical_device->surface_support_for(i, *vulkan_surface);
+        } catch (const pr::vk::VulkanError& e) {
+            fprintf(stderr, "Error. %d\n", e.vk_result());
+            exit(1);
         }
-        if (present_support == VK_TRUE) {
+
+        if (present_support == true) {
             fprintf(stderr, "Present support. index: %d\n", i);
             present_family = i;
             break;
         }
     }
-    queue_family_indices = (uint32_t*)malloc(sizeof(uint32_t) * 2);
+    queue_family_indices = new uint32_t[2];
     queue_family_indices[0] = graphics_family;
     queue_family_indices[1] = present_family;
     fprintf(stderr, "[DEBUG] graphics/present queue family indices: %d, %d\n",

@@ -191,6 +191,22 @@ Vector<::VkPresentModeKHR> VkPhysicalDevice::present_modes_for(
     return v;
 }
 
+bool VkPhysicalDevice::surface_support_for(uint32_t queue_family_index,
+                                           const Surface& surface) const
+{
+    ::VkResult result;
+    ::VkBool32 vk_bool;
+
+    result = vkGetPhysicalDeviceSurfaceSupportKHR(this->_device,
+        queue_family_index, surface.c_ptr(), &vk_bool);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    return (vk_bool == VK_TRUE) ? true : false;
+}
+
 ::VkPhysicalDevice VkPhysicalDevice::c_ptr()
 {
     return this->_device;

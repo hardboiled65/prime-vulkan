@@ -55,6 +55,10 @@ public:
     Vector<::VkPresentModeKHR> present_modes_for(
         const Surface& surface) const;
 
+    /// Using `vkGetPhysicalDeviceSurfaceSupportKHR` function.
+    bool surface_support_for(uint32_t queue_family_index,
+                             const Surface& surface) const;
+
     ::VkPhysicalDevice c_ptr();
 
 private:
