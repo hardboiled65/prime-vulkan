@@ -85,14 +85,14 @@ public:
     /// Using `vkGetDeviceQueue`.
     Queue queue_for(uint32_t queue_family_index, uint32_t queue_index) const;
 
-    VkSwapchain create_swapchain(const VkSwapchain::CreateInfo& info) const;
+    Swapchain create_swapchain(const Swapchain::CreateInfo& info) const;
 
-    Vector<VkImage> images_for(const VkSwapchain& swapchain) const;
+    Vector<Image> images_for(const Swapchain& swapchain) const;
 
-    VkImageView create_image_view(const VkImageView::CreateInfo& info) const;
+    ImageView create_image_view(const ImageView::CreateInfo& info) const;
 
-    VkShaderModule
-    create_shader_module(const VkShaderModule::CreateInfo& info) const;
+    ShaderModule
+    create_shader_module(const ShaderModule::CreateInfo& info) const;
 
     /// Create a pipeline layout.
     PipelineLayout
@@ -122,7 +122,7 @@ public:
     void reset_fences(const Vector<Fence>& fences) const;
 
     /// Call `vkAcquireNextImageKHR` function without a fence.
-    uint32_t acquire_next_image(const VkSwapchain& swapchain,
+    uint32_t acquire_next_image(const Swapchain& swapchain,
                                 uint64_t timeout,
                                 const Semaphore& semaphore) const;
 

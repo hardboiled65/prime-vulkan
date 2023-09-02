@@ -15,7 +15,7 @@ class Instance;
 
 class PhysicalDevice;
 
-class VkQueueFamilyProperties
+class QueueFamilyProperties
 {
     friend PhysicalDevice;
 public:
@@ -24,7 +24,7 @@ public:
     uint32_t queue_count() const;
 
 private:
-    VkQueueFamilyProperties();
+    QueueFamilyProperties();
 
 private:
     ::VkQueueFamilyProperties _properties;
@@ -39,7 +39,7 @@ public:
 
     /// Get the list of queue family properties.
     /// Using `vkGetPhysicalDeviceQueueFamilyProperties` function.
-    Vector<VkQueueFamilyProperties> queue_family_properties() const;
+    Vector<QueueFamilyProperties> queue_family_properties() const;
 
     Device create_device(const Device::CreateInfo& create_info) const;
 

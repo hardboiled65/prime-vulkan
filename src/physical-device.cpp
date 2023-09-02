@@ -6,16 +6,16 @@
 namespace pr {
 namespace vk {
 
-VkQueueFamilyProperties::VkQueueFamilyProperties()
+QueueFamilyProperties::QueueFamilyProperties()
 {
 }
 
-::VkFlags VkQueueFamilyProperties::queue_flags() const
+::VkFlags QueueFamilyProperties::queue_flags() const
 {
     return this->_properties.queueFlags;
 }
 
-uint32_t VkQueueFamilyProperties::queue_count() const
+uint32_t QueueFamilyProperties::queue_count() const
 {
     return this->_properties.queueCount;
 }
@@ -62,9 +62,9 @@ Vector<PhysicalDevice> PhysicalDevice::enumerate(const Instance& instance)
     return v;
 }
 
-Vector<VkQueueFamilyProperties> PhysicalDevice::queue_family_properties() const
+Vector<QueueFamilyProperties> PhysicalDevice::queue_family_properties() const
 {
-    Vector<VkQueueFamilyProperties> v;
+    Vector<QueueFamilyProperties> v;
 
     uint32_t count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(
@@ -77,7 +77,7 @@ Vector<VkQueueFamilyProperties> PhysicalDevice::queue_family_properties() const
         &count, properties);
 
     for (uint32_t i = 0; i < count; ++i) {
-        VkQueueFamilyProperties p;
+        QueueFamilyProperties p;
         p._properties = properties[i];
         v.push(p);
     }

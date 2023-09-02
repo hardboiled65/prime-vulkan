@@ -20,7 +20,7 @@ void Framebuffer::CreateInfo::set_render_pass(const RenderPass& render_pass)
 }
 
 void Framebuffer::CreateInfo::set_attachments(
-    const pr::Vector<VkImageView>& attachments)
+    const pr::Vector<ImageView>& attachments)
 {
     uint64_t count = attachments.length();
 

@@ -14,7 +14,7 @@ class Surface;
 
 class Device;
 
-class VkSwapchain
+class Swapchain
 {
     friend Device;
 public:
@@ -92,37 +92,39 @@ public:
     ::VkSwapchainKHR c_ptr() const;
 
 private:
-    VkSwapchain();
+    Swapchain();
 
 private:
     std::shared_ptr<CType> _swapchain;
 };
 
 
-class VkImage
+class Image
 {
     friend Device;
 public:
     ::VkImage c_ptr() const;
 
 private:
-    VkImage();
+    Image();
 
 private:
     ::VkImage _image;
 };
 
 
-class VkImageView
+class ImageView
 {
     friend Device;
 public:
+    using CType = ::VkImageView;
+
     class CreateInfo
     {
     public:
         CreateInfo();
 
-        void set_image(const VkImage& image);
+        void set_image(const Image& image);
 
         void set_view_type(::VkImageViewType type);
 
@@ -161,15 +163,15 @@ public:
     };
 
 public:
-    ~VkImageView();
+    ~ImageView();
 
-    ::VkImageView c_ptr() const;
-
-private:
-    VkImageView();
+    CType c_ptr() const;
 
 private:
-    std::shared_ptr<::VkImageView> _view;
+    ImageView();
+
+private:
+    std::shared_ptr<CType> _view;
 };
 
 } // namespace vk

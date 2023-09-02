@@ -3,7 +3,7 @@
 namespace pr {
 namespace vk {
 
-VkShaderModule::CreateInfo::CreateInfo()
+ShaderModule::CreateInfo::CreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 
@@ -11,24 +11,24 @@ VkShaderModule::CreateInfo::CreateInfo()
     this->_info.pNext = nullptr;
 }
 
-void VkShaderModule::CreateInfo::set_code(const uint32_t *code, uint64_t size)
+void ShaderModule::CreateInfo::set_code(const uint32_t *code, uint64_t size)
 {
     this->_info.pCode = code;
     this->_info.codeSize = size;
 }
 
-::VkShaderModuleCreateInfo VkShaderModule::CreateInfo::c_struct() const
+::VkShaderModuleCreateInfo ShaderModule::CreateInfo::c_struct() const
 {
     return this->_info;
 }
 
 
-VkShaderModule::VkShaderModule()
+ShaderModule::ShaderModule()
 {
     this->_shader_module = nullptr;
 }
 
-::VkShaderModule VkShaderModule::c_ptr() const
+::VkShaderModule ShaderModule::c_ptr() const
 {
     return *(this->_shader_module);
 }

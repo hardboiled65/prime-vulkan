@@ -3,13 +3,13 @@
 namespace pr {
 namespace vk {
 
-VkExtensionProperties::VkExtensionProperties()
+ExtensionProperties::ExtensionProperties()
 {
 }
 
-Vector<VkExtensionProperties> VkExtensionProperties::enumerate()
+Vector<ExtensionProperties> ExtensionProperties::enumerate()
 {
-    Vector<VkExtensionProperties> v;
+    Vector<ExtensionProperties> v;
 
     uint32_t count;
     vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr);
@@ -19,7 +19,7 @@ Vector<VkExtensionProperties> VkExtensionProperties::enumerate()
     vkEnumerateInstanceExtensionProperties(nullptr, &count, props);
 
     for (uint32_t i = 0; i < count; ++i) {
-        VkExtensionProperties properties;
+        ExtensionProperties properties;
         properties._extension_name = props[i].extensionName;
         properties._spec_version = props[i].specVersion;
         v.push(properties);
@@ -30,12 +30,12 @@ Vector<VkExtensionProperties> VkExtensionProperties::enumerate()
     return v;
 }
 
-pr::String VkExtensionProperties::extension_name() const
+pr::String ExtensionProperties::extension_name() const
 {
     return this->_extension_name;
 }
 
-uint32_t VkExtensionProperties::spec_version() const
+uint32_t ExtensionProperties::spec_version() const
 {
     return this->_spec_version;
 }

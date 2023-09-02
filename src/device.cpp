@@ -160,8 +160,8 @@ Queue Device::queue_for(uint32_t queue_family_index,
     return ret;
 }
 
-VkSwapchain Device::create_swapchain(
-    const VkSwapchain::CreateInfo& info) const
+Swapchain Device::create_swapchain(
+    const Swapchain::CreateInfo& info) const
 {
     ::VkResult result;
     ::VkSwapchainKHR vk_swapchain;
@@ -173,17 +173,17 @@ VkSwapchain Device::create_swapchain(
     if (result != VK_SUCCESS) {
         throw VulkanError(result);
     }
-    VkSwapchain swapchain;
-    swapchain._swapchain = std::shared_ptr<VkSwapchain::CType>(
-        new VkSwapchain::CType(vk_swapchain),
-        VkSwapchain::Deleter(this->_device));
+    Swapchain swapchain;
+    swapchain._swapchain = std::shared_ptr<Swapchain::CType>(
+        new Swapchain::CType(vk_swapchain),
+        Swapchain::Deleter(this->_device));
 
     return swapchain;
 }
 
-Vector<VkImage> Device::images_for(const VkSwapchain& swapchain) const
+Vector<Image> Device::images_for(const Swapchain& swapchain) const
 {
-    Vector<VkImage> v;
+    Vector<Image> v;
 
     ::VkResult result;
 
@@ -208,7 +208,7 @@ Vector<VkImage> Device::images_for(const VkSwapchain& swapchain) const
         throw VulkanError(result);
     } else {
         for (uint64_t i = 0; i < count; ++i) {
-            VkImage image;
+            Image image;
             image._image = vk_images[i];
             v.push(image);
         }
@@ -219,8 +219,8 @@ Vector<VkImage> Device::images_for(const VkSwapchain& swapchain) const
     return v;
 }
 
-VkImageView Device::create_image_view(
-    const VkImageView::CreateInfo& info) const
+ImageView Device::create_image_view(
+    const ImageView::CreateInfo& info) const
 {
     ::VkResult result;
 
@@ -232,15 +232,15 @@ VkImageView Device::create_image_view(
         throw VulkanError(result);
     }
 
-    VkImageView image_view;
+    ImageView image_view;
     image_view._view = std::shared_ptr<::VkImageView>(
-        new ::VkImageView(view), VkImageView::Deleter(this->_device));
+        new ::VkImageView(view), ImageView::Deleter(this->_device));
 
     return image_view;
 }
 
-VkShaderModule Device::create_shader_module(
-    const VkShaderModule::CreateInfo& info) const
+ShaderModule Device::create_shader_module(
+    const ShaderModule::CreateInfo& info) const
 {
     ::VkResult result;
 
@@ -252,9 +252,9 @@ VkShaderModule Device::create_shader_module(
         throw VulkanError(result);
     }
 
-    VkShaderModule shader_module;
+    ShaderModule shader_module;
     shader_module._shader_module = std::shared_ptr<::VkShaderModule>(
-        new ::VkShaderModule(module), VkShaderModule::Deleter(this->_device));
+        new ::VkShaderModule(module), ShaderModule::Deleter(this->_device));
 
     return shader_module;
 }
@@ -486,7 +486,7 @@ void Device::reset_fences(const Vector<Fence>& fences) const
     }
 }
 
-uint32_t Device::acquire_next_image(const VkSwapchain& swapchain,
+uint32_t Device::acquire_next_image(const Swapchain& swapchain,
                                       uint64_t timeout,
                                       const Semaphore& semaphore) const
 {

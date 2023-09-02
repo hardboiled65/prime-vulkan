@@ -13,7 +13,7 @@ namespace vk {
 
 class RenderPass;
 
-class VkImageView;
+class ImageView;
 
 class Device;
 
@@ -33,7 +33,7 @@ public:
 
         void set_render_pass(const RenderPass& render_pass);
 
-        void set_attachments(const pr::Vector<VkImageView>& attachments);
+        void set_attachments(const pr::Vector<ImageView>& attachments);
 
         void set_width(uint32_t width);
 

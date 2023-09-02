@@ -9,16 +9,16 @@
 namespace pr {
 namespace vk {
 
-class VkExtensionProperties
+class ExtensionProperties
 {
 public:
-    static Vector<VkExtensionProperties> enumerate();
+    static Vector<ExtensionProperties> enumerate();
 
     pr::String extension_name() const;
     uint32_t spec_version() const;
 
 private:
-    VkExtensionProperties();
+    ExtensionProperties();
 
 private:
     pr::String _extension_name;

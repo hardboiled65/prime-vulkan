@@ -21,7 +21,7 @@ void Pipeline::ShaderStageCreateInfo::set_stage(::VkShaderStageFlagBits stage)
 }
 
 void Pipeline::ShaderStageCreateInfo::set_module(
-    const VkShaderModule& shader_module)
+    const ShaderModule& shader_module)
 {
     this->_info.module = shader_module.c_ptr();
 }

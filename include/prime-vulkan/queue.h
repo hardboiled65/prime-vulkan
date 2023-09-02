@@ -82,7 +82,7 @@ public:
 
     void set_wait_semaphores(const pr::Vector<Semaphore>& semaphores);
 
-    void set_swapchains(const pr::Vector<VkSwapchain>& swapchains);
+    void set_swapchains(const pr::Vector<Swapchain>& swapchains);
 
     void set_image_indices(const pr::Vector<uint32_t>& indices);
 
@@ -92,7 +92,7 @@ private:
     CType _info;
 
     std::vector<Semaphore::CType> _wait_semaphores;
-    std::vector<VkSwapchain::CType> _swapchains;
+    std::vector<Swapchain::CType> _swapchains;
     std::vector<uint32_t> _indices;
 };
 

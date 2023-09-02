@@ -135,7 +135,7 @@ void PresentInfo::set_wait_semaphores(const pr::Vector<Semaphore>& semaphores)
     this->_info.pWaitSemaphores = this->_wait_semaphores.data();
 }
 
-void PresentInfo::set_swapchains(const pr::Vector<VkSwapchain>& swapchains)
+void PresentInfo::set_swapchains(const pr::Vector<Swapchain>& swapchains)
 {
     this->_info.swapchainCount = swapchains.length();
 

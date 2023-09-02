@@ -68,10 +68,10 @@ const char* *vulkan_required_extension_names = NULL; // Not used.
 VkSurfaceFormatKHR vulkan_format;
 VkPresentModeKHR vulkan_present_mode;
 VkExtent2D vulkan_extent;
-pr::vk::VkSwapchain *swapchain = nullptr;
-pr::Vector<pr::vk::VkImage> swapchain_images;
+pr::vk::Swapchain *swapchain = nullptr;
+pr::Vector<pr::vk::Image> swapchain_images;
 // Image views.
-pr::Vector<pr::vk::VkImageView> image_views;
+pr::Vector<pr::vk::ImageView> image_views;
 // Render pass.
 pr::vk::RenderPass *render_pass = nullptr;
 // Shaders.
@@ -157,7 +157,7 @@ static void init_vulkan()
     }
 
     // Check extensions.
-    auto extension_properties = pr::vk::VkExtensionProperties::enumerate();
+    auto extension_properties = pr::vk::ExtensionProperties::enumerate();
     fprintf(stderr, "Number of extensions: %ld\n",
         extension_properties.length());
 
@@ -223,7 +223,7 @@ static void create_vulkan_logical_device()
         queue_family_properties_list.length());
 
     for (uint32_t i = 0; i < queue_family_properties_list.length(); ++i) {
-        pr::vk::VkQueueFamilyProperties properties =
+        pr::vk::QueueFamilyProperties properties =
             queue_family_properties_list[i];
         fprintf(stderr, " - Queue count: %d\n", properties.queue_count());
         if (properties.queue_flags() & VK_QUEUE_GRAPHICS_BIT) {
@@ -372,7 +372,7 @@ static void create_vulkan_swapchain(bool init = true)
     uint32_t image_count = vk_capabilities.minImageCount + 1;
     fprintf(stderr, "Image count: %d\n", image_count);
 
-    pr::vk::VkSwapchain::CreateInfo swapchain_create_info;
+    pr::vk::Swapchain::CreateInfo swapchain_create_info;
     swapchain_create_info.set_surface(*vulkan_surface);
     swapchain_create_info.set_min_image_count(image_count);
     swapchain_create_info.set_image_format(vulkan_format.format);
@@ -403,7 +403,7 @@ static void create_vulkan_swapchain(bool init = true)
 
     // Create swapchain.
     try {
-        swapchain = new pr::vk::VkSwapchain(
+        swapchain = new pr::vk::Swapchain(
             device->create_swapchain(swapchain_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create swapchain! %d\n", e.vk_result());
@@ -445,7 +445,7 @@ static void recreate_swapchain()
 static void create_vulkan_image_views()
 {
     for (uint64_t i = 0; i < swapchain_images.length(); ++i) {
-        pr::vk::VkImageView::CreateInfo create_info;
+        pr::vk::ImageView::CreateInfo create_info;
         create_info.set_image(swapchain_images[i]);
         create_info.set_view_type(VK_IMAGE_VIEW_TYPE_2D);
         create_info.set_format(vulkan_format.format);
@@ -539,13 +539,13 @@ static void create_vulkan_graphics_pipeline()
     load_shader("frag.spv", &frag_shader_code, &frag_shader_code_size);
 
     // Create vertex shader module.
-    pr::vk::VkShaderModule::CreateInfo vert_create_info;
+    pr::vk::ShaderModule::CreateInfo vert_create_info;
     vert_create_info.set_code((const uint32_t*)vert_shader_code,
         vert_shader_code_size);
 
-    pr::vk::VkShaderModule *vert_shader_module;
+    pr::vk::ShaderModule *vert_shader_module;
     try {
-        vert_shader_module = new pr::vk::VkShaderModule(
+        vert_shader_module = new pr::vk::ShaderModule(
             device->create_shader_module(vert_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create vertex shader module!\n");
@@ -554,13 +554,13 @@ static void create_vulkan_graphics_pipeline()
     fprintf(stderr, "Vertex shader module created.\n");
 
     // Create fragment shader module.
-    pr::vk::VkShaderModule::CreateInfo frag_create_info;
+    pr::vk::ShaderModule::CreateInfo frag_create_info;
     frag_create_info.set_code((const uint32_t*)frag_shader_code,
         frag_shader_code_size);
 
-    pr::vk::VkShaderModule *frag_shader_module;
+    pr::vk::ShaderModule *frag_shader_module;
     try {
-        frag_shader_module = new pr::vk::VkShaderModule(
+        frag_shader_module = new pr::vk::ShaderModule(
             device->create_shader_module(frag_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create fragment shader module!\n");
@@ -710,7 +710,7 @@ static void create_vulkan_graphics_pipeline()
 static void create_vulkan_framebuffers()
 {
     for (uint32_t i = 0; i < swapchain_images.length(); ++i) {
-        pr::Vector<pr::vk::VkImageView> attachments = {
+        pr::Vector<pr::vk::ImageView> attachments = {
             image_views[i],
         };
 

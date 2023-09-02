@@ -11,7 +11,7 @@
 namespace pr {
 namespace vk {
 
-class VkShaderModule;
+class ShaderModule;
 
 class Device;
 
@@ -40,7 +40,7 @@ public:
 
         void set_stage(::VkShaderStageFlagBits stage);
 
-        void set_module(const VkShaderModule& shader_module);
+        void set_module(const ShaderModule& shader_module);
 
         void set_name(const pr::String& name);
 

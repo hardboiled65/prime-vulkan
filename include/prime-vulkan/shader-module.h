@@ -10,7 +10,7 @@ namespace vk {
 
 class Device;
 
-class VkShaderModule
+class ShaderModule
 {
     friend Device;
 public:
@@ -48,7 +48,7 @@ public:
     ::VkShaderModule c_ptr() const;
 
 private:
-    VkShaderModule();
+    ShaderModule();
 
 private:
     std::shared_ptr<::VkShaderModule> _shader_module;
