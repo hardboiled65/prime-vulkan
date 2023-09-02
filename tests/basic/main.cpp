@@ -862,11 +862,8 @@ static void record_command_buffer(pr::vk::CommandBuffer& command_buffer,
     //==============
     // In Commands
     //==============
-    auto vk_command_buffer = command_buffer.c_ptr();
-    vkCmdBindPipeline(vk_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        graphics_pipeline->c_ptr());
-//    command_buffer.bind_pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS,
-//        *graphics_pipeline);
+    command_buffer.bind_pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS,
+        *graphics_pipeline);
 
     VkViewport viewport;
     viewport.x = 0.0f;
