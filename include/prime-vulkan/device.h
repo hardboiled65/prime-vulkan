@@ -20,11 +20,11 @@
 namespace pr {
 namespace vk {
 
-class VkPhysicalDevice;
+class PhysicalDevice;
 
 class VkDevice
 {
-    friend VkPhysicalDevice;
+    friend PhysicalDevice;
 public:
     class QueueCreateInfo
     {

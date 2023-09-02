@@ -13,11 +13,11 @@ namespace vk {
 
 class Instance;
 
-class VkPhysicalDevice;
+class PhysicalDevice;
 
 class VkQueueFamilyProperties
 {
-    friend VkPhysicalDevice;
+    friend PhysicalDevice;
 public:
     ::VkFlags queue_flags() const;
 
@@ -30,12 +30,12 @@ private:
     ::VkQueueFamilyProperties _properties;
 };
 
-class VkPhysicalDevice
+class PhysicalDevice
 {
 public:
-    VkPhysicalDevice(const VkPhysicalDevice& other);
+    PhysicalDevice(const PhysicalDevice& other);
 
-    static Vector<VkPhysicalDevice> enumerate(const Instance& instance);
+    static Vector<PhysicalDevice> enumerate(const Instance& instance);
 
     /// Get the list of queue family properties.
     /// Using `vkGetPhysicalDeviceQueueFamilyProperties` function.
@@ -62,7 +62,7 @@ public:
     ::VkPhysicalDevice c_ptr();
 
 private:
-    VkPhysicalDevice();
+    PhysicalDevice();
 
 private:
     ::VkPhysicalDevice _device;

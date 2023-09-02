@@ -49,7 +49,7 @@ const bool enable_validation_layers = true;
 
 // Vulkan init.
 pr::vk::Instance *instance = nullptr;
-pr::vk::VkPhysicalDevice *physical_device = nullptr;
+pr::vk::PhysicalDevice *physical_device = nullptr;
 uint32_t graphics_family = 0;
 VkPhysicalDeviceFeatures vulkan_device_features;
 // Logical device.
@@ -184,7 +184,7 @@ static void init_vulkan()
     }
 
     // Pick physical device.
-    auto physical_devices = pr::vk::VkPhysicalDevice::enumerate(*instance);
+    auto physical_devices = pr::vk::PhysicalDevice::enumerate(*instance);
     if (physical_devices.length() == 0) {
         fprintf(stderr, "No GPUs with Vulkan support!\n");
         return;
@@ -194,7 +194,7 @@ static void init_vulkan()
     for (auto& device: physical_devices) {
         fprintf(stderr, " - Device: %p\n", device.c_ptr());
     }
-    physical_device = new pr::vk::VkPhysicalDevice(physical_devices[0]);
+    physical_device = new pr::vk::PhysicalDevice(physical_devices[0]);
 }
 
 static void create_vulkan_window()

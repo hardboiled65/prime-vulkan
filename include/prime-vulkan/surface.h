@@ -9,7 +9,7 @@ namespace vk {
 
 class Instance;
 
-class VkPhysicalDevice;
+class PhysicalDevice;
 
 class Surface
 {
@@ -32,7 +32,7 @@ public:
 
     class Capabilities
     {
-        friend VkPhysicalDevice;
+        friend PhysicalDevice;
     public:
         using CType = ::VkSurfaceCapabilitiesKHR;
 
@@ -59,7 +59,7 @@ private:
 
 class SurfaceFormat
 {
-    friend VkPhysicalDevice;
+    friend PhysicalDevice;
 public:
     using CType = ::VkSurfaceFormatKHR;
 

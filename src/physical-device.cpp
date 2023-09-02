@@ -21,19 +21,19 @@ uint32_t VkQueueFamilyProperties::queue_count() const
 }
 
 
-VkPhysicalDevice::VkPhysicalDevice()
+PhysicalDevice::PhysicalDevice()
 {
     this->_device = nullptr;
 }
 
-VkPhysicalDevice::VkPhysicalDevice(const VkPhysicalDevice& other)
+PhysicalDevice::PhysicalDevice(const PhysicalDevice& other)
 {
     this->_device = other._device;
 }
 
-Vector<VkPhysicalDevice> VkPhysicalDevice::enumerate(const Instance& instance)
+Vector<PhysicalDevice> PhysicalDevice::enumerate(const Instance& instance)
 {
-    Vector<VkPhysicalDevice> v;
+    Vector<PhysicalDevice> v;
 
     uint32_t count;
     vkEnumeratePhysicalDevices(
@@ -52,7 +52,7 @@ Vector<VkPhysicalDevice> VkPhysicalDevice::enumerate(const Instance& instance)
 
     for (uint32_t i = 0; i < count; ++i) {
         ::VkPhysicalDevice device = devices[i];
-        VkPhysicalDevice physical_device;
+        PhysicalDevice physical_device;
         physical_device._device = device;
         v.push(physical_device);
     }
@@ -62,18 +62,18 @@ Vector<VkPhysicalDevice> VkPhysicalDevice::enumerate(const Instance& instance)
     return v;
 }
 
-Vector<VkQueueFamilyProperties> VkPhysicalDevice::queue_family_properties() const
+Vector<VkQueueFamilyProperties> PhysicalDevice::queue_family_properties() const
 {
     Vector<VkQueueFamilyProperties> v;
 
     uint32_t count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(
-        const_cast<VkPhysicalDevice*>(this)->c_ptr(),
+        const_cast<PhysicalDevice*>(this)->c_ptr(),
         &count, nullptr);
 
     ::VkQueueFamilyProperties *properties = new ::VkQueueFamilyProperties[count];
     vkGetPhysicalDeviceQueueFamilyProperties(
-        const_cast<VkPhysicalDevice*>(this)->c_ptr(),
+        const_cast<PhysicalDevice*>(this)->c_ptr(),
         &count, properties);
 
     for (uint32_t i = 0; i < count; ++i) {
@@ -87,7 +87,7 @@ Vector<VkQueueFamilyProperties> VkPhysicalDevice::queue_family_properties() cons
     return v;
 }
 
-VkDevice VkPhysicalDevice::create_device(
+VkDevice PhysicalDevice::create_device(
     const VkDevice::CreateInfo& create_info) const
 {
     ::VkResult result;
@@ -107,7 +107,7 @@ VkDevice VkPhysicalDevice::create_device(
     return vk_device;
 }
 
-Surface::Capabilities VkPhysicalDevice::surface_capabilities_for(
+Surface::Capabilities PhysicalDevice::surface_capabilities_for(
     const Surface& surface) const
 {
     ::VkResult result;
@@ -128,7 +128,7 @@ Surface::Capabilities VkPhysicalDevice::surface_capabilities_for(
     return capabilities;
 }
 
-Vector<SurfaceFormat> VkPhysicalDevice::surface_formats_for(
+Vector<SurfaceFormat> PhysicalDevice::surface_formats_for(
     const Surface& surface) const
 {
     ::VkResult result;
@@ -159,7 +159,7 @@ Vector<SurfaceFormat> VkPhysicalDevice::surface_formats_for(
     return v;
 }
 
-Vector<::VkPresentModeKHR> VkPhysicalDevice::present_modes_for(
+Vector<::VkPresentModeKHR> PhysicalDevice::present_modes_for(
     const Surface& surface) const
 {
     ::VkResult result;
@@ -191,7 +191,7 @@ Vector<::VkPresentModeKHR> VkPhysicalDevice::present_modes_for(
     return v;
 }
 
-bool VkPhysicalDevice::surface_support_for(uint32_t queue_family_index,
+bool PhysicalDevice::surface_support_for(uint32_t queue_family_index,
                                            const Surface& surface) const
 {
     ::VkResult result;
@@ -207,7 +207,7 @@ bool VkPhysicalDevice::surface_support_for(uint32_t queue_family_index,
     return (vk_bool == VK_TRUE) ? true : false;
 }
 
-::VkPhysicalDevice VkPhysicalDevice::c_ptr()
+::VkPhysicalDevice PhysicalDevice::c_ptr()
 {
     return this->_device;
 }
