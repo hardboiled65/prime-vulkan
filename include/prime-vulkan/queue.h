@@ -20,11 +20,11 @@ class PresentInfo;
 
 class Fence;
 
-class VkDevice;
+class Device;
 
 class Queue
 {
-    friend VkDevice;
+    friend Device;
 public:
     using CType = ::VkQueue;
 

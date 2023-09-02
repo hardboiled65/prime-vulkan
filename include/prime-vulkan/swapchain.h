@@ -12,11 +12,11 @@ namespace vk {
 
 class Surface;
 
-class VkDevice;
+class Device;
 
 class VkSwapchain
 {
-    friend VkDevice;
+    friend Device;
 public:
     using CType = ::VkSwapchainKHR;
 
@@ -101,7 +101,7 @@ private:
 
 class VkImage
 {
-    friend VkDevice;
+    friend Device;
 public:
     ::VkImage c_ptr() const;
 
@@ -115,7 +115,7 @@ private:
 
 class VkImageView
 {
-    friend VkDevice;
+    friend Device;
 public:
     class CreateInfo
     {

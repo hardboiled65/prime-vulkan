@@ -8,11 +8,11 @@
 namespace pr {
 namespace vk {
 
-class VkDevice;
+class Device;
 
 class Semaphore
 {
-    friend VkDevice;
+    friend Device;
 public:
     using CType = ::VkSemaphore;
 

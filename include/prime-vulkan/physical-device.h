@@ -41,7 +41,7 @@ public:
     /// Using `vkGetPhysicalDeviceQueueFamilyProperties` function.
     Vector<VkQueueFamilyProperties> queue_family_properties() const;
 
-    VkDevice create_device(const VkDevice::CreateInfo& create_info) const;
+    Device create_device(const Device::CreateInfo& create_info) const;
 
     /// Using `vkGetPhysicalDeviceSurfaceCapabilitiesKHR` function.
     Surface::Capabilities surface_capabilities_for(

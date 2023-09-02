@@ -8,11 +8,11 @@
 namespace pr {
 namespace vk {
 
-class VkDevice;
+class Device;
 
 class VkShaderModule
 {
-    friend VkDevice;
+    friend Device;
 public:
     class CreateInfo
     {

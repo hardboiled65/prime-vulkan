@@ -5,7 +5,7 @@
 namespace pr {
 namespace vk {
 
-VkDevice::QueueCreateInfo::QueueCreateInfo()
+Device::QueueCreateInfo::QueueCreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     this->_info.flags = 0;
@@ -17,7 +17,7 @@ VkDevice::QueueCreateInfo::QueueCreateInfo()
     this->_priorities = nullptr;
 }
 
-VkDevice::QueueCreateInfo::QueueCreateInfo(const QueueCreateInfo& other)
+Device::QueueCreateInfo::QueueCreateInfo(const QueueCreateInfo& other)
 {
     this->_info = other._info;
 
@@ -29,24 +29,24 @@ VkDevice::QueueCreateInfo::QueueCreateInfo(const QueueCreateInfo& other)
     this->_info.pQueuePriorities = this->_priorities;
 }
 
-VkDevice::QueueCreateInfo::~QueueCreateInfo()
+Device::QueueCreateInfo::~QueueCreateInfo()
 {
     if (this->_priorities != nullptr) {
         delete[] this->_priorities;
     }
 }
 
-void VkDevice::QueueCreateInfo::set_queue_count(uint32_t count)
+void Device::QueueCreateInfo::set_queue_count(uint32_t count)
 {
     this->_info.queueCount = count;
 }
 
-void VkDevice::QueueCreateInfo::set_queue_family_index(uint32_t index)
+void Device::QueueCreateInfo::set_queue_family_index(uint32_t index)
 {
     this->_info.queueFamilyIndex = index;
 }
 
-void VkDevice::QueueCreateInfo::set_queue_priorities(const Vector<float>& priorities)
+void Device::QueueCreateInfo::set_queue_priorities(const Vector<float>& priorities)
 {
     if (this->_priorities != nullptr) {
         delete[] this->_priorities;
@@ -60,13 +60,13 @@ void VkDevice::QueueCreateInfo::set_queue_priorities(const Vector<float>& priori
     this->_info.pQueuePriorities = this->_priorities;
 }
 
-::VkDeviceQueueCreateInfo VkDevice::QueueCreateInfo::c_struct() const
+::VkDeviceQueueCreateInfo Device::QueueCreateInfo::c_struct() const
 {
     return this->_info;
 }
 
 
-VkDevice::CreateInfo::CreateInfo()
+Device::CreateInfo::CreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     this->_info.queueCreateInfoCount = 0;
@@ -87,7 +87,7 @@ VkDevice::CreateInfo::CreateInfo()
     this->_pp_enabled_extension_names = nullptr;
 }
 
-VkDevice::CreateInfo::~CreateInfo()
+Device::CreateInfo::~CreateInfo()
 {
     if (this->_queue_create_infos != nullptr) {
         delete[] this->_queue_create_infos;
@@ -97,7 +97,7 @@ VkDevice::CreateInfo::~CreateInfo()
     }
 }
 
-void VkDevice::CreateInfo::set_queue_create_infos(
+void Device::CreateInfo::set_queue_create_infos(
     const Vector<QueueCreateInfo>& infos)
 {
     this->_info.queueCreateInfoCount = infos.length();
@@ -110,7 +110,7 @@ void VkDevice::CreateInfo::set_queue_create_infos(
     this->_info.pQueueCreateInfos = this->_queue_create_infos;
 }
 
-void VkDevice::CreateInfo::set_enabled_features(
+void Device::CreateInfo::set_enabled_features(
     ::VkPhysicalDeviceFeatures features)
 {
     this->_enabled_features = features;
@@ -118,7 +118,7 @@ void VkDevice::CreateInfo::set_enabled_features(
     this->_info.pEnabledFeatures = &(this->_enabled_features);
 }
 
-void VkDevice::CreateInfo::set_enabled_extension_names(
+void Device::CreateInfo::set_enabled_extension_names(
     const Vector<String>& names)
 {
     this->_info.enabledExtensionCount = names.length();
@@ -133,22 +133,22 @@ void VkDevice::CreateInfo::set_enabled_extension_names(
     this->_info.ppEnabledExtensionNames = this->_pp_enabled_extension_names;
 }
 
-::VkDeviceCreateInfo VkDevice::CreateInfo::c_struct() const
+::VkDeviceCreateInfo Device::CreateInfo::c_struct() const
 {
     return this->_info;
 }
 
 
-VkDevice::VkDevice()
+Device::Device()
 {
 }
 
-VkDevice::VkDevice(const VkDevice& other)
+Device::Device(const Device& other)
 {
     this->_device = other._device;
 }
 
-Queue VkDevice::queue_for(uint32_t queue_family_index,
+Queue Device::queue_for(uint32_t queue_family_index,
                           uint32_t queue_index) const
 {
     ::VkQueue queue;
@@ -160,7 +160,7 @@ Queue VkDevice::queue_for(uint32_t queue_family_index,
     return ret;
 }
 
-VkSwapchain VkDevice::create_swapchain(
+VkSwapchain Device::create_swapchain(
     const VkSwapchain::CreateInfo& info) const
 {
     ::VkResult result;
@@ -181,7 +181,7 @@ VkSwapchain VkDevice::create_swapchain(
     return swapchain;
 }
 
-Vector<VkImage> VkDevice::images_for(const VkSwapchain& swapchain) const
+Vector<VkImage> Device::images_for(const VkSwapchain& swapchain) const
 {
     Vector<VkImage> v;
 
@@ -219,7 +219,7 @@ Vector<VkImage> VkDevice::images_for(const VkSwapchain& swapchain) const
     return v;
 }
 
-VkImageView VkDevice::create_image_view(
+VkImageView Device::create_image_view(
     const VkImageView::CreateInfo& info) const
 {
     ::VkResult result;
@@ -239,7 +239,7 @@ VkImageView VkDevice::create_image_view(
     return image_view;
 }
 
-VkShaderModule VkDevice::create_shader_module(
+VkShaderModule Device::create_shader_module(
     const VkShaderModule::CreateInfo& info) const
 {
     ::VkResult result;
@@ -259,7 +259,7 @@ VkShaderModule VkDevice::create_shader_module(
     return shader_module;
 }
 
-PipelineLayout VkDevice::create_pipeline_layout(
+PipelineLayout Device::create_pipeline_layout(
     const PipelineLayout::CreateInfo& info) const
 {
     ::VkResult result;
@@ -281,7 +281,7 @@ PipelineLayout VkDevice::create_pipeline_layout(
     return layout;
 }
 
-pr::Vector<Pipeline> VkDevice::create_graphics_pipelines(
+pr::Vector<Pipeline> Device::create_graphics_pipelines(
     const pr::Vector<GraphicsPipelineCreateInfo>& infos) const
 {
     pr::Vector<Pipeline> v;
@@ -316,7 +316,7 @@ pr::Vector<Pipeline> VkDevice::create_graphics_pipelines(
     return v;
 }
 
-RenderPass VkDevice::create_render_pass(
+RenderPass Device::create_render_pass(
     const RenderPass::CreateInfo& info) const
 {
     ::VkResult result;
@@ -338,7 +338,7 @@ RenderPass VkDevice::create_render_pass(
     return render_pass;
 }
 
-Framebuffer VkDevice::create_framebuffer(
+Framebuffer Device::create_framebuffer(
     const Framebuffer::CreateInfo& info) const
 {
     ::VkResult result;
@@ -360,7 +360,7 @@ Framebuffer VkDevice::create_framebuffer(
     return framebuffer;
 }
 
-CommandPool VkDevice::create_command_pool(
+CommandPool Device::create_command_pool(
     const CommandPool::CreateInfo& info) const
 {
     ::VkResult result;
@@ -382,7 +382,7 @@ CommandPool VkDevice::create_command_pool(
     return command_pool;
 }
 
-CommandBuffer VkDevice::allocate_command_buffers(
+CommandBuffer Device::allocate_command_buffers(
     const CommandBuffer::AllocateInfo& info) const
 {
     ::VkResult result;
@@ -403,7 +403,7 @@ CommandBuffer VkDevice::allocate_command_buffers(
     return command_buffer;
 }
 
-Semaphore VkDevice::create_semaphore(const Semaphore::CreateInfo& info) const
+Semaphore Device::create_semaphore(const Semaphore::CreateInfo& info) const
 {
     ::VkResult result;
 
@@ -423,7 +423,7 @@ Semaphore VkDevice::create_semaphore(const Semaphore::CreateInfo& info) const
     return semaphore;
 }
 
-Fence VkDevice::create_fence(const Fence::CreateInfo& info) const
+Fence Device::create_fence(const Fence::CreateInfo& info) const
 {
     ::VkResult result;
 
@@ -443,7 +443,7 @@ Fence VkDevice::create_fence(const Fence::CreateInfo& info) const
     return fence;
 }
 
-void VkDevice::wait_for_fences(const Vector<Fence>& fences,
+void Device::wait_for_fences(const Vector<Fence>& fences,
                                bool wait_all,
                                uint64_t timeout) const
 {
@@ -467,7 +467,7 @@ void VkDevice::wait_for_fences(const Vector<Fence>& fences,
     }
 }
 
-void VkDevice::reset_fences(const Vector<Fence>& fences) const
+void Device::reset_fences(const Vector<Fence>& fences) const
 {
     ::VkResult result;
 
@@ -486,7 +486,7 @@ void VkDevice::reset_fences(const Vector<Fence>& fences) const
     }
 }
 
-uint32_t VkDevice::acquire_next_image(const VkSwapchain& swapchain,
+uint32_t Device::acquire_next_image(const VkSwapchain& swapchain,
                                       uint64_t timeout,
                                       const Semaphore& semaphore) const
 {
@@ -503,13 +503,13 @@ uint32_t VkDevice::acquire_next_image(const VkSwapchain& swapchain,
     return index;
 }
 
-void VkDevice::wait_idle()
+void Device::wait_idle()
 {
     vkDeviceWaitIdle(this->_device);
     // TODO: Throw exception.
 }
 
-::VkDevice VkDevice::c_ptr()
+auto Device::c_ptr() -> CType
 {
     return this->_device;
 }

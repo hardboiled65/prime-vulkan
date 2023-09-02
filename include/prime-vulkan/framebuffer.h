@@ -15,11 +15,11 @@ class RenderPass;
 
 class VkImageView;
 
-class VkDevice;
+class Device;
 
 class Framebuffer
 {
-    friend VkDevice;
+    friend Device;
 public:
     using CType = ::VkFramebuffer;
 

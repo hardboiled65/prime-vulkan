@@ -22,9 +22,12 @@ namespace vk {
 
 class PhysicalDevice;
 
-class VkDevice
+class Device
 {
     friend PhysicalDevice;
+public:
+    using CType = ::VkDevice;
+
 public:
     class QueueCreateInfo
     {
@@ -77,7 +80,7 @@ public:
     };
 
 public:
-    VkDevice(const VkDevice& other);
+    Device(const Device& other);
 
     /// Using `vkGetDeviceQueue`.
     Queue queue_for(uint32_t queue_family_index, uint32_t queue_index) const;
@@ -125,13 +128,13 @@ public:
 
     void wait_idle();
 
-    ::VkDevice c_ptr();
+    CType c_ptr();
 
 private:
-    VkDevice();
+    Device();
 
 private:
-    ::VkDevice _device;
+    CType _device;
 };
 
 } // namespace vk

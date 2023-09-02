@@ -87,8 +87,8 @@ Vector<VkQueueFamilyProperties> PhysicalDevice::queue_family_properties() const
     return v;
 }
 
-VkDevice PhysicalDevice::create_device(
-    const VkDevice::CreateInfo& create_info) const
+Device PhysicalDevice::create_device(
+    const Device::CreateInfo& create_info) const
 {
     ::VkResult result;
     ::VkDevice device;
@@ -101,7 +101,7 @@ VkDevice PhysicalDevice::create_device(
     }
 
     // Construct device class.
-    VkDevice vk_device;
+    Device vk_device;
     vk_device._device = device;
 
     return vk_device;

@@ -12,11 +12,11 @@ class CommandPool;
 
 class Pipeline;
 
-class VkDevice;
+class Device;
 
 class CommandBuffer
 {
-    friend VkDevice;
+    friend Device;
 public:
     using CType = ::VkCommandBuffer;
 

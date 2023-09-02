@@ -13,7 +13,7 @@ namespace vk {
 
 class VkShaderModule;
 
-class VkDevice;
+class Device;
 
 class PipelineLayout;
 
@@ -21,7 +21,7 @@ class RenderPass;
 
 class Pipeline
 {
-    friend VkDevice;
+    friend Device;
 public:
     using CType = ::VkPipeline;
 
@@ -336,7 +336,7 @@ private:
 
 class PipelineLayout
 {
-    friend VkDevice;
+    friend Device;
 //===============
 // Type aliases
 //===============

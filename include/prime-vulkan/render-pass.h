@@ -13,7 +13,7 @@ namespace vk {
 
 class Framebuffer;
 
-class VkDevice;
+class Device;
 
 class AttachmentDescription
 {
@@ -114,7 +114,7 @@ private:
 
 class RenderPass
 {
-    friend VkDevice;
+    friend Device;
 public:
     using CType = ::VkRenderPass;
 

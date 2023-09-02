@@ -53,7 +53,7 @@ pr::vk::PhysicalDevice *physical_device = nullptr;
 uint32_t graphics_family = 0;
 VkPhysicalDeviceFeatures vulkan_device_features;
 // Logical device.
-pr::vk::VkDevice *device = nullptr;
+pr::vk::Device *device = nullptr;
 pr::vk::Queue *graphics_queue = nullptr;
 pr::vk::Queue *present_queue = nullptr;
 // Vulkan surface.
@@ -259,12 +259,12 @@ static void create_vulkan_logical_device()
     pr::Vector<float> queue_priorities;
     queue_priorities.push(1.0f);
 
-    pr::vk::VkDevice::QueueCreateInfo graphics_queue_create_info;
+    pr::vk::Device::QueueCreateInfo graphics_queue_create_info;
     graphics_queue_create_info.set_queue_family_index(graphics_family);
     graphics_queue_create_info.set_queue_count(1);
     graphics_queue_create_info.set_queue_priorities(queue_priorities);
 
-    pr::vk::VkDevice::QueueCreateInfo present_queue_create_info;
+    pr::vk::Device::QueueCreateInfo present_queue_create_info;
     present_queue_create_info.set_queue_family_index(present_family);
     present_queue_create_info.set_queue_count(1);
     present_queue_create_info.set_queue_priorities(queue_priorities);
@@ -275,7 +275,7 @@ static void create_vulkan_logical_device()
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     };
 
-    pr::vk::VkDevice::CreateInfo device_create_info;
+    pr::vk::Device::CreateInfo device_create_info;
     device_create_info.set_queue_create_infos({
         graphics_queue_create_info,
         present_queue_create_info,
@@ -284,7 +284,7 @@ static void create_vulkan_logical_device()
     device_create_info.set_enabled_extension_names(extension_names);
 
     try {
-        device = new pr::vk::VkDevice(
+        device = new pr::vk::Device(
             physical_device->create_device(device_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create logical device. %s\n", e.what());
