@@ -281,6 +281,41 @@ PipelineLayout VkDevice::create_pipeline_layout(
     return layout;
 }
 
+pr::Vector<Pipeline> VkDevice::create_graphics_pipelines(
+    const pr::Vector<GraphicsPipelineCreateInfo>& infos) const
+{
+    pr::Vector<Pipeline> v;
+    uint32_t count = infos.length();
+    GraphicsPipelineCreateInfo::CType *vk_infos =
+        new GraphicsPipelineCreateInfo::CType[count];
+    for (uint32_t i = 0; i < count; ++i) {
+        vk_infos[i] = infos[i].c_struct();
+    }
+
+    Pipeline::CType *vk_pipelines = new Pipeline::CType[count];
+    ::VkResult result = vkCreateGraphicsPipelines(this->_device,
+        nullptr, count, vk_infos, nullptr, vk_pipelines);
+
+    if (result != VK_SUCCESS) {
+        // Free memories.
+        delete[] vk_pipelines;
+        delete[] vk_infos;
+
+        throw VulkanError(result);
+    }
+
+    for (uint32_t i = 0; i < count; ++i) {
+        Pipeline pipeline;
+        pipeline._pipeline = std::shared_ptr<Pipeline::CType>(
+            new Pipeline::CType(vk_pipelines[i]));
+        v.push(pipeline);
+    }
+    delete[] vk_pipelines;
+    delete[] vk_infos;
+
+    return v;
+}
+
 RenderPass VkDevice::create_render_pass(
     const RenderPass::CreateInfo& info) const
 {

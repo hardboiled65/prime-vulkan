@@ -5,6 +5,8 @@
 #include <string.h>
 #include <wayland-client.h>
 
+#include <memory>
+
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_wayland.h>
 
@@ -77,10 +79,10 @@ uint8_t *vert_shader_code = NULL;
 uint32_t vert_shader_code_size = 0;
 uint8_t *frag_shader_code = NULL;
 uint32_t frag_shader_code_size = 0;
-VkPipelineShaderStageCreateInfo *vulkan_shader_stage_create_infos = NULL;
 pr::vk::PipelineLayout *vulkan_layout = nullptr;
 VkGraphicsPipelineCreateInfo vulkan_graphics_pipeline_create_info;
 VkPipeline vulkan_graphics_pipeline = NULL;
+std::shared_ptr<pr::vk::Pipeline> graphics_pipeline = nullptr;
 // Framebuffers.
 pr::Vector<pr::vk::Framebuffer> framebuffers;
 // Command pool.
@@ -536,8 +538,6 @@ static void create_vulkan_render_pass()
 
 static void create_vulkan_graphics_pipeline()
 {
-    VkResult result;
-
     // Load shader codes.
     load_shader("vert.spv", &vert_shader_code, &vert_shader_code_size);
     load_shader("frag.spv", &frag_shader_code, &frag_shader_code_size);
@@ -583,32 +583,23 @@ static void create_vulkan_graphics_pipeline()
     frag_shader_stage_create_info.set_module(*frag_shader_module);
     frag_shader_stage_create_info.set_name("main"_S);
 
-    // Shader stage.
-    vulkan_shader_stage_create_infos = new ::VkPipelineShaderStageCreateInfo[2];
-
-    vulkan_shader_stage_create_infos[0] = vert_shader_stage_create_info.c_struct();
-    vulkan_shader_stage_create_infos[1] = frag_shader_stage_create_info.c_struct();
-
     // Vertex input.
     pr::vk::Pipeline::VertexInputStateCreateInfo vert_input_state_create_info;
     vert_input_state_create_info.set_vertex_binding_descriptions(
         pr::Vector<::VkVertexInputBindingDescription>());
     vert_input_state_create_info.set_vertex_attribute_descriptions(
         pr::Vector<::VkVertexInputAttributeDescription>());
-    auto vulkan_vert_input_state_create_info = vert_input_state_create_info.c_struct();
 
     // Input assembly.
     pr::vk::Pipeline::InputAssemblyStateCreateInfo input_assembly_state_create_info;
     input_assembly_state_create_info.set_topology(
         VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
     input_assembly_state_create_info.set_primitive_restart_enable(false);
-    auto vulkan_input_assembly_state_create_info = input_assembly_state_create_info.c_struct();
 
     // Viewport.
     pr::vk::Pipeline::ViewportStateCreateInfo viewport_state_create_info;
     viewport_state_create_info.set_viewport_count(1);
     viewport_state_create_info.set_scissor_count(1);
-    auto vulkan_viewport_state_create_info = viewport_state_create_info.c_struct();
 
     // Rasterization.
     pr::vk::Pipeline::RasterizationStateCreateInfo rasterization_state_create_info;
@@ -619,13 +610,11 @@ static void create_vulkan_graphics_pipeline()
     rasterization_state_create_info.set_cull_mode(VK_CULL_MODE_BACK_BIT);
     rasterization_state_create_info.set_front_face(VK_FRONT_FACE_CLOCKWISE);
     rasterization_state_create_info.set_depth_bias_enable(false);
-    auto vulkan_rasterization_state_create_info = rasterization_state_create_info.c_struct();
 
     // Multisampling.
     pr::vk::Pipeline::MultisampleStateCreateInfo multisample_state_create_info;
     multisample_state_create_info.set_sample_shading_enable(false);
     multisample_state_create_info.set_rasterization_samples(VK_SAMPLE_COUNT_1_BIT);
-    auto vulkan_multisample_state_create_info = multisample_state_create_info.c_struct();
 
     // Color blending.
     pr::vk::Pipeline::ColorBlendStateCreateInfo color_blend_state_create_info;
@@ -645,7 +634,6 @@ static void create_vulkan_graphics_pipeline()
         }(),
     });
     color_blend_state_create_info.set_blend_constants(0.0f, 0.0f, 0.0f, 0.0f);
-    auto vulkan_color_blend_state_create_info = color_blend_state_create_info.c_struct();
 
     // Dynamic states.
     pr::Vector<::VkDynamicState> dynamic_states = {
@@ -655,10 +643,6 @@ static void create_vulkan_graphics_pipeline()
 
     pr::vk::Pipeline::DynamicStateCreateInfo dynamic_state_create_info;
     dynamic_state_create_info.set_dynamic_states(dynamic_states);
-
-    //-------------
-    auto vulkan_dynamic_state_create_info = dynamic_state_create_info.c_struct();
-    //-------------
 
     // Layout.
     pr::vk::PipelineLayout::CreateInfo pipeline_layout_create_info;
@@ -676,41 +660,48 @@ static void create_vulkan_graphics_pipeline()
     }
     fprintf(stderr, "Pipeline layout created.\n");
 
-    vulkan_graphics_pipeline_create_info.sType =
-        VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    vulkan_graphics_pipeline_create_info.stageCount = 2;
-    vulkan_graphics_pipeline_create_info.pStages = vulkan_shader_stage_create_infos;
-    vulkan_graphics_pipeline_create_info.pVertexInputState =
-        &vulkan_vert_input_state_create_info;
-    vulkan_graphics_pipeline_create_info.pInputAssemblyState =
-        &vulkan_input_assembly_state_create_info;
-    vulkan_graphics_pipeline_create_info.pViewportState =
-        &vulkan_viewport_state_create_info;
-    vulkan_graphics_pipeline_create_info.pRasterizationState =
-        &vulkan_rasterization_state_create_info;
-    vulkan_graphics_pipeline_create_info.pMultisampleState =
-        &vulkan_multisample_state_create_info;
-    vulkan_graphics_pipeline_create_info.pColorBlendState =
-        &vulkan_color_blend_state_create_info;
-    vulkan_graphics_pipeline_create_info.pDynamicState =
-        &vulkan_dynamic_state_create_info;
-    vulkan_graphics_pipeline_create_info.layout = vulkan_layout->c_ptr();
-    vulkan_graphics_pipeline_create_info.renderPass = render_pass->c_ptr();
-    vulkan_graphics_pipeline_create_info.subpass = 0;
-    vulkan_graphics_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
+    pr::vk::GraphicsPipelineCreateInfo graphics_pipeline_create_info;
+    // Shader stage.
+    graphics_pipeline_create_info.set_stages({
+        vert_shader_stage_create_info,
+        frag_shader_stage_create_info,
+    });
+    graphics_pipeline_create_info.set_vertex_input_state(
+        vert_input_state_create_info);
+    graphics_pipeline_create_info.set_input_assembly_state(
+        input_assembly_state_create_info);
+    graphics_pipeline_create_info.set_viewport_state(
+        viewport_state_create_info);
+    graphics_pipeline_create_info.set_rasterization_state(
+        rasterization_state_create_info);
+    graphics_pipeline_create_info.set_multisample_state(
+        multisample_state_create_info);
+    graphics_pipeline_create_info.set_color_blend_state(
+        color_blend_state_create_info);
+    graphics_pipeline_create_info.set_dynamic_state(
+        dynamic_state_create_info);
+    graphics_pipeline_create_info.set_layout(*vulkan_layout);
+    graphics_pipeline_create_info.set_render_pass(*render_pass);
+    graphics_pipeline_create_info.set_subpass(0);
 
-    vulkan_graphics_pipeline_create_info.flags = 0;
-    vulkan_graphics_pipeline_create_info.pNext = nullptr;
-
-    result = vkCreateGraphicsPipelines(device->c_ptr(), VK_NULL_HANDLE,
-        1, &vulkan_graphics_pipeline_create_info, NULL,
-        &vulkan_graphics_pipeline);
-    if (result != VK_SUCCESS) {
-        fprintf(stderr, "Failed to create graphics pipeline!\n");
-        return;
+    try {
+        auto graphics_pipelines = device->create_graphics_pipelines({
+            graphics_pipeline_create_info,
+        });
+        if (graphics_pipelines.length() != 1) {
+            fprintf(stderr, "Zero graphics pipelines!\n");
+            exit(1);
+        }
+        graphics_pipeline =
+            std::make_shared<pr::vk::Pipeline>(graphics_pipelines[0]);
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to create graphics pipeline. %d\n",
+            e.vk_result());
+        exit(1);
     }
+
     fprintf(stderr, "Graphics pipeline created - pipeline: %p\n",
-        vulkan_graphics_pipeline);
+        graphics_pipeline->c_ptr());
 
     /*
     vkDestroyShaderModule(vulkan_device, frag_shader_module, NULL);
@@ -873,7 +864,7 @@ static void record_command_buffer(pr::vk::CommandBuffer& command_buffer,
     //==============
     auto vk_command_buffer = command_buffer.c_ptr();
     vkCmdBindPipeline(vk_command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        vulkan_graphics_pipeline);
+        graphics_pipeline->c_ptr());
 //    command_buffer.bind_pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS,
 //        *graphics_pipeline);
 

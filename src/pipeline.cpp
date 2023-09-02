@@ -1,6 +1,7 @@
 #include <prime-vulkan/pipeline.h>
 
 #include <prime-vulkan/shader-module.h>
+#include <prime-vulkan/render-pass.h>
 
 namespace pr {
 namespace vk {
@@ -366,8 +367,126 @@ GraphicsPipelineCreateInfo::GraphicsPipelineCreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 
+    this->_info.basePipelineHandle = nullptr;
+    this->_info.pTessellationState = nullptr;
+
     this->_info.flags = 0;
     this->_info.pNext = nullptr;
+}
+
+void GraphicsPipelineCreateInfo::set_stages(
+    const pr::Vector<Pipeline::ShaderStageCreateInfo>& stages)
+{
+    uint64_t count = stages.length();
+
+    this->_info.stageCount = count;
+
+    this->_stages = stages;
+    this->_vk_stages = {};
+    for (uint64_t i = 0; i < count; ++i) {
+        this->_vk_stages.push_back(stages[i].c_struct());
+    }
+
+    this->_info.pStages = this->_vk_stages.data();
+}
+
+void GraphicsPipelineCreateInfo::set_vertex_input_state(
+    const Pipeline::VertexInputStateCreateInfo& info)
+{
+    this->_vertex_input_state = info.c_struct();
+
+    this->_info.pVertexInputState = &(this->_vertex_input_state);
+}
+
+void GraphicsPipelineCreateInfo::set_input_assembly_state(
+    const Pipeline::InputAssemblyStateCreateInfo& info)
+{
+    this->_input_assembly_state = info.c_struct();
+
+    this->_info.pInputAssemblyState = &(this->_input_assembly_state);
+}
+
+void GraphicsPipelineCreateInfo::set_viewport_state(
+    const Pipeline::ViewportStateCreateInfo& info)
+{
+    this->_viewport_state = info.c_struct();
+
+    this->_info.pViewportState = &(this->_viewport_state);
+}
+
+void GraphicsPipelineCreateInfo::set_rasterization_state(
+    const Pipeline::RasterizationStateCreateInfo& info)
+{
+    this->_rasterization_state = info.c_struct();
+
+    this->_info.pRasterizationState = &(this->_rasterization_state);
+}
+
+void GraphicsPipelineCreateInfo::set_multisample_state(
+    const Pipeline::MultisampleStateCreateInfo& info)
+{
+    this->_multisample_state = info.c_struct();
+
+    this->_info.pMultisampleState = &(this->_multisample_state);
+}
+
+void GraphicsPipelineCreateInfo::set_color_blend_state(
+    const Pipeline::ColorBlendStateCreateInfo& info)
+{
+    this->_color_blend_state = info.c_struct();
+
+    this->_info.pColorBlendState = &(this->_color_blend_state);
+}
+
+void GraphicsPipelineCreateInfo::set_dynamic_state(
+    const Pipeline::DynamicStateCreateInfo& info)
+{
+    this->_dynamic_state = info.c_struct();
+
+    this->_info.pDynamicState = &(this->_dynamic_state);
+}
+
+void GraphicsPipelineCreateInfo::set_layout(
+    const PipelineLayout& layout)
+{
+    this->_layout = layout.c_ptr();
+
+    this->_info.layout = this->_layout;
+}
+
+void GraphicsPipelineCreateInfo::set_render_pass(
+    const RenderPass& render_pass)
+{
+    this->_render_pass = render_pass.c_ptr();
+
+    this->_info.renderPass = this->_render_pass;
+}
+
+void GraphicsPipelineCreateInfo::set_subpass(uint32_t subpass)
+{
+    this->_info.subpass = subpass;
+}
+
+void GraphicsPipelineCreateInfo::set_base_pipeline_handle(
+    const Pipeline& pipeline_handle)
+{
+    this->_info.basePipelineHandle = pipeline_handle.c_ptr();
+}
+
+auto GraphicsPipelineCreateInfo::c_struct() const -> CType
+{
+    return this->_info;
+}
+
+
+Pipeline::Pipeline()
+{
+    this->_pipeline = nullptr;
+}
+
+auto Pipeline::c_ptr() const -> CType
+{
+    return *(this->_pipeline);
 }
 
 

@@ -95,6 +95,10 @@ public:
     PipelineLayout
     create_pipeline_layout(const PipelineLayout::CreateInfo& info) const;
 
+    /// `vkCreateGraphicsPipelines`.
+    pr::Vector<Pipeline> create_graphics_pipelines(
+        const pr::Vector<GraphicsPipelineCreateInfo>& infos) const;
+
     RenderPass create_render_pass(const RenderPass::CreateInfo& info) const;
 
     Framebuffer create_framebuffer(const Framebuffer::CreateInfo& info) const;

@@ -4,6 +4,7 @@
 
 #include <prime-vulkan/base.h>
 #include <prime-vulkan/command-pool.h>
+#include <prime-vulkan/pipeline.h>
 
 namespace pr {
 namespace vk {
@@ -87,9 +88,11 @@ void CommandBuffer::begin_render_pass(const RenderPass::BeginInfo& info,
 }
 
 void CommandBuffer::bind_pipeline(::VkPipelineBindPoint bind_point,
-                                  const VkPipeline& pipeline)
+                                  const Pipeline& pipeline)
 {
-    // TODO: Implementation.
+    vkCmdBindPipeline(this->_command_buffer,
+        bind_point,
+        pipeline.c_ptr());
 }
 
 void CommandBuffer::set_viewport(uint32_t first_viewport,

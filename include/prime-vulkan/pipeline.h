@@ -17,8 +17,14 @@ class VkDevice;
 
 class PipelineLayout;
 
+class RenderPass;
+
 class Pipeline
 {
+    friend VkDevice;
+public:
+    using CType = ::VkPipeline;
+
 //=================
 // Nested classes
 //=================
@@ -237,10 +243,29 @@ public:
         ::VkPipelineColorBlendAttachmentState *_p_attachments;
     };
 
+    /// Custom deleter used by a logical device when creating pipelines.
+    class Deleter
+    {
+    public:
+        Deleter(::VkDevice p_device)
+        {
+            this->_p_device = p_device;
+        }
+
+        void operator()(CType *pipeline)
+        {
+            vkDestroyPipeline(this->_p_device, *pipeline, nullptr);
+        }
+
+    private:
+        ::VkDevice _p_device;
+    };
+
 //===================
 // Public methods
 //===================
 public:
+    CType c_ptr() const;
 
 //===================
 // Private methods
@@ -252,6 +277,7 @@ private:
 // Members
 //============
 private:
+    std::shared_ptr<CType> _pipeline;
 };
 
 
@@ -282,11 +308,11 @@ public:
 
     void set_layout(const PipelineLayout& layout);
 
-    void set_render_pass(/*const VkRenderPass& render_pass*/);
+    void set_render_pass(const RenderPass& render_pass);
 
     void set_subpass(uint32_t subpass);
 
-    void set_base_pipeline_handle(/**/);
+    void set_base_pipeline_handle(const Pipeline& pipeline_handle);
 
     CType c_struct() const;
 
@@ -295,13 +321,16 @@ private:
 
     pr::Vector<Pipeline::ShaderStageCreateInfo> _stages;
     std::vector<Pipeline::ShaderStageCreateInfo::CType> _vk_stages;
-    Pipeline::VertexInputStateCreateInfo _vertex_input_state;
-    Pipeline::InputAssemblyStateCreateInfo _input_assembly_state;
-    Pipeline::ViewportStateCreateInfo _viewport_state;
-    Pipeline::RasterizationStateCreateInfo _rasterization_state;
-    Pipeline::MultisampleStateCreateInfo _multisample_state;
-    Pipeline::ColorBlendStateCreateInfo _color_blend_state;
-    Pipeline::DynamicStateCreateInfo _dynamic_state;
+    Pipeline::VertexInputStateCreateInfo::CType _vertex_input_state;
+    Pipeline::InputAssemblyStateCreateInfo::CType _input_assembly_state;
+    Pipeline::ViewportStateCreateInfo::CType _viewport_state;
+    Pipeline::RasterizationStateCreateInfo::CType _rasterization_state;
+    Pipeline::MultisampleStateCreateInfo::CType _multisample_state;
+    Pipeline::ColorBlendStateCreateInfo::CType _color_blend_state;
+    Pipeline::DynamicStateCreateInfo::CType _dynamic_state;
+    ::VkPipelineLayout _layout;
+    ::VkRenderPass _render_pass;
+    ::VkPipeline _pipeline_handle;
 };
 
 

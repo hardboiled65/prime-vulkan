@@ -10,7 +10,7 @@ namespace vk {
 
 class CommandPool;
 
-class VkPipeline;
+class Pipeline;
 
 class VkDevice;
 
@@ -63,7 +63,7 @@ public:
                            ::VkSubpassContents contents);
 
     void bind_pipeline(::VkPipelineBindPoint bind_point,
-                       const VkPipeline& pipeline);
+                       const Pipeline& pipeline);
 
     void set_viewport(uint32_t first_viewport,
                       const pr::Vector<::VkViewport>& viewports);
