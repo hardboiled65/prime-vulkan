@@ -7,13 +7,13 @@
 namespace pr {
 namespace vk {
 
-class VkInstance;
+class Instance;
 
 class VkPhysicalDevice;
 
 class Surface
 {
-    friend VkInstance;
+    friend Instance;
 public:
     using CType = ::VkSurfaceKHR;
 

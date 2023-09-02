@@ -57,7 +57,7 @@ pr::String LayerProperties::description() const
 }
 
 
-VkInstance::CreateInfo::CreateInfo()
+Instance::CreateInfo::CreateInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     this->_info.pApplicationInfo = nullptr;
@@ -69,14 +69,14 @@ VkInstance::CreateInfo::CreateInfo()
     this->_info.flags = 0;
 }
 
-VkInstance::CreateInfo::~CreateInfo()
+Instance::CreateInfo::~CreateInfo()
 {
     if (this->_pp_enabled_extension_names != nullptr) {
         delete[] this->_pp_enabled_extension_names;
     }
 }
 
-void VkInstance::CreateInfo::set_enabled_extension_names(
+void Instance::CreateInfo::set_enabled_extension_names(
     const pr::Vector<pr::String>& names)
 {
     this->_enabled_extension_names = names;
@@ -100,7 +100,7 @@ struct VkInstanceDeleter
     }
 };
 
-VkInstance::VkInstance(const VkInstance::CreateInfo& info)
+Instance::Instance(const Instance::CreateInfo& info)
 {
     ::VkInstance instance;
     VkResult result = vkCreateInstance(&(info._info),
@@ -116,12 +116,12 @@ VkInstance::VkInstance(const VkInstance::CreateInfo& info)
     }
 }
 
-VkInstance::~VkInstance()
+Instance::~Instance()
 {
     // Delete _instance.
 }
 
-Surface VkInstance::create_wayland_surface(
+Surface Instance::create_wayland_surface(
     const Surface::WaylandSurfaceCreateInfo& info
 ) const
 {
@@ -142,7 +142,7 @@ Surface VkInstance::create_wayland_surface(
     return surface;
 }
 
-::VkInstance VkInstance::c_ptr()
+::VkInstance Instance::c_ptr()
 {
     return *(this->_instance);
 }

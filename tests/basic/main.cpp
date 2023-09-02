@@ -48,7 +48,7 @@ const bool enable_validation_layers = true;
 #endif
 
 // Vulkan init.
-pr::vk::VkInstance *instance = nullptr;
+pr::vk::Instance *instance = nullptr;
 pr::vk::VkPhysicalDevice *physical_device = nullptr;
 uint32_t graphics_family = 0;
 VkPhysicalDeviceFeatures vulkan_device_features;
@@ -171,11 +171,11 @@ static void init_vulkan()
     }
 
     // Create instance.
-    pr::vk::VkInstance::CreateInfo info;
+    pr::vk::Instance::CreateInfo info;
     info.set_enabled_extension_names(extension_names);
 
     try {
-        instance = new pr::vk::VkInstance(info);
+        instance = new pr::vk::Instance(info);
         fprintf(stderr, "Vulkan instance created!\n");
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create Vulkan instance.\n");

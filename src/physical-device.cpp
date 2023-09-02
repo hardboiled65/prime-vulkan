@@ -31,13 +31,13 @@ VkPhysicalDevice::VkPhysicalDevice(const VkPhysicalDevice& other)
     this->_device = other._device;
 }
 
-Vector<VkPhysicalDevice> VkPhysicalDevice::enumerate(const VkInstance& instance)
+Vector<VkPhysicalDevice> VkPhysicalDevice::enumerate(const Instance& instance)
 {
     Vector<VkPhysicalDevice> v;
 
     uint32_t count;
     vkEnumeratePhysicalDevices(
-        const_cast<VkInstance&>(instance).c_ptr(),
+        const_cast<Instance&>(instance).c_ptr(),
         &count,
         NULL
     );
@@ -48,7 +48,7 @@ Vector<VkPhysicalDevice> VkPhysicalDevice::enumerate(const VkInstance& instance)
     ::VkPhysicalDevice *devices = new ::VkPhysicalDevice[count];
 
     vkEnumeratePhysicalDevices(
-        const_cast<VkInstance&>(instance).c_ptr(), &count, devices);
+        const_cast<Instance&>(instance).c_ptr(), &count, devices);
 
     for (uint32_t i = 0; i < count; ++i) {
         ::VkPhysicalDevice device = devices[i];

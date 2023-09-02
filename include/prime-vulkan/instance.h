@@ -40,13 +40,12 @@ private:
 };
 
 
-class VkInstance
+class Instance
 {
 public:
     class CreateInfo
     {
-        friend VkInstance;
-
+        friend Instance;
     public:
         CreateInfo();
 
@@ -61,19 +60,22 @@ public:
     };
 
 public:
-    VkInstance(const VkInstance::CreateInfo& info);
+    using CType = ::VkInstance;
 
-    ~VkInstance();
+public:
+    Instance(const Instance::CreateInfo& info);
+
+    ~Instance();
 
     /// Create a Wayland specific surface with the given info.
     Surface create_wayland_surface(
         const Surface::WaylandSurfaceCreateInfo& info
     ) const;
 
-    ::VkInstance c_ptr();
+    CType c_ptr();
 
 private:
-    std::shared_ptr<::VkInstance> _instance;
+    std::shared_ptr<CType> _instance;
 };
 
 } // namespace vk

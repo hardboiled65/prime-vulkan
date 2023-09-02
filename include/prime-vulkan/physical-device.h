@@ -11,7 +11,7 @@
 namespace pr {
 namespace vk {
 
-class VkInstance;
+class Instance;
 
 class VkPhysicalDevice;
 
@@ -35,7 +35,7 @@ class VkPhysicalDevice
 public:
     VkPhysicalDevice(const VkPhysicalDevice& other);
 
-    static Vector<VkPhysicalDevice> enumerate(const VkInstance& instance);
+    static Vector<VkPhysicalDevice> enumerate(const Instance& instance);
 
     /// Get the list of queue family properties.
     /// Using `vkGetPhysicalDeviceQueueFamilyProperties` function.
