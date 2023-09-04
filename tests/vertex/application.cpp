@@ -9,6 +9,11 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 static const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+static float vertices[] = {
+     0.0f, -0.5f,   1.0f, 0.0f, 0.0f,
+     0.5f,  0.5f,   0.0f, 1.0f, 0.0f,
+    -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+};
 
 static void load_shader(const char *path, uint8_t* *code, uint32_t *size);
 
@@ -699,6 +704,22 @@ void Application::_create_command_pool()
             this->_device->create_command_pool(command_pool_create_info));
     } catch (const pr::vk::VulkanError& e) {
         fprintf(stderr, "Failed to create command pool! %s\n", e.what());
+    }
+}
+
+void Application::_create_vertex_buffer()
+{
+    pr::vk::Buffer::CreateInfo create_info;
+    create_info.set_size(sizeof(float) * 5); // !!
+    create_info.set_usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    create_info.set_sharing_mode(VK_SHARING_MODE_EXCLUSIVE);
+
+    try {
+        this->_vertex_buffer = std::make_shared<pr::vk::Buffer>(
+            this->_device->create_buffer(create_info));
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to create buffer! %d\n", e.vk_result());
+        exit(1);
     }
 }
 

@@ -536,5 +536,58 @@ auto PipelineLayout::c_ptr() const -> CType
     return *(this->_layout);
 }
 
+
+VertexInputBindingDescription::VertexInputBindingDescription()
+{
+    this->_description.binding = 0;
+}
+
+void VertexInputBindingDescription::set_binding(uint32_t binding)
+{
+    this->_description.binding = binding;
+}
+
+void VertexInputBindingDescription::set_stride(uint32_t stride)
+{
+    this->_description.stride = stride;
+}
+
+void VertexInputBindingDescription::set_input_rate(
+    ::VkVertexInputRate rate)
+{
+    this->_description.inputRate = rate;
+}
+
+auto VertexInputBindingDescription::c_struct() const -> CType
+{
+    return this->_description;
+}
+
+
+VertexInputAttributeDescription::VertexInputAttributeDescription()
+{
+    this->_description.binding = 0;
+}
+
+void VertexInputAttributeDescription::set_binding(uint32_t binding)
+{
+    this->_description.binding = binding;
+}
+
+void VertexInputAttributeDescription::set_location(uint32_t location)
+{
+    this->_description.location = location;
+}
+
+void VertexInputAttributeDescription::set_format(::VkFormat format)
+{
+    this->_description.format = format;
+}
+
+void VertexInputAttributeDescription::set_offset(uint32_t offset)
+{
+    this->_description.offset = offset;
+}
+
 } // namespace vk
 } // namespace pr

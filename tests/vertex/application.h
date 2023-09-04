@@ -79,6 +79,8 @@ private:
 
     void _create_command_pool();
 
+    void _create_vertex_buffer();
+
     void _create_command_buffers();
 
     void _create_semaphores_and_fences();
@@ -141,6 +143,8 @@ private:
     pr::Vector<pr::vk::Framebuffer> _framebuffers;
     // Command pool.
     std::shared_ptr<pr::vk::CommandPool> _command_pool;
+    // Vertex buffer.
+    std::shared_ptr<pr::vk::Buffer> _vertex_buffer;
     // Command buffers.
     pr::Vector<pr::vk::CommandBuffer> _command_buffers;
     // Semaphores and fences.

@@ -19,6 +19,52 @@ class PipelineLayout;
 
 class RenderPass;
 
+
+/// A wrapper class for `VkVertexInputBindingDescription` struct.
+class VertexInputBindingDescription
+{
+public:
+    using CType = ::VkVertexInputBindingDescription;
+
+public:
+    VertexInputBindingDescription();
+
+    void set_binding(uint32_t binding);
+
+    void set_stride(uint32_t stride);
+
+    void set_input_rate(::VkVertexInputRate rate);
+
+    CType c_struct() const;
+
+private:
+    CType _description;
+};
+
+/// A wrapper class for `VkVertexInputAttributeDescription` struct.
+class VertexInputAttributeDescription
+{
+public:
+    using CType = ::VkVertexInputAttributeDescription;
+
+public:
+    VertexInputAttributeDescription();
+
+    void set_binding(uint32_t binding);
+
+    void set_location(uint32_t location);
+
+    void set_format(::VkFormat format);
+
+    void set_offset(uint32_t offset);
+
+    CType c_struct() const;
+
+private:
+    CType _description;
+};
+
+
 class Pipeline
 {
     friend Device;
