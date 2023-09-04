@@ -556,6 +556,23 @@ void Application::_create_graphics_pipeline()
     frag_shader_stage_create_info.set_name("main"_S);
 
     // Vertex input.
+    pr::vk::VertexInputBindingDescription binding_description;
+    binding_description.set_binding(0);
+    binding_description.set_stride(4 * 5);
+    binding_description.set_input_rate(VK_VERTEX_INPUT_RATE_VERTEX);
+
+    pr::vk::VertexInputAttributeDescription pos_attribute_description;
+    pos_attribute_description.set_binding(0);
+    pos_attribute_description.set_location(0);
+    pos_attribute_description.set_format(VK_FORMAT_R32G32_SFLOAT);
+    pos_attribute_description.set_offset(0);
+
+    pr::vk::VertexInputAttributeDescription color_attribute_description;
+    color_attribute_description.set_binding(0);
+    color_attribute_description.set_location(1);
+    color_attribute_description.set_format(VK_FORMAT_R32G32B32_SFLOAT);
+    color_attribute_description.set_offset(8);
+
     pr::vk::Pipeline::VertexInputStateCreateInfo vert_input_state_create_info;
     vert_input_state_create_info.set_vertex_binding_descriptions({});
     vert_input_state_create_info.set_vertex_attribute_descriptions({});

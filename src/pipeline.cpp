@@ -106,25 +106,35 @@ Pipeline::VertexInputStateCreateInfo::VertexInputStateCreateInfo()
 }
 
 void Pipeline::VertexInputStateCreateInfo::set_vertex_binding_descriptions(
-    const pr::Vector<::VkVertexInputBindingDescription>& descriptions)
+    const pr::Vector<VertexInputBindingDescription>& descriptions)
 {
     if (descriptions.length() != 0) {
-        fprintf(stderr, "[WARN] Description setter with non-zero length Vector is not implemented.\n");
+        uint32_t count = descriptions.length();
+        this->_info.vertexBindingDescriptionCount = count;
+        for (uint32_t i = 0; i < count; ++i) {
+            this->_bindings.push_back(descriptions[i].c_struct());
+        }
+        this->_info.pVertexBindingDescriptions = this->_bindings.data();
+    } else {
+        this->_info.vertexBindingDescriptionCount = 0;
+        this->_info.pVertexBindingDescriptions = nullptr;
     }
-
-    this->_info.vertexBindingDescriptionCount = 0;
-    this->_info.pVertexBindingDescriptions = nullptr;
 }
 
 void Pipeline::VertexInputStateCreateInfo::set_vertex_attribute_descriptions(
-    const pr::Vector<::VkVertexInputAttributeDescription>& descriptions)
+    const pr::Vector<VertexInputAttributeDescription>& descriptions)
 {
     if (descriptions.length() != 0) {
-        fprintf(stderr, "[WARN] Description setter with non-zero length Vector is not implemented.\n");
+        uint32_t count = descriptions.length();
+        this->_info.vertexAttributeDescriptionCount = count;
+        for (uint32_t i = 0; i < count; ++i) {
+            this->_attributes.push_back(descriptions[i].c_struct());
+        }
+        this->_info.pVertexAttributeDescriptions = this->_attributes.data();
+    } else {
+        this->_info.vertexAttributeDescriptionCount = 0;
+        this->_info.pVertexAttributeDescriptions = nullptr;
     }
-
-    this->_info.vertexAttributeDescriptionCount = 0;
-    this->_info.pVertexAttributeDescriptions = nullptr;
 }
 
 auto Pipeline::VertexInputStateCreateInfo::c_struct() const -> CType
@@ -587,6 +597,11 @@ void VertexInputAttributeDescription::set_format(::VkFormat format)
 void VertexInputAttributeDescription::set_offset(uint32_t offset)
 {
     this->_description.offset = offset;
+}
+
+auto VertexInputAttributeDescription::c_struct() const -> CType
+{
+    return this->_description;
 }
 
 } // namespace vk

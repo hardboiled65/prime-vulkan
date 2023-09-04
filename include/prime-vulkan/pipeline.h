@@ -132,24 +132,21 @@ public:
 
         /// Set the vertex input binding descriptions.
         /// Count will automatically filled.
-        ///
-        /// TODO: Currently only accepts 0 length Vector.
-        /// Others not implemented.
         void set_vertex_binding_descriptions(
-            const pr::Vector<::VkVertexInputBindingDescription>& descriptions);
+            const pr::Vector<VertexInputBindingDescription>& descriptions);
 
         /// Set the vertex input attribute descriptions.
         /// Count will automatically filled.
-        ///
-        /// TODO: Currently only accepts 0 length Vector.
-        /// Others not implemented.
         void set_vertex_attribute_descriptions(
-            const pr::Vector<::VkVertexInputAttributeDescription>& descriptions);
+            const pr::Vector<VertexInputAttributeDescription>& descriptions);
 
         CType c_struct() const;
 
     private:
         CType _info;
+
+        std::vector<VertexInputBindingDescription::CType> _bindings;
+        std::vector<VertexInputAttributeDescription::CType> _attributes;
     };
 
     /// A wrapper class for `VkPipelineInputAssemblyStateCreateInfo` struct.
