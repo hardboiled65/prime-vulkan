@@ -443,6 +443,26 @@ Fence Device::create_fence(const Fence::CreateInfo& info) const
     return fence;
 }
 
+Buffer Device::create_buffer(const Buffer::CreateInfo& info) const
+{
+    ::VkResult result;
+
+    Buffer::CreateInfo::CType vk_info = info.c_struct();
+    Buffer::CType vk_buffer;
+    result = vkCreateBuffer(this->_device, &vk_info, nullptr, &vk_buffer);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    Buffer buffer;
+    buffer._buffer = std::shared_ptr<Buffer::CType>(
+        new Buffer::CType(vk_buffer),
+        Buffer::Deleter(this->_device));
+
+    return buffer;
+}
+
 void Device::wait_for_fences(const Vector<Fence>& fences,
                                bool wait_all,
                                uint64_t timeout) const

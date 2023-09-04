@@ -16,6 +16,7 @@
 #include <prime-vulkan/command-buffer.h>
 #include <prime-vulkan/semaphore.h>
 #include <prime-vulkan/fence.h>
+#include <prime-vulkan/buffer.h>
 
 namespace pr {
 namespace vk {
@@ -114,6 +115,8 @@ public:
     Semaphore create_semaphore(const Semaphore::CreateInfo& info) const;
 
     Fence create_fence(const Fence::CreateInfo& info) const;
+
+    Buffer create_buffer(const Buffer::CreateInfo& info) const;
 
     void wait_for_fences(const Vector<Fence>& fences,
                          bool wait_all,
