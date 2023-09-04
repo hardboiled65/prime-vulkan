@@ -37,6 +37,11 @@ public:
         using CType = ::VkSurfaceCapabilitiesKHR;
 
     public:
+        ::VkSurfaceTransformFlagBitsKHR current_transform() const;
+
+        uint32_t min_image_count() const;
+        uint32_t max_image_count() const;
+
         CType c_struct() const;
 
     private:

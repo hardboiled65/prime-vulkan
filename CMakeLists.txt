@@ -67,4 +67,8 @@ set_target_properties(prime-vulkan PROPERTIES
 add_custom_target(tests
     SOURCES
     tests/basic/main.cpp
+    tests/vertex/application.h
+    tests/vertex/application.cpp
+    tests/vertex/wayland.h
+    tests/vertex/main.cpp
 )

@@ -34,6 +34,21 @@ Surface::Capabilities::Capabilities()
 {
 }
 
+::VkSurfaceTransformFlagBitsKHR Surface::Capabilities::current_transform() const
+{
+    return this->_capabilities.currentTransform;
+}
+
+uint32_t Surface::Capabilities::min_image_count() const
+{
+    return this->_capabilities.minImageCount;
+}
+
+uint32_t Surface::Capabilities::max_image_count() const
+{
+    return this->_capabilities.maxImageCount;
+}
+
 auto Surface::Capabilities::c_struct() const -> CType
 {
     return this->_capabilities;
