@@ -63,6 +63,23 @@ private:
     std::shared_ptr<CType> _buffer;
 };
 
+
+class BufferCopy
+{
+public:
+    using CType = VkBufferCopy;
+
+public:
+    BufferCopy();
+
+    void set_size(VkDeviceSize size);
+
+    CType c_struct() const;
+
+private:
+    CType _copy;
+};
+
 } // namespace vk
 } // namespace pr
 

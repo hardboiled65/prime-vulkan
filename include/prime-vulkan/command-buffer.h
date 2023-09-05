@@ -16,6 +16,8 @@ class Device;
 
 class Buffer;
 
+class BufferCopy;
+
 class CommandBuffer
 {
     friend Device;
@@ -50,6 +52,8 @@ public:
     public:
         BeginInfo();
 
+        void set_flags(VkCommandBufferUsageFlags flags);
+
         CType c_struct() const;
 
     private:
@@ -81,6 +85,9 @@ public:
     void bind_vertex_buffers(uint32_t first_binding,
                              const pr::Vector<Buffer>& buffers,
                              const pr::Vector<VkDeviceSize>& offsets);
+
+    void copy_buffer(const Buffer& src, Buffer& dst,
+        const pr::Vector<BufferCopy>& regions);
 
     void end_render_pass();
 

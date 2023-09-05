@@ -34,6 +34,25 @@ void Queue::submit(const pr::Vector<SubmitInfo>& submits, const Fence& fence)
     }
 }
 
+void Queue::submit(const pr::Vector<SubmitInfo>& submits)
+{
+    VkResult result;
+
+    uint32_t count = submits.length();
+
+    std::vector<SubmitInfo::CType> vk_submits;
+    for (uint32_t i = 0; i < count; ++i) {
+        vk_submits.push_back(submits[i].c_struct());
+    }
+
+    result = vkQueueSubmit(this->_queue,
+        count, vk_submits.data(), VK_NULL_HANDLE);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+}
+
 void Queue::present(const PresentInfo& present_info)
 {
     ::VkResult result;
@@ -41,6 +60,16 @@ void Queue::present(const PresentInfo& present_info)
     PresentInfo::CType vk_present_info = present_info.c_struct();
 
     result = vkQueuePresentKHR(this->_queue, &vk_present_info);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+}
+
+void Queue::wait_idle()
+{
+    VkResult result;
+    result = vkQueueWaitIdle(this->_queue);
 
     if (result != VK_SUCCESS) {
         throw VulkanError(result);
@@ -56,6 +85,9 @@ void Queue::present(const PresentInfo& present_info)
 SubmitInfo::SubmitInfo()
 {
     this->_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    this->_info.waitSemaphoreCount = 0;
+    this->_info.signalSemaphoreCount = 0;
 
     this->_info.pNext = nullptr;
 }

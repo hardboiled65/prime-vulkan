@@ -734,83 +734,35 @@ void Application::_create_command_pool()
 
 void Application::_create_vertex_buffer()
 {
-    pr::vk::Buffer::CreateInfo create_info;
-    create_info.set_size(sizeof(float) * 5 * 3); // !!
-    create_info.set_usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-    create_info.set_sharing_mode(VK_SHARING_MODE_EXCLUSIVE);
+    VkDeviceSize buffer_size = sizeof(float) * 5 * 3;
 
-    try {
-        this->_vertex_buffer = std::make_shared<pr::vk::Buffer>(
-            this->_device->create_buffer(create_info));
-    } catch (const pr::vk::VulkanError& e) {
-        fprintf(stderr, "Failed to create buffer! %d\n", e.vk_result());
-        exit(1);
-    }
-
-    // Memory requirements.
-    auto mem_requirements = this->_device->memory_requirements_for(
-        *this->_vertex_buffer);
-    fprintf(stderr, "Memory requirements:\n");
-    fprintf(stderr, " - size: %ld, alignment: %ld, type bits: %d\n",
-        mem_requirements.size(),
-        mem_requirements.alignment(),
-        mem_requirements.memory_type_bits());
-
-    // Memory properties.
-    auto mem_props = this->_physical_device->memory_properties();
-    fprintf(stderr, "Memory properties:\n");
-    fprintf(stderr, " - heaps: %ld, types: %ld\n",
-        mem_props.memory_heaps().length(),
-        mem_props.memory_types().length());
-
-    // Find memory type.
-    uint32_t memory_type_index = 0;
-    ::VkMemoryPropertyFlags props = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-        | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-    for (uint64_t i = 0; i < mem_props.memory_types().length(); ++i) {
-        if ((mem_requirements.memory_type_bits() & (1 << i)) &&
-            (mem_props.memory_types()[i].propertyFlags & props) == props) {
-            memory_type_index = i;
-            break;
-        }
-    }
-    fprintf(stderr, "Memory type index: %d\n", memory_type_index);
-
-    // Allocate memory.
-    pr::vk::MemoryAllocateInfo alloc_info;
-    alloc_info.set_allocation_size(mem_requirements.size());
-    alloc_info.set_memory_type_index(memory_type_index);
-
-    try {
-        this->_vertex_buffer_memory = std::make_shared<pr::vk::DeviceMemory>(
-            this->_device->allocate_memory(alloc_info));
-    } catch (const pr::vk::VulkanError& e) {
-        fprintf(stderr, "Failed to allocate memory. %d\n", e.vk_result());
-        exit(1);
-    }
-    fprintf(stderr, "Memory allocated.\n");
-
-    // Bind memory to a buffer.
-    try {
-        this->_device->bind_buffer_memory(*this->_vertex_buffer,
-            *this->_vertex_buffer_memory, 0);
-    } catch (const pr::vk::VulkanError& e) {
-        exit(1);
-    }
-    fprintf(stderr, "Memory binded to a buffer.\n");
+    auto [staging_buffer, staging_buffer_memory] = this->_create_buffer(
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
     // Map memory.
-    fprintf(stderr, " == sizeof(verteces): %ld\n", sizeof(vertices));
     try {
         void *data;
-        this->_device->map_memory(*this->_vertex_buffer_memory,
-            0, create_info.c_struct().size, 0, &data);
-        memcpy(data, vertices, create_info.c_struct().size);
+        this->_device->map_memory(staging_buffer_memory,
+            0, buffer_size, 0, &data);
+        memcpy(data, vertices, buffer_size);
     } catch (const pr::vk::VulkanError& e) {
         exit(1);
     }
-    fprintf(stderr, "Memory mapped.\n");
-    this->_device->unmap_memory(*this->_vertex_buffer_memory);
+    this->_device->unmap_memory(staging_buffer_memory);
+
+    auto [vertex_buffer, vertex_buffer_memory] = this->_create_buffer(
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    this->_vertex_buffer = std::make_shared<pr::vk::Buffer>(vertex_buffer);
+    this->_vertex_buffer_memory = std::make_shared<pr::vk::DeviceMemory>(
+        vertex_buffer_memory);
+
+    this->_copy_buffer(staging_buffer, vertex_buffer, buffer_size);
 }
 
 void Application::_create_command_buffers()
@@ -954,6 +906,113 @@ void Application::_record_command_buffer(pr::vk::CommandBuffer& command_buffer,
         exit(1);
     }
     fprintf(stderr, "End command buffer.\n");
+}
+
+std::pair<pr::vk::Buffer, pr::vk::DeviceMemory>
+Application::_create_buffer(VkDeviceSize size, VkBufferUsageFlags usage,
+    VkMemoryPropertyFlags properties)
+{
+    pr::vk::Buffer::CreateInfo create_info;
+    create_info.set_size(size);
+    create_info.set_usage(usage);
+    create_info.set_sharing_mode(VK_SHARING_MODE_EXCLUSIVE);
+
+    std::optional<pr::vk::Buffer> buffer = std::nullopt;
+    try {
+        buffer = this->_device->create_buffer(create_info);
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to create buffer! %d\n", e.vk_result());
+        exit(1);
+    }
+
+    // Memory requirements.
+    auto mem_requirements = this->_device->memory_requirements_for(
+        buffer.value());
+
+    // Memory properties.
+    auto mem_props = this->_physical_device->memory_properties();
+
+    // Find memory type.
+    uint32_t memory_type_index = 0;
+    ::VkMemoryPropertyFlags props = properties;
+    for (uint64_t i = 0; i < mem_props.memory_types().length(); ++i) {
+        if ((mem_requirements.memory_type_bits() & (1 << i)) &&
+            (mem_props.memory_types()[i].propertyFlags & props) == props) {
+            memory_type_index = i;
+            break;
+        }
+    }
+
+    // Allocate memory.
+    pr::vk::MemoryAllocateInfo alloc_info;
+    alloc_info.set_allocation_size(mem_requirements.size());
+    alloc_info.set_memory_type_index(memory_type_index);
+
+    std::optional<pr::vk::DeviceMemory> memory = std::nullopt;
+    try {
+        memory = this->_device->allocate_memory(alloc_info);
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to allocate memory. %d\n", e.vk_result());
+        exit(1);
+    }
+
+    // Bind memory to a buffer.
+    try {
+        this->_device->bind_buffer_memory(buffer.value(), memory.value(), 0);
+    } catch (const pr::vk::VulkanError& e) {
+        exit(1);
+    }
+
+    return {buffer.value(), memory.value()};
+}
+
+void Application::_copy_buffer(pr::vk::Buffer& src_buffer,
+                               pr::vk::Buffer& dst_buffer,
+                               VkDeviceSize size)
+{
+    pr::vk::CommandBuffer::AllocateInfo alloc_info;
+    alloc_info.set_level(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+    alloc_info.set_command_pool(*this->_command_pool);
+    alloc_info.set_command_buffer_count(1);
+
+    std::optional<pr::vk::CommandBuffer> command_buffer;
+    try {
+        command_buffer = this->_device->allocate_command_buffers(alloc_info);
+    } catch (const pr::vk::VulkanError& e) {
+        exit(1);
+    }
+
+    pr::vk::CommandBuffer::BeginInfo begin_info;
+    begin_info.set_flags(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+    command_buffer.value().begin(begin_info);
+
+    pr::Vector<pr::vk::BufferCopy> regions = {
+        pr::vk::BufferCopy(),
+    };
+    regions[0].set_size(size);
+    command_buffer.value().copy_buffer(src_buffer, dst_buffer, regions);
+
+    command_buffer.value().end();
+
+    pr::vk::SubmitInfo submit_info;
+    submit_info.set_command_buffers({
+        command_buffer.value(),
+    });
+
+    try {
+        this->_graphics_queue->submit({
+            submit_info,
+        });
+    } catch (const pr::vk::VulkanError& e) {
+        exit(1);
+    }
+
+    // Queue wait idle.
+    try {
+        this->_graphics_queue->wait_idle();
+    } catch (const pr::vk::VulkanError& e) {
+        exit(1);
+    }
 }
 
 void Application::_draw_frame()

@@ -9,6 +9,7 @@
 
 // C++
 #include <memory>
+#include <utility>
 
 // Primer
 #include <primer/vector.h>
@@ -87,6 +88,14 @@ private:
 
     void _record_command_buffer(pr::vk::CommandBuffer& command_buffer,
                                 uint32_t image_index);
+
+    std::pair<pr::vk::Buffer, pr::vk::DeviceMemory>
+    _create_buffer(VkDeviceSize size, VkBufferUsageFlags usage,
+        VkMemoryPropertyFlags properties);
+
+    void _copy_buffer(pr::vk::Buffer& src_buffer,
+                      pr::vk::Buffer& dst_buffer,
+                      VkDeviceSize size);
 
     void _draw_frame();
 

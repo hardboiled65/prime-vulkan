@@ -49,6 +49,11 @@ CommandBuffer::BeginInfo::BeginInfo()
     this->_info.pNext = nullptr;
 }
 
+void CommandBuffer::BeginInfo::set_flags(VkCommandBufferUsageFlags flags)
+{
+    this->_info.flags = flags;
+}
+
 auto CommandBuffer::BeginInfo::c_struct() const -> CType
 {
     return this->_info;
@@ -153,6 +158,20 @@ void CommandBuffer::bind_vertex_buffers(uint32_t first_binding,
 
     delete[] vk_offsets;
     delete[] vk_buffers;
+}
+
+void CommandBuffer::copy_buffer(const Buffer& src, Buffer& dst,
+                                const pr::Vector<BufferCopy>& regions)
+{
+    uint32_t count = regions.length();
+
+    std::vector<BufferCopy::CType> vk_regions;
+    for (uint32_t i = 0; i < count; ++i) {
+        vk_regions.push_back(regions[i].c_struct());
+    }
+
+    vkCmdCopyBuffer(this->_command_buffer,
+        src.c_ptr(), dst.c_ptr(), count, vk_regions.data());
 }
 
 void CommandBuffer::end_render_pass()

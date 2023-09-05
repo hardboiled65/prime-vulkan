@@ -45,5 +45,22 @@ auto Buffer::c_ptr() const -> CType
     return *(this->_buffer);
 }
 
+
+BufferCopy::BufferCopy()
+{
+    this->_copy.srcOffset = 0;
+    this->_copy.dstOffset = 0;
+}
+
+void BufferCopy::set_size(VkDeviceSize size)
+{
+    this->_copy.size = size;
+}
+
+auto BufferCopy::c_struct() const -> CType
+{
+    return this->_copy;
+}
+
 } // namespace vk
 } // namespace pr

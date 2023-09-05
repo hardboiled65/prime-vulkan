@@ -31,7 +31,12 @@ public:
 public:
     void submit(const pr::Vector<SubmitInfo>& submits, const Fence& fence);
 
+    /// Submit the queue without a fence.
+    void submit(const pr::Vector<SubmitInfo>& submits);
+
     void present(const PresentInfo& present_info);
+
+    void wait_idle();
 
     ::VkQueue c_ptr() const;
 
