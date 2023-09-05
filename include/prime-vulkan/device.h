@@ -145,7 +145,7 @@ public:
                     ::VkDeviceSize offset,
                     ::VkDeviceSize size,
                     ::VkMemoryMapFlags flags,
-                    void *data);
+                    void **data);
 
     void unmap_memory(DeviceMemory& memory);
 

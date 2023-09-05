@@ -578,12 +578,12 @@ void Device::map_memory(DeviceMemory& memory,
                         ::VkDeviceSize offset,
                         ::VkDeviceSize size,
                         ::VkMemoryMapFlags flags,
-                        void *data)
+                        void **data)
 {
     ::VkResult result;
 
     result = vkMapMemory(this->_device,
-        memory.c_ptr(), offset, size, flags, &data);
+        memory.c_ptr(), offset, size, flags, data);
 
     if (result != VK_SUCCESS) {
         throw VulkanError(result);

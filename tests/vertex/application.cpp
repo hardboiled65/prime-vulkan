@@ -801,7 +801,6 @@ void Application::_create_vertex_buffer()
 
     // Map memory.
     fprintf(stderr, " == sizeof(verteces): %ld\n", sizeof(vertices));
-    /*
     try {
         void *data;
         this->_device->map_memory(*this->_vertex_buffer_memory,
@@ -810,15 +809,6 @@ void Application::_create_vertex_buffer()
     } catch (const pr::vk::VulkanError& e) {
         exit(1);
     }
-    */
-    void *data;
-    vkMapMemory(this->_device->c_ptr(),
-        this->_vertex_buffer_memory->c_ptr(),
-        0,
-        create_info.c_struct().size,
-        0,
-        &data);
-    memcpy(data, vertices, create_info.c_struct().size);
     fprintf(stderr, "Memory mapped.\n");
     this->_device->unmap_memory(*this->_vertex_buffer_memory);
 }
