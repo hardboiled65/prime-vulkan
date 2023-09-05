@@ -76,6 +76,8 @@ public:
               uint32_t first_vertex,
               uint32_t first_instance);
 
+    void bind_vertex_buffers(); // TODO: Parameters.
+
     void end_render_pass();
 
     /// Finish recording a command buffer.

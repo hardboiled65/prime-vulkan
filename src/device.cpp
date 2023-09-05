@@ -523,6 +523,78 @@ uint32_t Device::acquire_next_image(const Swapchain& swapchain,
     return index;
 }
 
+MemoryRequirements Device::memory_requirements_for(const Buffer& buffer) const
+{
+    MemoryRequirements::CType vk_requirements;
+    Buffer::CType vk_buffer = buffer.c_ptr();
+    vkGetBufferMemoryRequirements(this->_device, vk_buffer, &vk_requirements);
+
+    MemoryRequirements requirements;
+    requirements._requirements = vk_requirements;
+
+    return requirements;
+}
+
+DeviceMemory Device::allocate_memory(const MemoryAllocateInfo& info) const
+{
+    ::VkResult result;
+    MemoryAllocateInfo::CType vk_info = info.c_struct();
+    DeviceMemory::CType vk_memory;
+
+    result = vkAllocateMemory(this->_device, &vk_info, nullptr, &vk_memory);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    DeviceMemory memory;
+    memory._memory = std::shared_ptr<DeviceMemory::CType>(
+        new DeviceMemory::CType(vk_memory),
+        DeviceMemory::Deleter(this->_device));
+
+    return memory;
+}
+
+void Device::bind_buffer_memory(Buffer& buffer,
+                                DeviceMemory& memory,
+                                ::VkDeviceSize offset)
+{
+    ::VkResult result;
+
+    result = vkBindBufferMemory(this->_device,
+        buffer.c_ptr(), memory.c_ptr(), offset);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+}
+
+void Device::bind_memory_to_buffer(Buffer& b, DeviceMemory& m, ::VkDeviceSize s)
+{
+    this->bind_buffer_memory(b, m, s);
+}
+
+void Device::map_memory(DeviceMemory& memory,
+                        ::VkDeviceSize offset,
+                        ::VkDeviceSize size,
+                        ::VkMemoryMapFlags flags,
+                        void *data)
+{
+    ::VkResult result;
+
+    result = vkMapMemory(this->_device,
+        memory.c_ptr(), offset, size, flags, &data);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+}
+
+void Device::unmap_memory(DeviceMemory& memory)
+{
+    vkUnmapMemory(this->_device, memory.c_ptr());
+}
+
 void Device::wait_idle()
 {
     vkDeviceWaitIdle(this->_device);

@@ -21,6 +21,40 @@ uint32_t QueueFamilyProperties::queue_count() const
 }
 
 
+PhysicalDevice::MemoryProperties::MemoryProperties()
+{
+}
+
+pr::Vector<::VkMemoryHeap>
+PhysicalDevice::MemoryProperties::memory_heaps() const
+{
+    pr::Vector<::VkMemoryHeap> v;
+
+    for (uint32_t i = 0; i < this->_properties.memoryHeapCount; ++i) {
+        v.push(this->_properties.memoryHeaps[i]);
+    }
+
+    return v;
+}
+
+pr::Vector<::VkMemoryType>
+PhysicalDevice::MemoryProperties::memory_types() const
+{
+    pr::Vector<::VkMemoryType> v;
+
+    for (uint32_t i = 0; i < this->_properties.memoryTypeCount; ++i) {
+        v.push(this->_properties.memoryTypes[i]);
+    }
+
+    return v;
+}
+
+auto PhysicalDevice::MemoryProperties::c_struct() const -> CType
+{
+    return this->_properties;
+}
+
+
 PhysicalDevice::PhysicalDevice()
 {
     this->_device = nullptr;
@@ -85,6 +119,17 @@ Vector<QueueFamilyProperties> PhysicalDevice::queue_family_properties() const
     delete[] properties;
 
     return v;
+}
+
+PhysicalDevice::MemoryProperties PhysicalDevice::memory_properties() const
+{
+    MemoryProperties::CType vk_props;
+    vkGetPhysicalDeviceMemoryProperties(this->_device, &vk_props);
+
+    MemoryProperties props;
+    props._properties = vk_props;
+
+    return props;
 }
 
 Device PhysicalDevice::create_device(

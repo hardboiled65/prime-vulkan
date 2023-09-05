@@ -145,6 +145,7 @@ private:
     std::shared_ptr<pr::vk::CommandPool> _command_pool;
     // Vertex buffer.
     std::shared_ptr<pr::vk::Buffer> _vertex_buffer;
+    std::shared_ptr<pr::vk::DeviceMemory> _vertex_buffer_memory;
     // Command buffers.
     pr::Vector<pr::vk::CommandBuffer> _command_buffers;
     // Semaphores and fences.

@@ -33,6 +33,27 @@ private:
 class PhysicalDevice
 {
 public:
+    class MemoryProperties
+    {
+        friend PhysicalDevice;
+    public:
+        using CType = ::VkPhysicalDeviceMemoryProperties;
+
+    public:
+        pr::Vector<::VkMemoryHeap> memory_heaps() const;
+
+        pr::Vector<::VkMemoryType> memory_types() const;
+
+        CType c_struct() const;
+
+    private:
+        MemoryProperties();
+
+    private:
+        CType _properties;
+    };
+
+public:
     PhysicalDevice(const PhysicalDevice& other);
 
     static Vector<PhysicalDevice> enumerate(const Instance& instance);
@@ -40,6 +61,9 @@ public:
     /// Get the list of queue family properties.
     /// Using `vkGetPhysicalDeviceQueueFamilyProperties` function.
     Vector<QueueFamilyProperties> queue_family_properties() const;
+
+    /// Using `vk_` function.
+    MemoryProperties memory_properties() const;
 
     Device create_device(const Device::CreateInfo& create_info) const;
 

@@ -23,6 +23,7 @@ add_library(prime-vulkan SHARED
     src/semaphore.cpp
     src/fence.cpp
     src/buffer.cpp
+    src/memory.cpp
     include/prime-vulkan/base.h
     include/prime-vulkan/extension-properties.h
     include/prime-vulkan/vulkan.h
@@ -41,6 +42,7 @@ add_library(prime-vulkan SHARED
     include/prime-vulkan/semaphore.h
     include/prime-vulkan/fence.h
     include/prime-vulkan/buffer.h
+    include/prime-vulkan/memory.h
 )
 
 target_include_directories(prime-vulkan

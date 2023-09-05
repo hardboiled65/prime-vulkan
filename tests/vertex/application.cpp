@@ -1,18 +1,20 @@
 #include "application.h"
 
 #include <stdio.h>
+#include <string.h> // memcpy
 
 #include <functional>
 
 #include <primer/io.h>
+#include <primer/range.h>
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 static const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 static float vertices[] = {
-     0.0f, -0.5f,   1.0f, 0.0f, 0.0f,
+     0.0f, -0.5f,   0.0f, 0.0f, 1.0f,
      0.5f,  0.5f,   0.0f, 1.0f, 0.0f,
-    -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+    -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
 };
 
 static void load_shader(const char *path, uint8_t* *code, uint32_t *size);
@@ -166,6 +168,7 @@ void Application::init_vulkan()
     this->_create_graphics_pipeline();
     this->_create_framebuffers();
     this->_create_command_pool();
+    this->_create_vertex_buffer();
     this->_create_command_buffers();
     this->_create_semaphores_and_fences();
 }
@@ -177,7 +180,7 @@ void Application::run()
     int res = wl_display_dispatch(this->_display);
     fprintf(stderr, "Initial dispatch.\n");
     while (res != -1) {
-        // draw_frame();
+        this->_draw_frame();
         res = wl_display_dispatch(this->_display);
     }
     fprintf(stderr, "wl_display_dispatch() - res: %d\n", res);
@@ -574,8 +577,13 @@ void Application::_create_graphics_pipeline()
     color_attribute_description.set_offset(8);
 
     pr::vk::Pipeline::VertexInputStateCreateInfo vert_input_state_create_info;
-    vert_input_state_create_info.set_vertex_binding_descriptions({});
-    vert_input_state_create_info.set_vertex_attribute_descriptions({});
+    vert_input_state_create_info.set_vertex_binding_descriptions({
+        binding_description,
+    });
+    vert_input_state_create_info.set_vertex_attribute_descriptions({
+        pos_attribute_description,
+        color_attribute_description,
+    });
 
     // Input assembly.
     pr::vk::Pipeline::InputAssemblyStateCreateInfo input_assembly_state_create_info;
@@ -727,7 +735,7 @@ void Application::_create_command_pool()
 void Application::_create_vertex_buffer()
 {
     pr::vk::Buffer::CreateInfo create_info;
-    create_info.set_size(sizeof(float) * 5); // !!
+    create_info.set_size(sizeof(float) * 5 * 3); // !!
     create_info.set_usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
     create_info.set_sharing_mode(VK_SHARING_MODE_EXCLUSIVE);
 
@@ -738,6 +746,81 @@ void Application::_create_vertex_buffer()
         fprintf(stderr, "Failed to create buffer! %d\n", e.vk_result());
         exit(1);
     }
+
+    // Memory requirements.
+    auto mem_requirements = this->_device->memory_requirements_for(
+        *this->_vertex_buffer);
+    fprintf(stderr, "Memory requirements:\n");
+    fprintf(stderr, " - size: %ld, alignment: %ld, type bits: %d\n",
+        mem_requirements.size(),
+        mem_requirements.alignment(),
+        mem_requirements.memory_type_bits());
+
+    // Memory properties.
+    auto mem_props = this->_physical_device->memory_properties();
+    fprintf(stderr, "Memory properties:\n");
+    fprintf(stderr, " - heaps: %ld, types: %ld\n",
+        mem_props.memory_heaps().length(),
+        mem_props.memory_types().length());
+
+    // Find memory type.
+    uint32_t memory_type_index = 0;
+    ::VkMemoryPropertyFlags props = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+        | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    for (uint64_t i = 0; i < mem_props.memory_types().length(); ++i) {
+        if ((mem_requirements.memory_type_bits() & (1 << i)) &&
+            (mem_props.memory_types()[i].propertyFlags & props) == props) {
+            memory_type_index = i;
+            break;
+        }
+    }
+    fprintf(stderr, "Memory type index: %d\n", memory_type_index);
+
+    // Allocate memory.
+    pr::vk::MemoryAllocateInfo alloc_info;
+    alloc_info.set_allocation_size(mem_requirements.size());
+    alloc_info.set_memory_type_index(memory_type_index);
+
+    try {
+        this->_vertex_buffer_memory = std::make_shared<pr::vk::DeviceMemory>(
+            this->_device->allocate_memory(alloc_info));
+    } catch (const pr::vk::VulkanError& e) {
+        fprintf(stderr, "Failed to allocate memory. %d\n", e.vk_result());
+        exit(1);
+    }
+    fprintf(stderr, "Memory allocated.\n");
+
+    // Bind memory to a buffer.
+    try {
+        this->_device->bind_buffer_memory(*this->_vertex_buffer,
+            *this->_vertex_buffer_memory, 0);
+    } catch (const pr::vk::VulkanError& e) {
+        exit(1);
+    }
+    fprintf(stderr, "Memory binded to a buffer.\n");
+
+    // Map memory.
+    fprintf(stderr, " == sizeof(verteces): %ld\n", sizeof(vertices));
+    /*
+    try {
+        void *data;
+        this->_device->map_memory(*this->_vertex_buffer_memory,
+            0, create_info.c_struct().size, 0, &data);
+        memcpy(data, vertices, create_info.c_struct().size);
+    } catch (const pr::vk::VulkanError& e) {
+        exit(1);
+    }
+    */
+    void *data;
+    vkMapMemory(this->_device->c_ptr(),
+        this->_vertex_buffer_memory->c_ptr(),
+        0,
+        create_info.c_struct().size,
+        0,
+        &data);
+    memcpy(data, vertices, create_info.c_struct().size);
+    fprintf(stderr, "Memory mapped.\n");
+    this->_device->unmap_memory(*this->_vertex_buffer_memory);
 }
 
 void Application::_create_command_buffers()
@@ -844,6 +927,10 @@ void Application::_record_command_buffer(pr::vk::CommandBuffer& command_buffer,
     command_buffer.bind_pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS,
         *this->_graphics_pipeline);
 
+    VkBuffer vertex_buffers[] = {this->_vertex_buffer->c_ptr()};
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(command_buffer.c_ptr(), 0, 1, vertex_buffers, offsets);
+
     VkViewport viewport;
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -863,7 +950,7 @@ void Application::_record_command_buffer(pr::vk::CommandBuffer& command_buffer,
                                       scissor,
                                   });
 
-    command_buffer.draw(3, 1, 0, 0);
+    command_buffer.draw(sizeof(vertices), 1, 0, 0);
 
     //===============
     // Out Commands
@@ -881,6 +968,12 @@ void Application::_record_command_buffer(pr::vk::CommandBuffer& command_buffer,
 
 void Application::_draw_frame()
 {
+    /////////////////////////
+    // Color changing demo
+    /////////////////////////
+    pr::Range<uint8_t> r(1, 255);
+    vertices[2] = 1.0f / r.random();
+
     try {
         this->_device->wait_for_fences({
             this->_in_flight_fences[this->_current_frame],

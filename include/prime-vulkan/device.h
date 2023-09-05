@@ -17,6 +17,7 @@
 #include <prime-vulkan/semaphore.h>
 #include <prime-vulkan/fence.h>
 #include <prime-vulkan/buffer.h>
+#include <prime-vulkan/memory.h>
 
 namespace pr {
 namespace vk {
@@ -128,6 +129,25 @@ public:
     uint32_t acquire_next_image(const Swapchain& swapchain,
                                 uint64_t timeout,
                                 const Semaphore& semaphore) const;
+
+    MemoryRequirements memory_requirements_for(const Buffer& buffer) const;
+
+    DeviceMemory allocate_memory(const MemoryAllocateInfo& info) const;
+
+    /// Bind device memory to a buffer object.
+    void bind_buffer_memory(Buffer& buffer,
+                            DeviceMemory& memory,
+                            ::VkDeviceSize offset);
+    /// Alias to `bind_buffer_memory`.
+    void bind_memory_to_buffer(Buffer&, DeviceMemory&, ::VkDeviceSize);
+
+    void map_memory(DeviceMemory& memory,
+                    ::VkDeviceSize offset,
+                    ::VkDeviceSize size,
+                    ::VkMemoryMapFlags flags,
+                    void *data);
+
+    void unmap_memory(DeviceMemory& memory);
 
     void wait_idle();
 
