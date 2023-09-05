@@ -917,9 +917,9 @@ void Application::_record_command_buffer(pr::vk::CommandBuffer& command_buffer,
     command_buffer.bind_pipeline(VK_PIPELINE_BIND_POINT_GRAPHICS,
         *this->_graphics_pipeline);
 
-    VkBuffer vertex_buffers[] = {this->_vertex_buffer->c_ptr()};
-    VkDeviceSize offsets[] = {0};
-    vkCmdBindVertexBuffers(command_buffer.c_ptr(), 0, 1, vertex_buffers, offsets);
+    command_buffer.bind_vertex_buffers(0,
+        {*this->_vertex_buffer},
+        {0});
 
     VkViewport viewport;
     viewport.x = 0.0f;
@@ -929,16 +929,16 @@ void Application::_record_command_buffer(pr::vk::CommandBuffer& command_buffer,
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     command_buffer.set_viewport(0, {
-                                       viewport,
-                                   });
+        viewport,
+    });
 
     VkRect2D scissor;
     scissor.offset.x = 0;
     scissor.offset.y = 0;
     scissor.extent = this->_extent;
     command_buffer.set_scissor(0, {
-                                      scissor,
-                                  });
+        scissor,
+    });
 
     command_buffer.draw(sizeof(vertices), 1, 0, 0);
 

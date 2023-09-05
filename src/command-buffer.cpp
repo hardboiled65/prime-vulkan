@@ -5,6 +5,7 @@
 #include <prime-vulkan/base.h>
 #include <prime-vulkan/command-pool.h>
 #include <prime-vulkan/pipeline.h>
+#include <prime-vulkan/buffer.h>
 
 namespace pr {
 namespace vk {
@@ -130,6 +131,28 @@ void CommandBuffer::draw(uint32_t vertex_count,
 {
     vkCmdDraw(this->_command_buffer,
         vertex_count, instance_count, first_vertex, first_instance);
+}
+
+void CommandBuffer::bind_vertex_buffers(uint32_t first_binding,
+                                        const pr::Vector<Buffer>& buffers,
+                                        const pr::Vector<VkDeviceSize>& offsets)
+{
+    // assert(buffers.length() == offsets.length());
+
+    uint32_t count = buffers.length();
+    Buffer::CType *vk_buffers = new Buffer::CType[count];
+    VkDeviceSize *vk_offsets = new VkDeviceSize[count];
+
+    for (uint32_t i = 0; i < count; ++i) {
+        vk_buffers[i] = buffers[i].c_ptr();
+        vk_offsets[i] = offsets[i];
+    }
+
+    vkCmdBindVertexBuffers(this->_command_buffer,
+        first_binding, count, vk_buffers, vk_offsets);
+
+    delete[] vk_offsets;
+    delete[] vk_buffers;
 }
 
 void CommandBuffer::end_render_pass()

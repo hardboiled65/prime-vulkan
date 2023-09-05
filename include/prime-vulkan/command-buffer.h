@@ -14,6 +14,8 @@ class Pipeline;
 
 class Device;
 
+class Buffer;
+
 class CommandBuffer
 {
     friend Device;
@@ -76,7 +78,9 @@ public:
               uint32_t first_vertex,
               uint32_t first_instance);
 
-    void bind_vertex_buffers(); // TODO: Parameters.
+    void bind_vertex_buffers(uint32_t first_binding,
+                             const pr::Vector<Buffer>& buffers,
+                             const pr::Vector<VkDeviceSize>& offsets);
 
     void end_render_pass();
 
