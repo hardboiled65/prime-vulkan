@@ -582,9 +582,9 @@ static void create_vulkan_graphics_pipeline()
     // Vertex input.
     pr::vk::Pipeline::VertexInputStateCreateInfo vert_input_state_create_info;
     vert_input_state_create_info.set_vertex_binding_descriptions(
-        pr::Vector<::VkVertexInputBindingDescription>());
+        pr::Vector<pr::vk::VertexInputBindingDescription>());
     vert_input_state_create_info.set_vertex_attribute_descriptions(
-        pr::Vector<::VkVertexInputAttributeDescription>());
+        pr::Vector<pr::vk::VertexInputAttributeDescription>());
 
     // Input assembly.
     pr::vk::Pipeline::InputAssemblyStateCreateInfo input_assembly_state_create_info;
