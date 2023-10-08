@@ -12,9 +12,14 @@
 #define WINDOW_HEIGHT 600
 static const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 static float vertices[] = {
-     0.0f, -0.5f,   0.0f, 0.0f, 1.0f,
-     0.5f,  0.5f,   0.0f, 1.0f, 0.0f,
-    -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
+     0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
+     0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+    -0.5f,  0.5f,   1.0f, 1.0f, 1.0f,
+};
+
+static uint16_t indices[] = {
+    0, 1, 2, 2, 3, 0,
 };
 
 static void load_shader(const char *path, uint8_t* *code, uint32_t *size);
@@ -169,6 +174,7 @@ void Application::init_vulkan()
     this->_create_framebuffers();
     this->_create_command_pool();
     this->_create_vertex_buffer();
+    this->_create_index_buffer();
     this->_create_command_buffers();
     this->_create_semaphores_and_fences();
 }
@@ -734,7 +740,7 @@ void Application::_create_command_pool()
 
 void Application::_create_vertex_buffer()
 {
-    VkDeviceSize buffer_size = sizeof(float) * 5 * 3;
+    VkDeviceSize buffer_size = sizeof(float) * 5 * 4;
 
     auto [staging_buffer, staging_buffer_memory] = this->_create_buffer(
         buffer_size,
@@ -763,6 +769,39 @@ void Application::_create_vertex_buffer()
         vertex_buffer_memory);
 
     this->_copy_buffer(staging_buffer, vertex_buffer, buffer_size);
+}
+
+void Application::_create_index_buffer()
+{
+    VkDeviceSize buffer_size = sizeof(uint16_t) * 6;
+
+    auto [staging_buffer, staging_buffer_memory] = this->_create_buffer(
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    // Map memory.
+    try {
+        void *data;
+        this->_device->map_memory(staging_buffer_memory,
+            0, buffer_size, 0, &data);
+        memcpy(data, indices, buffer_size);
+    } catch (const pr::vk::VulkanError& e) {
+        exit(1);
+    }
+    this->_device->unmap_memory(staging_buffer_memory);
+
+    auto [index_buffer, index_buffer_memory] = this->_create_buffer(
+        buffer_size,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+        VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    this->_index_buffer = std::make_shared<pr::vk::Buffer>(index_buffer);
+    this->_index_buffer_memory = std::make_shared<pr::vk::DeviceMemory>(
+        index_buffer_memory);
+
+    this->_copy_buffer(staging_buffer, index_buffer, buffer_size);
 }
 
 void Application::_create_command_buffers()
@@ -873,6 +912,9 @@ void Application::_record_command_buffer(pr::vk::CommandBuffer& command_buffer,
         {*this->_vertex_buffer},
         {0});
 
+    command_buffer.bind_index_buffer(*this->_index_buffer, 0,
+        VK_INDEX_TYPE_UINT16);
+
     VkViewport viewport;
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -892,7 +934,8 @@ void Application::_record_command_buffer(pr::vk::CommandBuffer& command_buffer,
         scissor,
     });
 
-    command_buffer.draw(sizeof(vertices), 1, 0, 0);
+    // command_buffer.draw(sizeof(vertices), 1, 0, 0);
+    command_buffer.draw_indexed(6, 1, 0, 0, 0);
 
     //===============
     // Out Commands

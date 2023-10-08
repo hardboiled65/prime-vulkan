@@ -82,9 +82,18 @@ public:
               uint32_t first_vertex,
               uint32_t first_instance);
 
+    void draw_indexed(uint32_t index_count,
+                      uint32_t instance_count,
+                      uint32_t first_index,
+                      int32_t vertex_offset,
+                      uint32_t first_instance);
+
     void bind_vertex_buffers(uint32_t first_binding,
                              const pr::Vector<Buffer>& buffers,
                              const pr::Vector<VkDeviceSize>& offsets);
+
+    void bind_index_buffer(const Buffer& buffer, VkDeviceSize offset,
+                           VkIndexType index_type);
 
     void copy_buffer(const Buffer& src, Buffer& dst,
         const pr::Vector<BufferCopy>& regions);

@@ -138,6 +138,17 @@ void CommandBuffer::draw(uint32_t vertex_count,
         vertex_count, instance_count, first_vertex, first_instance);
 }
 
+void CommandBuffer::draw_indexed(uint32_t index_count,
+                  uint32_t instance_count,
+                  uint32_t first_index,
+                  int32_t vertex_offset,
+                  uint32_t first_instance)
+{
+    vkCmdDrawIndexed(this->_command_buffer,
+        index_count, instance_count, first_index, vertex_offset,
+        first_instance);
+}
+
 void CommandBuffer::bind_vertex_buffers(uint32_t first_binding,
                                         const pr::Vector<Buffer>& buffers,
                                         const pr::Vector<VkDeviceSize>& offsets)
@@ -158,6 +169,13 @@ void CommandBuffer::bind_vertex_buffers(uint32_t first_binding,
 
     delete[] vk_offsets;
     delete[] vk_buffers;
+}
+
+void CommandBuffer::bind_index_buffer(const Buffer& buffer, VkDeviceSize offset,
+                                      VkIndexType index_type)
+{
+    vkCmdBindIndexBuffer(this->_command_buffer, buffer.c_ptr(), offset,
+        index_type);
 }
 
 void CommandBuffer::copy_buffer(const Buffer& src, Buffer& dst,
