@@ -2,6 +2,7 @@
 
 #include <prime-vulkan/shader-module.h>
 #include <prime-vulkan/render-pass.h>
+#include <prime-vulkan/descriptor.h>
 
 namespace pr {
 namespace vk {
@@ -517,6 +518,22 @@ void PipelineLayout::CreateInfo::set_set_layouts(
 
     this->_info.setLayoutCount = 0;
     this->_info.pSetLayouts = nullptr;
+}
+
+void PipelineLayout::CreateInfo::set_set_layouts(
+    const pr::Vector<DescriptorSetLayout>& set_layouts)
+{
+    if (set_layouts.length() == 0) {
+        this->_info.setLayoutCount = 0;
+        this->_info.pSetLayouts = nullptr;
+    } else {
+        this->_info.setLayoutCount = set_layouts.length();
+        for (auto& set_layout: set_layouts) {
+            auto vk_set_layout = set_layout.c_struct();
+            this->_set_layouts.push(vk_set_layout);
+        }
+        this->_info.pSetLayouts = this->_set_layouts.c_ptr();
+    }
 }
 
 void PipelineLayout::CreateInfo::set_push_constant_range(

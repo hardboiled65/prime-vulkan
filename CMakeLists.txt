@@ -24,6 +24,7 @@ add_library(prime-vulkan SHARED
     src/fence.cpp
     src/buffer.cpp
     src/memory.cpp
+    src/descriptor.cpp
     include/prime-vulkan/base.h
     include/prime-vulkan/extension-properties.h
     include/prime-vulkan/vulkan.h
@@ -43,6 +44,7 @@ add_library(prime-vulkan SHARED
     include/prime-vulkan/fence.h
     include/prime-vulkan/buffer.h
     include/prime-vulkan/memory.h
+    include/prime-vulkan/descriptor.h
 )
 
 target_include_directories(prime-vulkan
@@ -75,4 +77,6 @@ add_custom_target(tests
     tests/vertex/application.cpp
     tests/vertex/wayland.h
     tests/vertex/main.cpp
+    tests/uniform/application.h
+    tests/uniform/application.cpp
 )

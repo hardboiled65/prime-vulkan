@@ -463,6 +463,28 @@ Buffer Device::create_buffer(const Buffer::CreateInfo& info) const
     return buffer;
 }
 
+DescriptorSetLayout Device::create_descriptor_set_layout(
+    const DescriptorSetLayout::CreateInfo& info) const
+{
+    VkResult result;
+
+    DescriptorSetLayout::CreateInfo::CType vk_info = info.c_struct();
+    DescriptorSetLayout::CType vk_layout;
+    result = vkCreateDescriptorSetLayout(this->_device, &vk_info, nullptr,
+        &vk_layout);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    DescriptorSetLayout layout;
+    layout._layout = std::shared_ptr<DescriptorSetLayout::CType>(
+        new DescriptorSetLayout::CType(vk_layout),
+        DescriptorSetLayout::Deleter(this->_device));
+
+    return layout;
+}
+
 void Device::wait_for_fences(const Vector<Fence>& fences,
                                bool wait_all,
                                uint64_t timeout) const

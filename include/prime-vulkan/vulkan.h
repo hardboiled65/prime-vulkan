@@ -16,6 +16,7 @@
 #include <prime-vulkan/command-buffer.h>
 #include <prime-vulkan/semaphore.h>
 #include <prime-vulkan/fence.h>
+#include <prime-vulkan/descriptor.h>
 
 namespace pr {
 namespace vk {

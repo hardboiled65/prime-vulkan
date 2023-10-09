@@ -18,6 +18,7 @@
 #include <prime-vulkan/fence.h>
 #include <prime-vulkan/buffer.h>
 #include <prime-vulkan/memory.h>
+#include <prime-vulkan/descriptor.h>
 
 namespace pr {
 namespace vk {
@@ -118,6 +119,10 @@ public:
     Fence create_fence(const Fence::CreateInfo& info) const;
 
     Buffer create_buffer(const Buffer::CreateInfo& info) const;
+
+    DescriptorSetLayout
+    create_descriptor_set_layout(
+        const DescriptorSetLayout::CreateInfo& info) const;
 
     void wait_for_fences(const Vector<Fence>& fences,
                          bool wait_all,

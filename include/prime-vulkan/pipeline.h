@@ -19,6 +19,8 @@ class PipelineLayout;
 
 class RenderPass;
 
+class DescriptorSetLayout;
+
 
 /// A wrapper class for `VkVertexInputBindingDescription` struct.
 class VertexInputBindingDescription
@@ -405,6 +407,9 @@ public:
         void set_set_layouts(
             const pr::Vector<::VkDescriptorSetLayout>& set_layouts);
 
+        void set_set_layouts(
+            const pr::Vector<DescriptorSetLayout>& set_layouts);
+
         /// Sets the push constant range list. Count will automatically filled.
         ///
         /// TODO: Currently only accepts 0 length Vector.
@@ -416,6 +421,8 @@ public:
 
     private:
         CType _info;
+
+        pr::Vector<VkDescriptorSetLayout> _set_layouts;
     };
 
     class Deleter
