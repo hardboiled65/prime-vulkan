@@ -485,6 +485,28 @@ DescriptorSetLayout Device::create_descriptor_set_layout(
     return layout;
 }
 
+DescriptorPool Device::create_descriptor_pool(
+    const DescriptorPool::CreateInfo& info) const
+{
+    VkResult result;
+
+    DescriptorPool::CreateInfo::CType vk_info = info.c_struct();
+    DescriptorPool::CType vk_pool;
+    result = vkCreateDescriptorPool(this->_device, &vk_info, nullptr,
+        &vk_pool);
+
+    if (result != VK_SUCCESS) {
+        throw VulkanError(result);
+    }
+
+    DescriptorPool pool;
+    pool._pool = std::shared_ptr<DescriptorPool::CType>(
+        new DescriptorPool::CType(vk_pool),
+        DescriptorPool::Deleter(this->_device));
+
+    return pool;
+}
+
 void Device::wait_for_fences(const Vector<Fence>& fences,
                                bool wait_all,
                                uint64_t timeout) const

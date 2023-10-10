@@ -124,6 +124,9 @@ public:
     create_descriptor_set_layout(
         const DescriptorSetLayout::CreateInfo& info) const;
 
+    DescriptorPool create_descriptor_pool(
+        const DescriptorPool::CreateInfo& info) const;
+
     void wait_for_fences(const Vector<Fence>& fences,
                          bool wait_all,
                          uint64_t timeout) const;
