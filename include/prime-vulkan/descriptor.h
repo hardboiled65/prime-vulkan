@@ -12,6 +12,7 @@ namespace vk {
 
 class Device;
 
+/// \brief Wrapper class for `VkDescriptorSetLayout`.
 class DescriptorSetLayout
 {
     friend Device;
@@ -78,13 +79,89 @@ public:
     };
 
 public:
-    CType c_struct() const;
+    CType c_ptr() const;
 
 private:
     DescriptorSetLayout();
 
 private:
     std::shared_ptr<CType> _layout;
+};
+
+
+/// \brief Wrapper class for `VkDescriptorPool`.
+class DescriptorPool
+{
+    friend Device;
+public:
+    using CType = VkDescriptorPool;
+
+public:
+    /// \brief Wrapper class for `VkDescriptorPoolSize`.
+    class Size
+    {
+    public:
+        using CType = VkDescriptorPoolSize;
+
+    public:
+        Size();
+
+        void set_type(VkDescriptorType type);
+
+        void set_descriptor_count(uint32_t count);
+
+        CType c_struct() const;
+
+    private:
+        CType _size;
+    };
+
+    /// \brief Wrapper class for `VkDescriptorPoolCreateInfo`.
+    class CreateInfo
+    {
+    public:
+        using CType = VkDescriptorPoolCreateInfo;
+
+    public:
+        CreateInfo();
+
+        void set_pool_sizes(const pr::Vector<DescriptorPool::Size>& sizes);
+
+        void set_max_sets(uint32_t sets);
+
+        CType c_struct() const;
+
+    private:
+        CType _info;
+
+        pr::Vector<DescriptorPool::Size::CType> _sizes;
+    };
+
+    class Deleter
+    {
+    public:
+        Deleter(VkDevice p_device)
+        {
+            this->_p_device = p_device;
+        }
+
+        void operator()(CType *pool)
+        {
+            vkDestroyDescriptorPool(this->_p_device, *pool, nullptr);
+        }
+
+    private:
+        VkDevice _p_device;
+    };
+
+public:
+    CType c_ptr() const;
+
+private:
+    DescriptorPool();
+
+private:
+    std::shared_ptr<CType> _pool;
 };
 
 } // namespace vk

@@ -529,7 +529,7 @@ void PipelineLayout::CreateInfo::set_set_layouts(
     } else {
         this->_info.setLayoutCount = set_layouts.length();
         for (auto& set_layout: set_layouts) {
-            auto vk_set_layout = set_layout.c_struct();
+            auto vk_set_layout = set_layout.c_ptr();
             this->_set_layouts.push(vk_set_layout);
         }
         this->_info.pSetLayouts = this->_set_layouts.c_ptr();
