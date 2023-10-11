@@ -16,6 +16,8 @@ public:
     static pr::String vk_format_to_string(::VkFormat format);
 
     static pr::String vk_present_mode_to_string(::VkPresentModeKHR mode);
+
+    static pr::String queue_flags_to_string(VkFlags flags);
 };
 
 class VulkanError : public std::exception

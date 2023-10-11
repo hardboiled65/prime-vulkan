@@ -42,6 +42,43 @@ pr::String Vulkan::vk_present_mode_to_string(::VkPresentModeKHR mode)
     // TODO: More enum values.
 }
 
+pr::String Vulkan::queue_flags_to_string(VkFlags flags)
+{
+    pr::Vector<pr::String> string_list;
+    if (flags & VK_QUEUE_GRAPHICS_BIT) {
+        string_list.push("VK_QUEUE_GRAPHICS_BIT"_S);
+    }
+    if (flags & VK_QUEUE_COMPUTE_BIT) {
+        string_list.push("VK_QUEUE_COMPUTE_BIT"_S);
+    }
+    if (flags & VK_QUEUE_TRANSFER_BIT) {
+        string_list.push("VK_QUEUE_TRANSFER_BIT"_S);
+    }
+    if (flags & VK_QUEUE_SPARSE_BINDING_BIT) {
+        string_list.push("VK_QUEUE_SPARSE_BINDING_BIT"_S);
+    }
+    if (flags & VK_QUEUE_PROTECTED_BIT) {
+        string_list.push("VK_QUEUE_PROTECTED_BIT"_S);
+    }
+
+    pr::String ret;
+    auto length = string_list.length();
+    if (length == 0) {
+        return ret;
+    } else if (length == 1) {
+        return string_list[0];
+    }
+    for (uint64_t i = 0; i < length; ++i) {
+        if (i == length - 1) {
+            ret = ret + string_list[i];
+            continue;
+        }
+        ret = ret + string_list[i] + " | "_S;
+    }
+
+    return ret;
+}
+
 
 VulkanError::VulkanError(::VkResult result)
 {
