@@ -127,6 +127,9 @@ public:
     DescriptorPool create_descriptor_pool(
         const DescriptorPool::CreateInfo& info) const;
 
+    pr::Vector<DescriptorSet> allocate_descriptor_sets(
+        const DescriptorSet::AllocateInfo& info) const;
+
     void wait_for_fences(const Vector<Fence>& fences,
                          bool wait_all,
                          uint64_t timeout) const;

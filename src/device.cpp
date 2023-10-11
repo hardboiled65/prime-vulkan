@@ -507,6 +507,34 @@ DescriptorPool Device::create_descriptor_pool(
     return pool;
 }
 
+pr::Vector<DescriptorSet> Device::allocate_descriptor_sets(
+    const DescriptorSet::AllocateInfo& info) const
+{
+    VkResult result;
+
+    pr::Vector<DescriptorSet> sets;
+
+    DescriptorSet::AllocateInfo::CType vk_info = info.c_struct();
+    DescriptorSet::CType *vk_sets =
+        new DescriptorSet::CType[vk_info.descriptorSetCount];
+    result = vkAllocateDescriptorSets(this->_device, &vk_info, vk_sets);
+
+    if (result != VK_SUCCESS) {
+        delete[] vk_sets;
+        throw VulkanError(result);
+    }
+
+    for (uint32_t i = 0; i < vk_info.descriptorSetCount; ++i) {
+        pr::vk::DescriptorSet set;
+        set._set = std::make_shared<DescriptorSet::CType>(vk_sets[i]);
+        sets.push(set);
+    }
+
+    delete[] vk_sets;
+
+    return sets;
+}
+
 void Device::wait_for_fences(const Vector<Fence>& fences,
                                bool wait_all,
                                uint64_t timeout) const

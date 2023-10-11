@@ -164,6 +164,48 @@ private:
     std::shared_ptr<CType> _pool;
 };
 
+
+/// \brief Wrapper class for `VkDescriptorSet`.
+class DescriptorSet
+{
+    friend Device;
+public:
+    using CType = VkDescriptorSet;
+
+public:
+    /// \brief Wrapper class for `VkDescriptorSetAllocateInfo`.
+    class AllocateInfo
+    {
+    public:
+        using CType = VkDescriptorSetAllocateInfo;
+
+    public:
+        AllocateInfo();
+
+        void set_descriptor_pool(const DescriptorPool& pool);
+
+        void set_descriptor_set_count(uint32_t count);
+
+        void set_set_layouts(const pr::Vector<DescriptorSetLayout>& layouts);
+
+        CType c_struct() const;
+
+    private:
+        CType _info;
+
+        pr::Vector<DescriptorSetLayout::CType> _set_layouts;
+    };
+
+public:
+    CType c_ptr() const;
+
+private:
+    DescriptorSet();
+
+private:
+    std::shared_ptr<DescriptorSet::CType> _set;
+};
+
 } // namespace vk
 } // namespace pr
 

@@ -135,5 +135,49 @@ auto DescriptorPool::c_ptr() const -> CType
     return *(this->_pool);
 }
 
+
+DescriptorSet::AllocateInfo::AllocateInfo()
+{
+    this->_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+
+    this->_info.pNext = nullptr;
+}
+
+void DescriptorSet::AllocateInfo::set_descriptor_pool(
+    const DescriptorPool& pool)
+{
+    this->_info.descriptorPool = pool.c_ptr();
+}
+
+void DescriptorSet::AllocateInfo::set_descriptor_set_count(uint32_t count)
+{
+    this->_info.descriptorSetCount = count;
+}
+
+void DescriptorSet::AllocateInfo::set_set_layouts(
+    const pr::Vector<DescriptorSetLayout>& layouts)
+{
+    for (auto& layout: layouts) {
+        this->_set_layouts.push(layout.c_ptr());
+    }
+    this->_info.pSetLayouts = this->_set_layouts.c_ptr();
+}
+
+auto DescriptorSet::AllocateInfo::c_struct() const -> CType
+{
+    return this->_info;
+}
+
+
+DescriptorSet::DescriptorSet()
+{
+    this->_set = nullptr;
+}
+
+auto DescriptorSet::c_ptr() const -> CType
+{
+    return *(this->_set);
+}
+
 } // namespace vk
 } // namespace pr
